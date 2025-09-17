@@ -1,6 +1,6 @@
 pluginManagement {
     repositories {
-        google() // Sin restricciones
+        google()
         mavenCentral()
         gradlePluginPortal()
     }

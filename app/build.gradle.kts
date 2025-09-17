@@ -41,8 +41,7 @@ android {
 }
 
 dependencies {
-    // Importa el BOM de Firebase primero para que gestione las versiones
-    implementation(platform(libs.firebase.bom))
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -54,9 +53,10 @@ dependencies {
     implementation(libs.androidx.material3)
 
     // Ahora, declara las dependencias de Firebase
-
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.firebase.firestore.ktx)
+    // Importa el BOM de Firebase primero para que gestione las versiones
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
 
     // el resto de tus dependencias

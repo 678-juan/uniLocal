@@ -1,8 +1,12 @@
 package com.example.unilocal.model.repositorioFireBase
 
 
+
+import com.example.unilocal.model.entidad.Comentario
+import com.example.unilocal.model.repositorio.ComentarioRepositorio
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+
 
 class ComentarioRepositorioFirebase(
     private val db: FirebaseFirestore

@@ -2,7 +2,9 @@ package com.example.unilocal.model.repositorioFireBase
 
 import com.example.unilocal.model.repositorio.UsuarioRepositorio
 import com.example.unilocal.model.entidad.Usuario
-
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 
 class UsuarioRepositorioFirebase(
