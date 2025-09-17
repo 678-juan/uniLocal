@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "478480157940",
+    "project_id": "app-moviles-a6db6",
+    "storage_bucket": "app-moviles-a6db6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:478480157940:android:104bb52e8698b5f2cd22a1",
+        "android_client_info": {
+          "package_name": "com.example.unilocal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbQxenY2XJ2uLoC7Hl-G7Xnm1ErxztiGo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
