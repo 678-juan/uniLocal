@@ -26,7 +26,7 @@ import com.example.unilocal.ui.componentes.LineaDecorativa
 
 @Composable
 fun PantallaRegisto(
-    onRegistrar: (nombre: String, username: String, email: String, ciudad: String, password: String) -> Unit
+
 ) {
 
     var nombre by remember { mutableStateOf("") }
@@ -67,7 +67,7 @@ fun PantallaRegisto(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(220.dp))
 
             Text(
                 text = stringResource(R.string.register_title),
@@ -75,7 +75,7 @@ fun PantallaRegisto(
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             CampoTexto(
                 valor = nombre,
@@ -118,7 +118,7 @@ fun PantallaRegisto(
             BotonPrincipal(
                 texto = stringResource(R.string.register_button),
                 onClick = {
-                    onRegistrar(nombre, username, email, ciudad, password)
+
                 }
             )
         }

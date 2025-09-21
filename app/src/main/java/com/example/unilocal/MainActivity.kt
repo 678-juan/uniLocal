@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.unilocal.ui.configuracion.visual.TemaApp
+import com.example.unilocal.ui.pantallas.Navegacion
 import com.example.unilocal.ui.pantallas.PantallaLogin
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +14,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TemaApp {
-                PantallaLogin()
+                Navegacion()
             }
         }
     }

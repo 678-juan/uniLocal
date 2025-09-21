@@ -26,7 +26,9 @@ import com.example.unilocal.ui.componentes.LineaDecorativa
 
 
 @Composable
-fun PantallaLogin() {
+fun PantallaLogin(
+    navegarARegistro: () -> Unit
+) {
     var usuario by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
 
@@ -117,7 +119,9 @@ fun PantallaLogin() {
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 color = AzulEnlaces,
-                modifier = Modifier.clickable { }
+                modifier = Modifier.clickable {
+                    navegarARegistro()
+                }
             )
         }
     }

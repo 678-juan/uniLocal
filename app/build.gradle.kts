@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
@@ -42,7 +43,6 @@ android {
 
 dependencies {
 
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -52,16 +52,19 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    // Ahora, declara las dependencias de Firebase
-    // Importa el BOM de Firebase primero para que gestione las versiones
+
+    implementation(libs.kotlinx.serialization.json)
+
+    // Navegación de Compose
+    implementation(libs.navigation.compose)
+
+
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
-    implementation(libs.androidx.ui.text)
-    implementation(libs.navigation.compose)
 
-    // el resto de tus dependencias
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
