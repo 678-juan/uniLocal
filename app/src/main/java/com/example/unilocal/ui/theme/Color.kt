@@ -14,6 +14,10 @@ val Pink40 = Color(0xFF7D5260)
 val VerdePrincipal = Color(0xFF00796B)
 val AzulEnlaces = Color(0xFF1565C0)
 
+val AzulPrincipal = Color(0xFF1976D2)
+val BlancoTexto = Color(0xFFFFFFFF)
+val RojoError = Color(0xFFD32F2F)
+
 val ColoresApp = darkColorScheme(
     primary = VerdePrincipal,
     secondary = AzulEnlaces
