@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -24,8 +25,8 @@ import com.example.unilocal.ui.theme.BlancoTexto
 
 
 @Composable
-fun PantallaLogin()
-{ var usuario by remember { mutableStateOf("") }
+fun PantallaLogin() {
+    var usuario by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
 
     Box(
@@ -33,7 +34,7 @@ fun PantallaLogin()
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        // 🔹 Líneas arriba
+        // lineas :c
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -45,16 +46,14 @@ fun PantallaLogin()
             LineaDecorativa(250.dp)
         }
 
-
         Image(
             painter = painterResource(id = R.drawable.logo),
-            contentDescription = "Logo UniLocal",
+            contentDescription = stringResource(R.string.app_name), // o "Logo UniLocal"
             modifier = Modifier
                 .size(270.dp)
                 .align(Alignment.TopCenter)
                 .padding(top = 60.dp)
         )
-
 
         Column(
             modifier = Modifier
@@ -66,25 +65,25 @@ fun PantallaLogin()
             Spacer(modifier = Modifier.height(250.dp))
 
             Spacer(modifier = Modifier.height(10.dp))
-            Text("Accede a tu cuenta")
+            Text(stringResource(R.string.login_title))
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Campo usuario
+            // C
             CampoTexto(
                 valor = usuario,
                 cuandoCambia = { usuario = it },
-                etiqueta = "Usuario",
+                etiqueta = stringResource(R.string.usuario_hint),
                 modificador = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo contraseña
+            // C contraseña
             CampoTexto(
                 valor = clave,
                 cuandoCambia = { clave = it },
-                etiqueta = "Contraseña",
+                etiqueta = stringResource(R.string.clave_hint),
                 modificador = Modifier.fillMaxWidth(),
                 transformacion = PasswordVisualTransformation(),
                 opcionesTeclado = KeyboardOptions.Default.copy()
@@ -92,9 +91,9 @@ fun PantallaLogin()
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // Recuperar contraseña
+            // Rcontraseña
             Text(
-                text = "Recupera tu contraseña",
+                text = stringResource(R.string.forgot_password),
                 fontSize = 14.sp,
                 color = AzulEnlaces,
                 modifier = Modifier.clickable { }
@@ -107,21 +106,18 @@ fun PantallaLogin()
                 onClick = { },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-
                     contentColor = BlancoTexto
                 ),
                 contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
-
-
             ) {
-                Text("Entrar")
+                Text(stringResource(R.string.login_button))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // registrarse
             Text(
-                text = "¿No tienes cuenta? Regístrate",
+                text = stringResource(R.string.register_prompt),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 color = AzulEnlaces,
