@@ -6,4 +6,14 @@
     <string name="forgot_password">Recupera tu contraseña</string>
     <string name="login_button">Entrar</string>
     <string name="register_prompt">¿No tienes cuenta? Regístrate</string>
+    <string name="register_title">Registro de Usuario</string>
+    <string name="nombre_hint">Nombre completo</string>
+    <string name="username_hint">Username</string>
+    <string name="email_hint">Email</string>
+    <string name="ciudad_hint">Ciudad</string>
+    <string name="password_hint">Contraseña</string>
+    <string name="confirm_password_hint">Confirmar contraseña</string>
+    <string name="register_button">Registrarse</string>
+    <string name="passwords_no_match">Las contraseñas no coinciden</string>
+    <string name="all_fields_required">Todos los campos son obligatorios</string>
 </resources>

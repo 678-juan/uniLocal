@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
+    implementation(libs.androidx.ui.text)
+    implementation(libs.navigation.compose)
 
     // el resto de tus dependencias
     testImplementation(libs.junit)

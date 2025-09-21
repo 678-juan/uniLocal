@@ -22,7 +22,7 @@ import com.example.unilocal.ui.theme.AzulEnlaces
 import com.example.unilocal.R
 import com.example.unilocal.ui.componentes.BotonPrincipal
 import com.example.unilocal.ui.componentes.LineaDecorativa
-import com.example.unilocal.ui.theme.BlancoTexto
+
 
 
 @Composable

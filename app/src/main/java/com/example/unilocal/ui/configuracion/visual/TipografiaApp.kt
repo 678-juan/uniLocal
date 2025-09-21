@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.configuracion
+package com.example.unilocal.ui.configuracion.visual
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

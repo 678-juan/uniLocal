@@ -1,10 +1,12 @@
 package com.example.unilocal.model.entidad
 
 data class Usuario(
-    val id: String ,
+    //val id: String , frebase puede auto asignarla
     val nombre: String ,
     val username: String ,
+    //val clave: String , mirar la seguridad e firebase
     val email: String ,
     val ciudad: String ,
+    val sexo: String ,
     val favoritos: List<String> = emptyList()
 )
