@@ -1,10 +1,13 @@
 <resources>
+    <!-- Pantalla login -->
     <string name="app_name">uniLocal</string>
     <string name="login_title">Accede a tu cuenta</string>
     <string name="usuario_hint">Usuario</string>
     <string name="clave_hint">Contraseña</string>
     <string name="forgot_password">Recupera tu contraseña</string>
     <string name="login_button">Entrar</string>
+
+    <!-- Pantalla Registro -->
     <string name="register_prompt">¿No tienes cuenta? Regístrate</string>
     <string name="register_title">Registro de Usuario</string>
     <string name="nombre_hint">Nombre completo</string>
@@ -16,4 +19,26 @@
     <string name="register_button">Registrarse</string>
     <string name="passwords_no_match">Las contraseñas no coinciden</string>
     <string name="all_fields_required">Todos los campos son obligatorios</string>
+
+    <!-- Pantalla Crear Lugar -->
+    <string name="crear_lugar_titulo">Crear Lugar</string>
+    <string name="selecciona_categoria">Selecciona la categoría</string>
+    <string name="crea_nuevo_hogar">Crea tu nuevo hogar</string>
+    <string name="nombre_lugar">Nombre del lugar</string>
+    <string name="descripcion_lugar">Descripción</string>
+    <string name="horario_atencion">Horario de atención</string>
+    <string name="telefono_lugar">Teléfono o línea de atención</string>
+    <string name="direccion_lugar">Dirección</string>
+    <string name="marca_direccion">Marca la dirección del lugar</string>
+    <string name="selecciona_foto">Selecciona la mejor foto del lugar</string>
+    <string name="boton_guardar">Guardar</string>
+
+    <!-- Categorías -->
+    <string name="categoria_restaurante">Restaurante</string>
+    <string name="categoria_cafe">Café</string>
+    <string name="categoria_hotel">Hotel</string>
+    <string name="categoria_museo">Museo</string>
+    <string name="categoria_comida_rapida">Comida rápida</string>
+    <string name="categoria_pasada">Pasada</string>
+
 </resources>

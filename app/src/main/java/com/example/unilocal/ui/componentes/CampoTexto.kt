@@ -1,6 +1,11 @@
 package com.example.unilocal.ui.componentes
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -13,7 +18,9 @@ import androidx.compose.material3.TextFieldDefaults
 
 
 import androidx.compose.ui.graphics.Color
-
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 
 @Composable
@@ -25,24 +32,27 @@ fun CampoTexto(
     transformacion: VisualTransformation = VisualTransformation.None,
     opcionesTeclado: KeyboardOptions = KeyboardOptions.Default
 ) {
-    TextField(
-        value = valor,
-        onValueChange = cuandoCambia,
-        label = { Text(etiqueta) },
-        modifier = modificador.fillMaxWidth(),
-        visualTransformation = transformacion,
-        keyboardOptions = opcionesTeclado,
-        singleLine = true,
-        colors = TextFieldDefaults.colors(
-            focusedTextColor = Color.Black,
-            focusedIndicatorColor = Color.Black,
-            unfocusedIndicatorColor = Color.Black,
-            disabledIndicatorColor = Color.Gray,
-            errorIndicatorColor = Color.Red,
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            disabledContainerColor = Color.Transparent,
-            errorContainerColor = Color.Transparent
+    Column(modifier = modificador.fillMaxWidth()) {
+        // Etiqueta fija (no flotante ni animada)
+        Text(
+            text = etiqueta,
+            fontSize = 14.sp,
+            color = Color.DarkGray,
+            modifier = Modifier.padding(bottom = 4.dp)
         )
-    )
+
+        BasicTextField(
+            value = valor,
+            onValueChange = cuandoCambia,
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
+                .padding(12.dp),
+            singleLine = true,
+            visualTransformation = transformacion,
+            keyboardOptions = opcionesTeclado,
+            textStyle = TextStyle(color = Color.Black)
+        )
+    }
 }
+
