@@ -23,9 +23,11 @@ import androidx.compose.ui.unit.sp
 import com.example.unilocal.R
 
 import androidx.compose.foundation.verticalScroll
+import com.example.unilocal.ui.componentes.BotonPrincipal
+import com.example.unilocal.ui.componentes.CampoTexto
 
 @Composable
-fun PantallaCrearLugar() {
+fun CrearLugar() {
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var horario by remember { mutableStateOf("") }
@@ -44,12 +46,12 @@ fun PantallaCrearLugar() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()) // permite scroll vertical
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // --- Título centrado ---
+        // --- Título ---
         Text(
-            text = stringResource(R.string.app_name), // UniLocal
+            text = stringResource(R.string.app_name),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -57,7 +59,7 @@ fun PantallaCrearLugar() {
         )
         Spacer(modifier = Modifier.height(4.dp))
 
-        // --- Subtítulo centrado ---
+        // --- Subtítulo ---
         Text(
             text = stringResource(R.string.crea_nuevo_hogar),
             fontSize = 16.sp,
@@ -69,7 +71,7 @@ fun PantallaCrearLugar() {
         Spacer(modifier = Modifier.height(12.dp))
         Divider(modifier = Modifier.padding(vertical = 8.dp), color = Color.Gray)
 
-        // --- Selección de categorías estilo chips ---
+        // --- Categorías ---
         Text(text = stringResource(R.string.selecciona_categoria), fontWeight = FontWeight.Medium)
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -83,7 +85,7 @@ fun PantallaCrearLugar() {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .background(Color(0xFFFFEB3B), shape = RoundedCornerShape(50)) // ovalado
+                        .background(Color(0xFFFFEB3B), shape = RoundedCornerShape(50))
                         .border(2.dp, Color.DarkGray, shape = RoundedCornerShape(50))
                         .clickable { /* seleccionar categoría */ }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -95,46 +97,43 @@ fun PantallaCrearLugar() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Formulario ---
-        OutlinedTextField(
-            value = nombre,
-            onValueChange = { nombre = it },
-            label = { Text(stringResource(R.string.nombre_lugar)) },
-            modifier = Modifier.fillMaxWidth()
+        // --- Campos de texto personalizados ---
+        CampoTexto(
+            valor = nombre,
+            cuandoCambia = { nombre = it },
+            etiqueta = stringResource(R.string.nombre_lugar)
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = descripcion,
-            onValueChange = { descripcion = it },
-            label = { Text(stringResource(R.string.descripcion_lugar)) },
-            modifier = Modifier.fillMaxWidth()
+        CampoTexto(
+            valor = descripcion,
+            cuandoCambia = { descripcion = it },
+            etiqueta = stringResource(R.string.descripcion_lugar)
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = horario,
-            onValueChange = { horario = it },
-            label = { Text(stringResource(R.string.horario_atencion)) },
-            modifier = Modifier.fillMaxWidth()
+        CampoTexto(
+            valor = horario,
+            cuandoCambia = { horario = it },
+            etiqueta = stringResource(R.string.horario_atencion)
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = telefono,
-            onValueChange = { telefono = it },
-            label = { Text(stringResource(R.string.telefono_lugar)) },
-            modifier = Modifier.fillMaxWidth()
+        CampoTexto(
+            valor = telefono,
+            cuandoCambia = { telefono = it },
+            etiqueta = stringResource(R.string.telefono_lugar),
+
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        // --- Dirección con lupa ---
+        // Dirección con lupa
         Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = direccion,
-                onValueChange = { direccion = it },
-                label = { Text(stringResource(R.string.marca_direccion)) },
-                modifier = Modifier.weight(1f)
+            CampoTexto(
+                valor = direccion,
+                cuandoCambia = { direccion = it },
+                etiqueta = stringResource(R.string.marca_direccion),
+                modificador = Modifier.weight(1f)
             )
             IconButton(onClick = { /* abrir mapa */ }) {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar en mapa")
@@ -143,7 +142,7 @@ fun PantallaCrearLugar() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Placeholder de mapa de Google ---
+        // --- Mapa ---
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -158,7 +157,7 @@ fun PantallaCrearLugar() {
         Divider(color = Color.Gray, thickness = 1.dp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Galería de fotos ---
+        // --- Galería ---
         Text(text = stringResource(R.string.selecciona_foto), fontWeight = FontWeight.Medium)
         Spacer(modifier = Modifier.height(8.dp))
         Box(
@@ -173,14 +172,11 @@ fun PantallaCrearLugar() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Botón guardar ---
-        Button(
+        
+        BotonPrincipal(
+            texto = stringResource(R.string.boton_guardar),
             onClick = { /* guardar */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-        ) {
-            Text(stringResource(R.string.boton_guardar))
-        }
+            modifier = Modifier.height(50.dp)
+        )
     }
 }

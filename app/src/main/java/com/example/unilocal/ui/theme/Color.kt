@@ -21,4 +21,5 @@ val RojoError = Color(0xFFD32F2F)
 val ColoresApp = darkColorScheme(
     primary = VerdePrincipal,
     secondary = AzulEnlaces
+
 )
