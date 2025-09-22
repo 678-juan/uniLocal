@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.configuracion.rutas
+package com.example.unilocal.ui.configuracion
 
 import kotlinx.serialization.Serializable
 
