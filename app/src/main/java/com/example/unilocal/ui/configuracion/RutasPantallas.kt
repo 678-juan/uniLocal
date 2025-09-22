@@ -9,4 +9,15 @@ sealed class RutasPantallas {
 
     @Serializable
     data object Registro : RutasPantallas()
+
+    @Serializable
+    data object PrincipalUsuarios : RutasPantallas()
+
+    @Serializable
+    data object PrincipalAdministrador : RutasPantallas()
+
+
+
+
+
 }

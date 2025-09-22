@@ -41,4 +41,11 @@
     <string name="categoria_comida_rapida">Comida rápida</string>
     <string name="categoria_pasada">Pasada</string>
 
+    <!-- Barra Navegacion -->
+    <string name="inicio">Inicio</string>
+    <string name="recomendados">Recomendaciones</string>">
+    <string name="perfil">Perfil</string>
+    <string name="crear_lugar">Crear Lugar</string>
+    <string name="busqueda">Buscar</string>
+
 </resources>

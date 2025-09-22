@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas
+package com.example.unilocal.ui.pantallas.usuario.Taps
 
 
 import androidx.compose.foundation.background

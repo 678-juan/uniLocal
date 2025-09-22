@@ -33,7 +33,7 @@ fun CampoTexto(
     opcionesTeclado: KeyboardOptions = KeyboardOptions.Default
 ) {
     Column(modifier = modificador.fillMaxWidth()) {
-        // Etiqueta fija (no flotante ni animada)
+
         Text(
             text = etiqueta,
             fontSize = 14.sp,

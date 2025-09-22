@@ -9,28 +9,28 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.unilocal.ui.componentes.CampoTexto
 import com.example.unilocal.ui.theme.AzulEnlaces
-import com.example.unilocal.R
 import com.example.unilocal.ui.componentes.BotonPrincipal
 import com.example.unilocal.ui.componentes.LineaDecorativa
-
-
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.example.unilocal.R
 
 @Composable
 fun PantallaLogin(
-    navegarARegistro: () -> Unit
+    navegarARegistro: () -> Unit,
+    navegarAPrincipalUsuario: () -> Unit
 ) {
     var usuario by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -107,7 +107,14 @@ fun PantallaLogin(
             // boton entrar
             BotonPrincipal(
                 texto = stringResource(R.string.login_button),
-                onClick = {  }
+                onClick = {
+                    if (usuario == "admin" && clave == "123") {
+                        navegarAPrincipalUsuario()
+
+                    } else {
+                        Toast.makeText(context, "Acceso denegado. Admin quemado.", Toast.LENGTH_SHORT).show()
+                    }
+                }
             )
 
 

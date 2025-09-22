@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.unilocal.ui.configuracion.RutasPantallas
+import com.example.unilocal.ui.pantallas.usuario.PrincipalUsuario
 
 
 @Composable
@@ -17,6 +18,9 @@ fun Navegacion() {
     ) {
         composable<RutasPantallas.Login> {
             PantallaLogin(
+                navegarAPrincipalUsuario = {
+                    navController.navigate(RutasPantallas.PrincipalUsuarios)
+                },
                 navegarARegistro = {
                     navController.navigate(RutasPantallas.Registro)
                 }
@@ -25,5 +29,10 @@ fun Navegacion() {
         composable<RutasPantallas.Registro> {
             PantallaRegisto()
         }
+
+        composable<RutasPantallas.PrincipalUsuarios> {
+            PrincipalUsuario()
+        }
+
     }
 }
