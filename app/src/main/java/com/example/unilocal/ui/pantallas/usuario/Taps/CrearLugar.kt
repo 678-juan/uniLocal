@@ -1,6 +1,7 @@
 package com.example.unilocal.ui.pantallas.usuario.Taps
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.example.unilocal.R
 
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.res.painterResource
 import com.example.unilocal.ui.componentes.BotonPrincipal
 import com.example.unilocal.ui.componentes.CampoTexto
 
@@ -47,32 +49,42 @@ fun CrearLugar() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        // --- Título ---
-        Text(
-            text = stringResource(R.string.app_name),
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+            .padding(horizontal = 15.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
 
-        // --- Subtítulo ---
+    ) {
+
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            contentDescription = stringResource(R.string.app_name),
+            modifier = Modifier
+                .size(190.dp)
+
+        )
+
+
+
+
         Text(
             text = stringResource(R.string.crea_nuevo_hogar),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            color = Color.Gray,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black,
+            textAlign = TextAlign.Start,
             modifier = Modifier.fillMaxWidth()
         )
+
         Spacer(modifier = Modifier.height(12.dp))
         Divider(modifier = Modifier.padding(vertical = 8.dp), color = Color.Gray)
 
-        // --- Categorías ---
-        Text(text = stringResource(R.string.selecciona_categoria), fontWeight = FontWeight.Medium)
+        // categoria
+        Text(
+            text = stringResource(R.string.selecciona_categoria),
+            fontWeight = FontWeight.Medium,
+            color = Color.Black,
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
@@ -97,7 +109,7 @@ fun CrearLugar() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Campos de texto personalizados ---
+        // Campos de texto
         CampoTexto(
             valor = nombre,
             cuandoCambia = { nombre = it },
@@ -122,12 +134,18 @@ fun CrearLugar() {
         CampoTexto(
             valor = telefono,
             cuandoCambia = { telefono = it },
-            etiqueta = stringResource(R.string.telefono_lugar),
-
+            etiqueta = stringResource(R.string.telefono_lugar)
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Dirección con lupa
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            color = Color.Gray,
+            thickness = 1.dp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             CampoTexto(
                 valor = direccion,
@@ -135,14 +153,17 @@ fun CrearLugar() {
                 etiqueta = stringResource(R.string.marca_direccion),
                 modificador = Modifier.weight(1f)
             )
-            IconButton(onClick = { /* abrir mapa */ }) {
+            IconButton(
+                onClick = { /* abrir mapa */ },
+                modifier = Modifier.align(Alignment.Bottom)
+            ) {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar en mapa")
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Mapa ---
+        // mapa
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -157,8 +178,13 @@ fun CrearLugar() {
         Divider(color = Color.Gray, thickness = 1.dp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Galería ---
-        Text(text = stringResource(R.string.selecciona_foto), fontWeight = FontWeight.Medium)
+        // galeria
+        Text(
+            text = stringResource(R.string.selecciona_foto),
+            fontWeight = FontWeight.Medium,
+            color = Color.Black,
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Box(
             modifier = Modifier
@@ -172,11 +198,12 @@ fun CrearLugar() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        
         BotonPrincipal(
             texto = stringResource(R.string.boton_guardar),
             onClick = { /* guardar */ },
-            modifier = Modifier.height(50.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
         )
     }
 }
