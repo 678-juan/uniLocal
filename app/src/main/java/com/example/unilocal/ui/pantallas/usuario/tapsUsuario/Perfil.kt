@@ -1,12 +1,12 @@
-package com.example.unilocal.ui.pantallas.usuario.Taps
+package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun Inicio(){
+fun Perfil(){
     Text(
-        text = "Inicio"
+        text = "Perfil"
 
     )
 }

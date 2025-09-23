@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.NavegacionUsuario
+package com.example.unilocal.ui.pantallas.usuario.navegacionUsuario
 
 import kotlinx.serialization.Serializable
 

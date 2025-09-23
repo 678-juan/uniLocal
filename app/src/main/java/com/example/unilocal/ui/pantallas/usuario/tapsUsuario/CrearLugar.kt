@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.Taps
+package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
 
 import androidx.compose.foundation.Image
