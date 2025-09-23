@@ -27,7 +27,7 @@ fun BottonBarUsuario(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-
+    val topRounded = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
     NavigationBar(
         modifier = Modifier
 
@@ -35,9 +35,9 @@ fun BottonBarUsuario(
             .border(
                 width = 1.dp,
                 color = Color.Black,
-                shape = RoundedCornerShape(16.dp)
+                shape = topRounded
             )
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(topRounded),
         containerColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground
     ){
