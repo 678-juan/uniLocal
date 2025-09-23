@@ -48,4 +48,10 @@
     <string name="crear_lugar">Crear Lugar</string>
     <string name="busqueda">Buscar</string>
 
+    <!-- Pantalla Editar Perfil -->
+    <string name="editar_perfil_titulo">Editar Perfil</string>
+    <string name="nombre_usuario">Nombre de usuario</string>"
+    <string name="email_usuario">Email</string>"
+    <string name="ciudad_usuario">Ciudad</string>"
+    <string name="boton_editar_datos_usuario">Editar</string>"
 </resources>

@@ -16,7 +16,8 @@ sealed class RutasPantallas {
     @Serializable
     data object PrincipalAdministrador : RutasPantallas()
 
-
+    @Serializable
+    object EditarPerfilUsuario : RutasPantallas()
 
 
 

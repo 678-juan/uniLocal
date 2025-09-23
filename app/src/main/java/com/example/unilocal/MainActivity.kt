@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.unilocal.ui.theme.TemaApp
 import com.example.unilocal.ui.pantallas.Navegacion
+import com.example.unilocal.ui.pantallas.usuario.PantallaEditarUsuario
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,7 +14,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TemaApp {
-                Navegacion()
+                PantallaEditarUsuario()
             }
         }
     }
