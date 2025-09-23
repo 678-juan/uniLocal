@@ -23,9 +23,9 @@ fun ContentUsuario(
     NavHost(
         modifier = Modifier.padding(padding),
         navController = navController,
-        startDestination = RutaTab.Inicio
+        startDestination = RutaTab.InicioUsuario
     ){
-        composable<RutaTab.Inicio> {
+        composable<RutaTab.InicioUsuario> {
             Inicio()
         }
         composable<RutaTab.Busqueda> {

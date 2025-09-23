@@ -60,7 +60,7 @@ enum class Destino(
     val icono: ImageVector
 
 ){
-    INICIO(RutaTab.Inicio,R.string.inicio,Icons.Default.Home),
+    INICIO(RutaTab.InicioUsuario,R.string.inicio,Icons.Default.Home),
     BUSQUEDA(RutaTab.Busqueda,R.string.busqueda,Icons.Default.Search),
     CREARLUGAR(RutaTab.CrearLugar,R.string.crear_lugar,Icons.Default.AddCircle),
     RECOMENDACIONES(RutaTab.Recomendados,R.string.recomendados,Icons.Default.Place),

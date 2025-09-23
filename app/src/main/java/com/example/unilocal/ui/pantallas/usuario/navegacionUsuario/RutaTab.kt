@@ -11,7 +11,7 @@ sealed class RutaTab() {
     data object CrearLugar : RutaTab()
 
     @Serializable
-    data object Inicio : RutaTab()
+    data object InicioUsuario : RutaTab()
 
     @Serializable
     data object Perfil : RutaTab()
