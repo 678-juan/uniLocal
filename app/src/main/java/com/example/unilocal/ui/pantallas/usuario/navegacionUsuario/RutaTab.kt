@@ -19,4 +19,6 @@ sealed class RutaTab() {
     @Serializable
     data object Recomendados : RutaTab()
 
+
+
 }

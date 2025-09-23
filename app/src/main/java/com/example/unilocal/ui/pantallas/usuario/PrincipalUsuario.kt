@@ -64,5 +64,5 @@ enum class Destino(
     BUSQUEDA(RutaTab.Busqueda,R.string.busqueda,Icons.Default.Search),
     CREARLUGAR(RutaTab.CrearLugar,R.string.crear_lugar,Icons.Default.AddCircle),
     RECOMENDACIONES(RutaTab.Recomendados,R.string.recomendados,Icons.Default.Place),
-    PERFIL(RutaTab.Perfil,R.string.perfil,Icons.Default.Person)
+    PERFIL(RutaTab.Perfil,R.string.perfil,Icons.Default.Person) // vamos al editar momentaniam
 }

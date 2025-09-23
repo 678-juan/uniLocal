@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.unilocal.ui.pantallas.usuario.PantallaEditarUsuario
 import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.Busqueda
 import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.CrearLugar
 import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.Inicio
@@ -38,7 +39,7 @@ fun ContentUsuario(
             Recomendaciones()
         }
         composable<RutaTab.Perfil> {
-            Perfil()
+            PantallaEditarUsuario()
         }
     }
 
