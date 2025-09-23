@@ -20,6 +20,12 @@ val RojoError = Color(0xFFD32F2F)
 
 val ColoresApp = darkColorScheme(
     primary = VerdePrincipal,
-    secondary = AzulEnlaces
+    secondary = AzulEnlaces,
+    background = BlancoTexto,
+    surface = BlancoTexto,
+    onPrimary = BlancoTexto,
+    onSecondary = BlancoTexto,
+    onBackground = Color.Black,
+    onSurface = Color.Black
 
 )

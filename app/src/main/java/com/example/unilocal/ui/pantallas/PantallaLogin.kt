@@ -51,7 +51,7 @@ fun PantallaLogin(
 
         Image(
             painter = painterResource(id = R.drawable.logo),
-            contentDescription = stringResource(R.string.app_name), // o "Logo UniLocal"
+            contentDescription = stringResource(R.string.app_name),
             modifier = Modifier
                 .size(270.dp)
                 .align(Alignment.TopCenter)
@@ -65,9 +65,9 @@ fun PantallaLogin(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Spacer(modifier = Modifier.height(250.dp))
+            Spacer(modifier = Modifier.height(260.dp))
 
-            Spacer(modifier = Modifier.height(10.dp))
+
             Text(stringResource(R.string.login_title))
 
             Spacer(modifier = Modifier.height(32.dp))
