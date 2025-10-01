@@ -20,7 +20,7 @@ import com.example.unilocal.ui.componentes.CampoTexto
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaEditarUsuario(
-    onNavigateBack: () -> Unit = {}
+
 ) {
 
     var nombre by remember { mutableStateOf("Nombre Ejemplo") }
@@ -38,7 +38,7 @@ fun PantallaEditarUsuario(
             TopAppBar(
                 title = { Text(stringResource(id = R.string.editar_datos_titulo)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = { /* Navegar hacia atrás */ }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"

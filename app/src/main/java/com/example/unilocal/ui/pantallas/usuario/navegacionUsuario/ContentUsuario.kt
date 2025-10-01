@@ -37,7 +37,11 @@ fun ContentUsuario(
             Recomendaciones()
         }
         composable<RutaTab.Perfil> {
-            Perfil(navController)
+            Perfil(
+                navegarACrearLugar = {
+                    navController.navigate(RutaTab.CrearLugar)
+                }
+            )
         }
     }
 

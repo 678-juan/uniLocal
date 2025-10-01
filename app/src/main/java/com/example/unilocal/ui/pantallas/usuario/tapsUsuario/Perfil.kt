@@ -24,7 +24,7 @@ import com.example.unilocal.ui.configuracion.RutasPantallas
 
 
 @Composable
-fun Perfil(navController: NavController) {
+fun Perfil(navegarACrearLugar: () -> Unit) {
 
     val usuarioNombre = "Jose Maria dos Santos"
     val usuarioUsername = "@sm1llle"
@@ -100,7 +100,7 @@ fun Perfil(navController: NavController) {
             IconButton(
                 onClick = {
                     // Navega usando la ruta global
-                    navController.navigate(RutasPantallas.EditarPerfilUsuario)
+                    navegarACrearLugar()
                 },
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
@@ -139,7 +139,7 @@ fun Perfil(navController: NavController) {
                 .fillMaxWidth()
                 .clickable {
                     // Navega usando la ruta global (ahora resuelta)
-                    navController.navigate(RutasPantallas.CrearLugar)
+                    navegarACrearLugar()
                 }
                 .padding(vertical = 24.dp)
         ) {
