@@ -19,8 +19,6 @@ fun ContentUsuario(
     navController: NavHostController,
     padding: PaddingValues
 ) {
-
-
     NavHost(
         modifier = Modifier.padding(padding),
         navController = navController,
@@ -39,7 +37,7 @@ fun ContentUsuario(
             Recomendaciones()
         }
         composable<RutaTab.Perfil> {
-            PantallaEditarUsuario()
+            Perfil(navController)
         }
     }
 

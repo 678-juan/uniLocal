@@ -19,6 +19,9 @@ sealed class RutasPantallas {
     @Serializable
     object EditarPerfilUsuario : RutasPantallas()
 
+    @Serializable
+    object CrearLugar : RutasPantallas()
+
 
 
 

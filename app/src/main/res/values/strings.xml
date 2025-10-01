@@ -49,7 +49,7 @@
     <string name="busqueda">Buscar</string>
 
     <!-- Pantalla Editar Perfil -->
-    <string name="editar_perfil_titulo">Editar Perfil</string>
+    <string name="editar_datos_titulo">Editar Datos</string>
     <string name="nombre_usuario">Nombre de usuario</string>"
     <string name="email_usuario">Email</string>"
     <string name="ciudad_usuario">Ciudad</string>"

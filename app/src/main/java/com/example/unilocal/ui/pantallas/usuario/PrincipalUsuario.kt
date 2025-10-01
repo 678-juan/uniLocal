@@ -52,8 +52,6 @@ fun TopBarUsuario() {
 
 }
 
-
-
 enum class Destino(
     val ruta: RutaTab,
     val texto: Int,

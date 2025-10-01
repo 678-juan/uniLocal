@@ -36,7 +36,7 @@ fun PantallaEditarUsuario(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(id = R.string.editar_perfil_titulo)) },
+                title = { Text(stringResource(id = R.string.editar_datos_titulo)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
