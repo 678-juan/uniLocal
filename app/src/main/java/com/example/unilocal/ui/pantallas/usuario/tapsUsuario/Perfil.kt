@@ -113,7 +113,7 @@ fun Perfil(navController: NavController) {
 
         //  Sección de Publicaciones/Lugares Creados
         Text(
-            text = "Publicación",
+            text = stringResource(R.string.Publicación),
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
             modifier = Modifier
@@ -143,7 +143,9 @@ fun Perfil(navController: NavController) {
                 }
                 .padding(vertical = 24.dp)
         ) {
-            Text(text = "¡Añade un lugar nuevo!", fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp))
+            Text(text = stringResource(R.string.Añade_un_lugar_nuevo),
+                fontSize = 16.sp,
+                modifier = Modifier.padding(bottom = 8.dp))
 
             // Icono nueva publicacion
             Icon(
@@ -158,7 +160,7 @@ fun Perfil(navController: NavController) {
             )
 
             Text(
-                text = "Nueva publicación",
+                text = stringResource(R.string.Nueva_publicacion),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -166,7 +168,7 @@ fun Perfil(navController: NavController) {
 
         // Sección de Lista de Lugares Creados
         Text(
-            text = "Lugares creados por mí (Pendiente: Lista y Respuesta a Comentarios)",
+            text = stringResource(R.string.Descripcion_lugar_para_el_usuario),
             color = Color.DarkGray,
             modifier = Modifier.padding(16.dp)
         )

@@ -54,4 +54,14 @@
     <string name="email_usuario">Email</string>"
     <string name="ciudad_usuario">Ciudad</string>"
     <string name="boton_editar_datos_usuario">Editar</string>"
+
+    <!-- Pantalla Editar Perfil -->
+    <string name="Añade_un_lugar_nuevo">Añade un lugar nuevo</string>
+    <string name="Descripcion_lugar_para_el_usuario">¡Crea un lugar! Aqui lo pordras ver</string>">
+    <string name="Nueva_publicacion">Nueva publicación</string>">
+    <string name="Publicación">Publicación</string>
+
+
+
+
 </resources>

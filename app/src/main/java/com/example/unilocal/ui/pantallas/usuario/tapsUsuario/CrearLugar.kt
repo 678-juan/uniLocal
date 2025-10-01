@@ -64,8 +64,6 @@ fun CrearLugar() {
         )
 
 
-
-
         Text(
             text = stringResource(R.string.crea_nuevo_hogar),
             fontSize = 18.sp,
