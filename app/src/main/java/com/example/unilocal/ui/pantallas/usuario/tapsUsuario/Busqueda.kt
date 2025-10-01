@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.unilocal.R
 import com.example.unilocal.ui.componentes.CampoMinimalista
 import com.example.unilocal.ui.componentes.FichaLugar
 
@@ -35,9 +36,9 @@ fun Busqueda() {
         Text("Recomendaciones mágicas", fontWeight = FontWeight.Bold)
 
         FichaLugar(
-            imagenUrl = "https://picsum.photos/400/200",
-            titulo = "Gourmet Express",
-            descripcion = "Cocina internacional"
+            imagenResId = R.drawable.cafeteria_moderna,
+            titulo = "Café Modernista",
+            descripcion = "Café de especialidad y postres"
         )
     }
 }
