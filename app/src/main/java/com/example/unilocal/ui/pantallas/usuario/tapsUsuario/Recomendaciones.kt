@@ -16,27 +16,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.unilocal.ui.componentes.FichaLugar
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 
 @Composable
 fun Recomendaciones() {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 
-        // busqueda basica
-        OutlinedTextField(
-            value = "Desciada das escadas de Santos",
-            onValueChange = {},
-            modifier = Modifier.fillMaxWidth(),
-            trailingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") }
-        )
+    val scrollState = rememberScrollState()
 
-        Spacer(modifier = Modifier.height(16.dp))
-
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(scrollState) // <-- scroll aquí
+    ) {
         Text("Tu ubicación", fontWeight = FontWeight.Bold)
 
         // imagen mapa
         Image(
-            painter = painterResource(id = R.drawable.mapamomentaneo), // Usa tu imagen del mapa
+            painter = painterResource(id = R.drawable.mapamomentaneo),
             contentDescription = "Mapa",
             modifier = Modifier
                 .fillMaxWidth()
@@ -48,23 +47,31 @@ fun Recomendaciones() {
 
         Text("Recomendaciones cerca a tu ubicación", fontWeight = FontWeight.Bold)
 
-        // poner unna lista preparada de recomendaciones
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // poner una lista preparada de recomendaciones
         Column {
             FichaLugar(
-                imagenUrl = "https://picsum.photos/400/200",
-                titulo = "Gourmet Express",
-                descripcion = "Cocina internacional"
+                imagenResId = R.drawable.restaurante_mex,
+                titulo = "El Sombrero",
+                descripcion = "Comida mexicana auténtica"
             )
             FichaLugar(
-                imagenUrl = "https://picsum.photos/401/200",
-                titulo = "Comida Italiana",
-                descripcion = "Pasta & Pizza"
+                imagenResId = R.drawable.cafeteria_moderna,
+                titulo = "Café Modernista",
+                descripcion = "Café de especialidad y postres"
             )
             FichaLugar(
-                imagenUrl = "https://picsum.photos/402/200",
-                titulo = "Cafetería - Hotel",
-                descripcion = "Ambiente acogedor"
+                imagenResId = R.drawable.pizzeria_roma,
+                titulo = "Pizzería La Roma",
+                descripcion = "Pizza artesanal y horno de leña"
             )
+            FichaLugar(
+                imagenResId = R.drawable.burger_house,
+                titulo = "Burger House",
+                descripcion = "Hamburguesas gourmet y papas rústicas"
+            )
+
         }
     }
 }
