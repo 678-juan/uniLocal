@@ -6,6 +6,7 @@ import com.example.unilocal.model.repositorio.LugarRepositorio
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
+/**
 class LugarRepositorioFirebase(
     private val db: FirebaseFirestore
 ) : LugarRepositorio {
@@ -52,3 +53,4 @@ class LugarRepositorioFirebase(
         }
     }
 }
+        **/

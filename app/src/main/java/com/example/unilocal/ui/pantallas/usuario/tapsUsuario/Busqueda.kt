@@ -35,11 +35,10 @@ fun Busqueda() {
 
         Text("Recomendaciones mágicas", fontWeight = FontWeight.Bold)
 
-        FichaLugar(
-            imagenResId = R.drawable.cafeteria_moderna,
-            titulo = "Café Modernista",
-            descripcion = "Café de especialidad y postres"
-        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // poner una lista preparada de recomendaciones
+
     }
 }
 

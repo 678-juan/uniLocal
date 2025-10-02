@@ -27,14 +27,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.res.painterResource
 import com.example.unilocal.ui.componentes.BotonPrincipal
 import com.example.unilocal.ui.componentes.CampoTexto
+import com.example.unilocal.viewModel.LugaresViewModel
 
 @Composable
 fun CrearLugar() {
+
+
+
+
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var horario by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
+
 
     val categorias = listOf(
         stringResource(R.string.categoria_restaurante),

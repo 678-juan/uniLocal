@@ -12,6 +12,7 @@ import com.example.unilocal.ui.pantallas.usuario.PrincipalUsuario
 fun Navegacion() {
     val navController = rememberNavController()
 
+
     NavHost(
         navController = navController,
         startDestination = RutasPantallas.Login
@@ -33,6 +34,8 @@ fun Navegacion() {
         composable<RutasPantallas.PrincipalUsuarios> {
             PrincipalUsuario()
         }
+
+
 
 
 

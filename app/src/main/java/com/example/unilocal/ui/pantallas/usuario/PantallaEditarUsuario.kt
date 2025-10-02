@@ -30,7 +30,7 @@ fun PantallaEditarUsuario(
     var nuevaContrasena by remember { mutableStateOf("") }
     var confirmarNuevaContrasena by remember { mutableStateOf("") }
 
-    // Estados para errores
+
     var mostrarErrorContrasena by remember { mutableStateOf(false) }
 
     Scaffold(

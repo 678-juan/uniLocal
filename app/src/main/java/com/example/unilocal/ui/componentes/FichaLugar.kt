@@ -2,6 +2,7 @@ package com.example.unilocal.ui.componentes
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -17,58 +18,37 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import com.example.unilocal.model.entidad.Lugar
+
 
 @Composable
 fun FichaLugar(
-    imagenResId: Int,
-    titulo: String,
-    descripcion: String,
+    lugar: Lugar,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
-            .fillMaxWidth()
-            .height(150.dp)
-            .padding(8.dp),
+            .fillMaxWidth()  // << Esto puede combinarse mal con height fijo
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box {
             Image(
-                painter = painterResource(id = imagenResId),
-                contentDescription = titulo,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                painter = painterResource(id = lugar.imagenResId),
+                contentDescription = lugar.nombre,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize() // << Aquí está el problema
             )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black),
-                            startY = 100f
-                        )
-                    )
-            )
-
-            Column(
+            Text(
+                text = lugar.nombre,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(12.dp)
-            ) {
-                Text(
-                    text = titulo,
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = descripcion,
-                    color = Color.White,
-                    fontSize = 12.sp
-                )
-            }
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .padding(8.dp),
+                color = Color.White
+            )
         }
     }
 }

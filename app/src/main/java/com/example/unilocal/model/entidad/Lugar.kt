@@ -1,16 +1,25 @@
 package com.example.unilocal.model.entidad
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Lugar(
-    val id: String ,
-    val nombre: String ,
-    val descripcion: String ,
-    val categoria: String ,
+    val id: String,
+    val nombre: String,
+    val descripcion: String,
+    val direccion: String,
+    val categoria: String,
     val horario: Map<String, Pair<String, String>> = emptyMap(),
-    val telefono: String ,
-    val imagenes: List<String> = emptyList(),
-    val latitud: Double ,
-    val longitud: Double ,
+    val telefono: String,
+    val imagenResId: Int,
+    var likes: Int,
+    val longitud: Double,
     val estado: EstadoLugar = EstadoLugar.PENDIENTE,
-    val creadorId: String ,
-    val calificacionPromedio: Double
+    val creadorId: String,
+    val calificacionPromedio: Double,
+    val ubicacion: Ubicacion,
+    val comentarios: List<Comentario> = emptyList()
 )
+
+
+
+

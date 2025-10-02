@@ -19,6 +19,9 @@ sealed class RutaTab() {
     @Serializable
     data object Recomendados : RutaTab()
 
+    @Serializable
+    data class LugarDetalles(val idLugar: String) : RutaTab()
+
 
 
 }

@@ -6,7 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
-
+/**
 class UsuarioRepositorioFirebase(
     private val auth: FirebaseAuth,
     private val db: FirebaseFirestore
@@ -59,3 +59,4 @@ class UsuarioRepositorioFirebase(
         }
     }
 }
+        **/
