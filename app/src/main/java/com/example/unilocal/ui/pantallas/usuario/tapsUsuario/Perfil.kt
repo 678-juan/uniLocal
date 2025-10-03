@@ -24,7 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.unilocal.R
 import com.example.unilocal.ui.configuracion.RutasPantallas
-import com.example.unilocal.ui.componentes.PublicacionUno
+import com.example.unilocal.ui.componentes.FichaLugar
 import com.example.unilocal.viewModel.UsuarioViewModel
 import com.example.unilocal.viewModel.LugaresViewModel
 
@@ -40,20 +40,20 @@ fun Perfil(
     val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
     val usuarioActual by viewModel.usuarioActual.collectAsState()
     val lugares by lugaresVM.lugares.collectAsState()
-    
+
     // avatares disponibles
     val avatares = listOf(
         R.drawable.hombre, R.drawable.mujer, R.drawable.hombre1,
         R.drawable.mujer1, R.drawable.hombre2, R.drawable.mujer2
     )
-    
+
     // datos del usuario o por defecto
     val usuarioNombre = usuarioActual?.nombre ?: "Usuario"
     val usuarioUsername = usuarioActual?.username ?: "@usuario"
     val descripcion = "Me gusta"
     val ciudad = usuarioActual?.ciudad ?: "Ciudad"
-    val avatarId = usuarioActual?.avatar ?: 0
-    
+    val avatarId = (usuarioActual?.avatar ?: 0).coerceIn(0, avatares.size - 1)
+
     // lugares que creo este usuario
     val lugaresDelUsuario = lugares.filter { lugar ->
         lugar.creadorId == usuarioActual?.id
@@ -71,7 +71,6 @@ fun Perfil(
                 .fillMaxWidth()
                 .height(200.dp)
         ) {
-
             Image(
                 painter = painterResource(id = R.drawable.fotoperfil),
                 contentDescription = "Imagen de Portada",
@@ -81,10 +80,8 @@ fun Perfil(
                     .height(150.dp)
             )
 
-
-            // avatar del usuario
             Image(
-                painter = painterResource(id = avatares[avatarId]),
+                painter = painterResource(id = avatares.getOrElse(avatarId) { avatares[0] }),
                 contentDescription = "Avatar del Usuario",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -98,7 +95,7 @@ fun Perfil(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        // Cuerpo del Perfil (Informacion y Botón de Configuracion)
+        // Cuerpo del Perfil (Informacion y Botón de Configuración)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,10 +114,8 @@ fun Perfil(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Descripción o bio
                 Text(text = descripcion, fontSize = 14.sp)
 
-                // Datos requeridos
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "Ciudad: $ciudad",
@@ -129,22 +124,20 @@ fun Perfil(
                 )
             }
 
-            // Botón de Configuración/Editar Perfil
             IconButton(
-                onClick = {
-                    // Navega usando la ruta global
-                    navegarACrearLugar()
-                },
+                onClick = { navegarACrearLugar() },
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
                 Icon(Icons.Default.Settings, contentDescription = "Editar Perfil")
             }
         }
 
-        // Uso de HorizontalDivider
-        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = Color.LightGray)
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 16.dp),
+            color = Color.LightGray
+        )
 
-        // publicaciones
+        // Sección de publicaciones
         Text(
             text = stringResource(R.string.Publicación),
             fontWeight = FontWeight.Bold,
@@ -165,30 +158,24 @@ fun Perfil(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // mostrar lugares del usuario
         if (lugaresDelUsuario.isNotEmpty()) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(horizontal = 16.dp)
             ) {
-                items(lugaresDelUsuario) { lugar ->
-                    PublicacionUno(
+                lugaresDelUsuario.forEach { lugar ->
+                    FichaLugar(
                         lugar = lugar,
-                        onClick = { navegarALugar(lugar.id) },
-                        usuarioViewModel = viewModel
+                        onClick = { navegarALugar(lugar.id) }
                     )
                 }
             }
         } else {
-            // boton para crear lugar si no tiene
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        navegarACrearLugar()
-                    }
+                    .clickable { navegarACrearLugar() }
                     .padding(vertical = 24.dp)
             ) {
                 Text(
@@ -197,7 +184,6 @@ fun Perfil(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                // Icono nueva publicacion
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Añadir Lugar",
@@ -216,13 +202,11 @@ fun Perfil(
                 )
             }
 
-            // Sección de Lista de Lugares Creados
             Text(
                 text = stringResource(R.string.Descripcion_lugar_para_el_usuario),
                 color = Color.DarkGray,
                 modifier = Modifier.padding(16.dp)
             )
         }
-
     }
 }
