@@ -7,7 +7,7 @@ import com.example.unilocal.model.repositorio.ComentarioRepositorio
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 /**
-// PROBANDO FIREBASE CON REPOSITORIO Y ENTIDAD ESPERAR VIDEO DE FIREBASE PARA ACABAR DE IMPLEMENTAR
+// probando firebase con repositorio y entidad, esperar video de firebase para acabar de implementar
 class ComentarioRepositorioFirebase(
     private val db: FirebaseFirestore
 ) : ComentarioRepositorio {
@@ -27,4 +27,4 @@ class ComentarioRepositorioFirebase(
             .get().await()
             .toObjects(Comentario::class.java)
     }
-} **/
+} */

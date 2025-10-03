@@ -27,12 +27,14 @@ import com.example.unilocal.model.entidad.Lugar
 import com.example.unilocal.ui.componentes.FichaInformacion
 import com.example.unilocal.ui.componentes.PublicacionUno
 import com.example.unilocal.viewModel.LugaresViewModel
+import com.example.unilocal.viewModel.UsuarioViewModel
 
 
 @Composable
 fun Recomendaciones(
     lugaresViewModel: LugaresViewModel,
-    navegarALugar: (String) -> Unit
+    navegarALugar: (String) -> Unit,
+    usuarioViewModel: UsuarioViewModel? = null
 ) {
     val lugares by lugaresViewModel.lugares.collectAsState()
 
@@ -42,7 +44,7 @@ fun Recomendaciones(
             .padding(16.dp)
     ) {
         item {
-            Text("Tu ubicación", fontWeight = FontWeight.Bold)
+            Text("Tu ubicacion", fontWeight = FontWeight.Bold)
 
             Image(
                 painter = painterResource(id = R.drawable.mapamomentaneo),
@@ -55,7 +57,7 @@ fun Recomendaciones(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Recomendaciones cerca a tu ubicación", fontWeight = FontWeight.Bold)
+            Text("Recomendaciones cerca a tu ubicacion", fontWeight = FontWeight.Bold)
 
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -64,9 +66,9 @@ fun Recomendaciones(
         items(lugares) { lugar ->
             PublicacionUno(
                 lugar = lugar,
-                onClick = {navegarALugar(lugar.id)}
+                onClick = { navegarALugar(lugar.id) },
+                usuarioViewModel = usuarioViewModel
             )
-
         }
     }
 }

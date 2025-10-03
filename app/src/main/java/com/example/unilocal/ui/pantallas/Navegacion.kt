@@ -40,7 +40,7 @@ fun Navegacion() {
         }
 
         composable<RutasPantallas.PrincipalUsuarios> {
-            PrincipalUsuario()
+            PrincipalUsuario(usuarioViewModel = usuarioViewModel)
         }
 
 

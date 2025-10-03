@@ -2,6 +2,8 @@ package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -18,18 +20,44 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.unilocal.R
 import com.example.unilocal.ui.configuracion.RutasPantallas
+import com.example.unilocal.ui.componentes.PublicacionUno
+import com.example.unilocal.viewModel.UsuarioViewModel
+import com.example.unilocal.viewModel.LugaresViewModel
 
 
 @Composable
-fun Perfil(navegarACrearLugar: () -> Unit) {
-
-    val usuarioNombre = "Jose Maria dos Santos"
-    val usuarioUsername = "@sm1llle"
+fun Perfil(
+    navegarACrearLugar: () -> Unit,
+    usuarioViewModel: UsuarioViewModel? = null,
+    lugaresViewModel: LugaresViewModel? = null,
+    navegarALugar: (String) -> Unit = {}
+) {
+    val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
+    val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
+    val usuarioActual by viewModel.usuarioActual.collectAsState()
+    val lugares by lugaresVM.lugares.collectAsState()
+    
+    // avatares disponibles
+    val avatares = listOf(
+        R.drawable.hombre, R.drawable.mujer, R.drawable.hombre1,
+        R.drawable.mujer1, R.drawable.hombre2, R.drawable.mujer2
+    )
+    
+    // datos del usuario o por defecto
+    val usuarioNombre = usuarioActual?.nombre ?: "Usuario"
+    val usuarioUsername = usuarioActual?.username ?: "@usuario"
     val descripcion = "Me gusta"
-    val ciudad = "Armenia"
+    val ciudad = usuarioActual?.ciudad ?: "Ciudad"
+    val avatarId = usuarioActual?.avatar ?: 0
+    
+    // lugares que creo este usuario
+    val lugaresDelUsuario = lugares.filter { lugar ->
+        lugar.creadorId == usuarioActual?.id
+    }
 
     Column(
         modifier = Modifier
@@ -54,8 +82,9 @@ fun Perfil(navegarACrearLugar: () -> Unit) {
             )
 
 
+            // avatar del usuario
             Image(
-                painter = painterResource(id = R.drawable.perfilusuario),
+                painter = painterResource(id = avatares[avatarId]),
                 contentDescription = "Avatar del Usuario",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -93,7 +122,11 @@ fun Perfil(navegarACrearLugar: () -> Unit) {
 
                 // Datos requeridos
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(text = "Ciudad: $ciudad", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp)
+                Text(
+                    text = "Ciudad: $ciudad",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 14.sp
+                )
             }
 
             // Botón de Configuración/Editar Perfil
@@ -111,7 +144,7 @@ fun Perfil(navegarACrearLugar: () -> Unit) {
         // Uso de HorizontalDivider
         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = Color.LightGray)
 
-        //  Sección de Publicaciones/Lugares Creados
+        // publicaciones
         Text(
             text = stringResource(R.string.Publicación),
             fontWeight = FontWeight.Bold,
@@ -120,7 +153,7 @@ fun Perfil(navegarACrearLugar: () -> Unit) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         )
-        // La barra azul del diseño
+
         Box(
             modifier = Modifier
                 .width(100.dp)
@@ -132,45 +165,64 @@ fun Perfil(navegarACrearLugar: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // CTA para crear un nuevo lugar
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    // Navega usando la ruta global (ahora resuelta)
-                    navegarACrearLugar()
-                }
-                .padding(vertical = 24.dp)
-        ) {
-            Text(text = stringResource(R.string.Añade_un_lugar_nuevo),
-                fontSize = 16.sp,
-                modifier = Modifier.padding(bottom = 8.dp))
-
-            // Icono nueva publicacion
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Añadir Lugar",
-                tint = MaterialTheme.colorScheme.primary,
+        // mostrar lugares del usuario
+        if (lugaresDelUsuario.isNotEmpty()) {
+            LazyColumn(
                 modifier = Modifier
-                    .size(60.dp)
-                    .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                    .clip(CircleShape)
-                    .padding(8.dp)
-            )
+                    .fillMaxWidth()
+                    .height(300.dp)
+            ) {
+                items(lugaresDelUsuario) { lugar ->
+                    PublicacionUno(
+                        lugar = lugar,
+                        onClick = { navegarALugar(lugar.id) },
+                        usuarioViewModel = viewModel
+                    )
+                }
+            }
+        } else {
+            // boton para crear lugar si no tiene
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        navegarACrearLugar()
+                    }
+                    .padding(vertical = 24.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.Añade_un_lugar_nuevo),
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
 
+                // Icono nueva publicacion
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Añadir Lugar",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        .clip(CircleShape)
+                        .padding(8.dp)
+                )
+
+                Text(
+                    text = stringResource(R.string.Nueva_publicacion),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            // Sección de Lista de Lugares Creados
             Text(
-                text = stringResource(R.string.Nueva_publicacion),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp)
+                text = stringResource(R.string.Descripcion_lugar_para_el_usuario),
+                color = Color.DarkGray,
+                modifier = Modifier.padding(16.dp)
             )
         }
 
-        // Sección de Lista de Lugares Creados
-        Text(
-            text = stringResource(R.string.Descripcion_lugar_para_el_usuario),
-            color = Color.DarkGray,
-            modifier = Modifier.padding(16.dp)
-        )
     }
 }

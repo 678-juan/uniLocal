@@ -16,13 +16,16 @@ import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.LugarDetalles
 import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.Perfil
 import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.Recomendaciones
 import com.example.unilocal.viewModel.LugaresViewModel
+import com.example.unilocal.viewModel.UsuarioViewModel
 
 @Composable
 fun ContentUsuario(
     navController: NavHostController,
-    padding: PaddingValues
+    padding: PaddingValues,
+    usuarioViewModel: UsuarioViewModel? = null
 ) {
     val lugaresViewModel:LugaresViewModel = viewModel()
+    val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
 
     NavHost(
         modifier = Modifier.padding(padding),
@@ -30,7 +33,14 @@ fun ContentUsuario(
         startDestination = RutaTab.InicioUsuario
     ){
         composable<RutaTab.InicioUsuario> {
-            Inicio()
+            Inicio(
+                lugaresViewModel = lugaresViewModel,
+                usuarioViewModel = viewModel,
+                navegarALugar = { lugarId ->
+                    println("DEBUG: Navegando a detalles del lugar: $lugarId")
+                    navController.navigate(RutaTab.LugarDetalles(lugarId))
+                }
+            )
         }
         composable<RutaTab.Busqueda> {
             Busqueda(navController = navController)
@@ -41,16 +51,21 @@ fun ContentUsuario(
         composable<RutaTab.Recomendados> {
             Recomendaciones(
                 lugaresViewModel = lugaresViewModel,
-
                 navegarALugar = {
                     navController.navigate(RutaTab.LugarDetalles(it))
-                }
+                },
+                usuarioViewModel = viewModel
             )
         }
         composable<RutaTab.Perfil> {
             Perfil(
                 navegarACrearLugar = {
                     navController.navigate(RutaTab.CrearLugar)
+                },
+                usuarioViewModel = viewModel,
+                lugaresViewModel = lugaresViewModel,
+                navegarALugar = { lugarId ->
+                    navController.navigate(RutaTab.LugarDetalles(lugarId))
                 }
             )
         }
@@ -60,7 +75,8 @@ fun ContentUsuario(
 
             LugarDetalles(
                 idLugar = args.idLugar,
-                navController = navController
+                navController = navController,
+                usuarioViewModel = viewModel
             )
         }
 

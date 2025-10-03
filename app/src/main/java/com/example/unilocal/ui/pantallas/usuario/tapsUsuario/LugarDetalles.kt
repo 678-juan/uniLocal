@@ -20,6 +20,7 @@ import com.example.unilocal.ui.componentes.FichaInformacion
 
 import com.example.unilocal.ui.componentes.PublicacionUno
 import com.example.unilocal.viewModel.LugaresViewModel
+import com.example.unilocal.viewModel.UsuarioViewModel
 
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -27,7 +28,8 @@ import androidx.compose.foundation.rememberScrollState
 @Composable
 fun LugarDetalles(
     idLugar: String,
-    navController: NavController? = null
+    navController: NavController? = null,
+    usuarioViewModel: UsuarioViewModel? = null
 ) {
     val lugarViewModel: LugaresViewModel = viewModel()
     val lugar: Lugar? = lugarViewModel.buscarPorId(idLugar)
@@ -56,7 +58,7 @@ fun LugarDetalles(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Más información del lugar",
+                text = "Mas informacion del lugar",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -67,7 +69,8 @@ fun LugarDetalles(
         lugar?.let {
             PublicacionUno(
                 lugar = it,
-                onClick = { }
+                onClick = { },
+                usuarioViewModel = usuarioViewModel
             )
 
             Spacer(modifier = Modifier.height(12.dp))

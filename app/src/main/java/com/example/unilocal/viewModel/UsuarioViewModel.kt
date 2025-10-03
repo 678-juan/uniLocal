@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.asStateFlow
 class UsuarioViewModel : ViewModel() {
     private val _usuario = MutableStateFlow(emptyList<Usuario>())
     val usuario: StateFlow<List<Usuario>> = _usuario.asStateFlow()
+    
+    private val _usuarioActual = MutableStateFlow<Usuario?>(null)
+    val usuarioActual: StateFlow<Usuario?> = _usuarioActual.asStateFlow()
 
     init {
         cargarUsuarios()
@@ -37,7 +40,15 @@ class UsuarioViewModel : ViewModel() {
     }
 
     fun login(email: String, password: String): Usuario? {
-        return _usuario.value.find { it.email == email && it.clave == password }
+        val usuarioEncontrado = _usuario.value.find { it.email == email && it.clave == password }
+        if (usuarioEncontrado != null) {
+            _usuarioActual.value = usuarioEncontrado
+        }
+        return usuarioEncontrado
+    }
+    
+    fun cerrarSesion() {
+        _usuarioActual.value = null
     }
 
 

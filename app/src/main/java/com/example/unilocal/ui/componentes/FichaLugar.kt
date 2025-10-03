@@ -31,7 +31,10 @@ fun FichaLugar(
         modifier = modifier
             .fillMaxWidth()
             .height(200.dp)
-            .clickable { onClick() },
+            .clickable { 
+                println("DEBUG: Click en FichaLugar - ${lugar.nombre}")
+                onClick() 
+            },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {

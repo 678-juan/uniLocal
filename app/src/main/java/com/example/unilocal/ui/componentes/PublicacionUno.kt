@@ -1,5 +1,6 @@
 package com.example.unilocal.ui.componentes
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,20 +18,37 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.unilocal.R
 import com.example.unilocal.model.entidad.Lugar
+import com.example.unilocal.viewModel.UsuarioViewModel
 
 @Composable
 fun PublicacionUno(
     lugar: Lugar,
     onClick: () -> Unit,
+    usuarioViewModel: UsuarioViewModel? = null
 ) {
-    // Estado local para controlar si el usuario ya dio like
+    // like state
     var yaDioLike by remember { mutableStateOf(false) }
     var likes by remember { mutableStateOf(lugar.likes.toInt()) }
+    
+    // buscar quien creo el lugar
+    val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
+    val creador = viewModel.buscarId(lugar.creadorId)
+    
+    // avatares disponibles
+    val avatares = listOf(
+        R.drawable.hombre, R.drawable.mujer, R.drawable.hombre1,
+        R.drawable.mujer1, R.drawable.hombre2, R.drawable.mujer2
+    )
 
     Card(
         modifier = Modifier
@@ -43,23 +61,29 @@ fun PublicacionUno(
     ) {
         Column {
 
-            // --- CABECERA DE LA PUBLICACIÓN (CREADOR) ---
+            // header con avatar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
+                // avatar del creador
+                Image(
+                    painter = painterResource(id = avatares[creador?.avatar ?: 0]),
+                    contentDescription = "Avatar del Creador",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(36.dp)
-                        .background(Color.Gray, CircleShape)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.Gray, CircleShape)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = "Creador: ${lugar.creadorId}",
-                        fontWeight = FontWeight.Bold
+                        text = creador?.nombre ?: "Usuario desconocido",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
                     )
                     Text(
                         text = lugar.estado.name,
@@ -111,9 +135,9 @@ fun PublicacionUno(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // Comentarios
+                // comentarios
                 Text(
-                    text = "💬 ${lugar.comentarios.size}", // no encuentro iconos de ommentarios
+                    text = "💬 ${lugar.comentarios.size}", // no hay iconos de comentarios
                     modifier = Modifier
                         .clickable { /* abrir comentarios */ }
                         .padding(4.dp)

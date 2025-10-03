@@ -17,11 +17,13 @@ import com.example.unilocal.R
 import com.example.unilocal.ui.pantallas.usuario.bottonBarUsuario.BottonBarUsuario
 import com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.ContentUsuario
 import com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab
+import com.example.unilocal.viewModel.UsuarioViewModel
 
 
 @Composable
-fun PrincipalUsuario() {
-
+fun PrincipalUsuario(
+    usuarioViewModel: UsuarioViewModel? = null
+) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -40,7 +42,8 @@ fun PrincipalUsuario() {
     ) { padding ->
         ContentUsuario(
             navController = navController,
-            padding = padding
+            padding = padding,
+            usuarioViewModel = usuarioViewModel
         )
 
     }

@@ -9,5 +9,5 @@ data class Comentario(
     val texto: String ,
     val estrellas: Int ,
     val comentarios: List<String> = emptyList(),
-    val fecha: Long = System.currentTimeMillis() //par ala hora actual
+    val fecha: Long = System.currentTimeMillis() // para la hora actual
 )
