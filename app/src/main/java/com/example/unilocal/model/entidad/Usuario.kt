@@ -10,6 +10,7 @@ data class Usuario(
     val email: String ,
     val ciudad: String ,
     val sexo: String ,
+    val avatar: Int = 0, // ID del recurso de avatar seleccionado
     val favoritos: List<Lugar> = emptyList()
 
 )

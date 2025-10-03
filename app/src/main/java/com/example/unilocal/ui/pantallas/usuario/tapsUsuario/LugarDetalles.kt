@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 
 import com.example.unilocal.model.entidad.Lugar
 import com.example.unilocal.ui.componentes.FichaInformacion
@@ -26,7 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 @Composable
 fun LugarDetalles(
     idLugar: String,
-    navegacionARecomendados: () -> Unit
+    navController: NavController? = null
 ) {
     val lugarViewModel: LugaresViewModel = viewModel()
     val lugar: Lugar? = lugarViewModel.buscarPorId(idLugar)
@@ -49,7 +50,9 @@ fun LugarDetalles(
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Atrás",
-                modifier = Modifier.clickable { navegacionARecomendados() }
+                modifier = Modifier.clickable { 
+                    navController?.popBackStack()
+                }
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(

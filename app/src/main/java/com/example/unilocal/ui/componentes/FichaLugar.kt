@@ -29,7 +29,8 @@ fun FichaLugar(
 ) {
     Card(
         modifier = modifier
-            .fillMaxWidth()  // << Esto puede combinarse mal con height fijo
+            .fillMaxWidth()
+            .height(200.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -39,7 +40,7 @@ fun FichaLugar(
                 painter = painterResource(id = lugar.imagenResId),
                 contentDescription = lugar.nombre,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize() // << Aquí está el problema
+                modifier = Modifier.fillMaxSize()
             )
             Text(
                 text = lugar.nombre,
@@ -47,7 +48,8 @@ fun FichaLugar(
                     .align(Alignment.BottomStart)
                     .background(Color.Black.copy(alpha = 0.5f))
                     .padding(8.dp),
-                color = Color.White
+                color = Color.White,
+                fontWeight = FontWeight.Bold
             )
         }
     }

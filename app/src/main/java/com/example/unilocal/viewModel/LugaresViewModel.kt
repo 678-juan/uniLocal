@@ -64,8 +64,91 @@ class LugaresViewModel : ViewModel() {
             comentarios = emptyList()
         )
 
+        val lugar3 = Lugar(
+            id = "l3",
+            nombre = "Gimnasio PowerFit",
+            descripcion = "Centro de fitness con equipos modernos y entrenadores certificados.",
+            direccion = "Carrera 15 # 78-90",
+            categoria = "Gimnasio",
+            horario = mapOf(
+                "Lunes-Viernes" to ("05:00" to "22:00"),
+                "Sábado-Domingo" to ("06:00" to "20:00")
+            ),
+            telefono = "3005551234",
+            imagenResId = R.drawable.gimnasio,
+            likes = 42,
+            longitud = -74.08175,
+            estado = EstadoLugar.AUTORIZADO,
+            creadorId = "1",
+            calificacionPromedio = 4.3,
+            ubicacion = Ubicacion(4.60971, -74.08175),
+            comentarios = emptyList()
+        )
 
-        _lugares.value = listOf(lugar1, lugar2)
+        val lugar4 = Lugar(
+            id = "l4",
+            nombre = "Librería El Saber",
+            descripcion = "Librería especializada en literatura y libros académicos.",
+            direccion = "Calle 72 # 11-25",
+            categoria = "Librería",
+            horario = mapOf(
+                "Lunes-Sábado" to ("09:00" to "19:00"),
+                "Domingo" to ("10:00" to "16:00")
+            ),
+            telefono = "3007778888",
+            imagenResId = R.drawable.libreria,
+            likes = 18,
+            longitud = -74.08175,
+            estado = EstadoLugar.AUTORIZADO,
+            creadorId = "3",
+            calificacionPromedio = 4.6,
+            ubicacion = Ubicacion(4.60971, -74.08175),
+            comentarios = emptyList()
+        )
+
+        val lugar5 = Lugar(
+            id = "l5",
+            nombre = "Farmacia Salud Total",
+            descripcion = "Farmacia 24 horas con servicio de entrega a domicilio.",
+            direccion = "Carrera 7 # 32-16",
+            categoria = "Farmacia",
+            horario = mapOf(
+                "Lunes-Domingo" to ("00:00" to "23:59")
+            ),
+            telefono = "3009990000",
+            imagenResId = R.drawable.farmacia,
+            likes = 35,
+            longitud = -74.08175,
+            estado = EstadoLugar.AUTORIZADO,
+            creadorId = "2",
+            calificacionPromedio = 4.4,
+            ubicacion = Ubicacion(4.60971, -74.08175),
+            comentarios = emptyList()
+        )
+
+        val lugar6 = Lugar(
+            id = "l6",
+            nombre = "Bar El Rincón",
+            descripcion = "Bar tradicional con música en vivo y ambiente relajado.",
+            direccion = "Calle 85 # 12-45",
+            categoria = "Bar",
+            horario = mapOf(
+                "Martes-Domingo" to ("18:00" to "02:00"),
+                "Lunes" to ("Cerrado" to "Cerrado")
+            ),
+
+            telefono = "3001112222",
+            imagenResId = R.drawable.bar,
+            likes = 28,
+            longitud = -74.08175,
+            estado = EstadoLugar.AUTORIZADO,
+            creadorId = "1",
+            calificacionPromedio = 4.2,
+            ubicacion = Ubicacion(4.60971, -74.08175),
+            comentarios = emptyList()
+        )
+
+        _lugares.value = listOf(lugar1, lugar2, lugar3, lugar4, lugar5, lugar6)
     }
 
     fun crearLugar(lugar: Lugar) {

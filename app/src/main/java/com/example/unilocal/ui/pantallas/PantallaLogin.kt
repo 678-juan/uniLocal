@@ -21,16 +21,26 @@ import com.example.unilocal.ui.componentes.BotonPrincipal
 import com.example.unilocal.ui.componentes.LineaDecorativa
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.R
+import com.example.unilocal.viewModel.UsuarioViewModel
 
 @Composable
 fun PantallaLogin(
     navegarARegistro: () -> Unit,
-    navegarAPrincipalUsuario: () -> Unit
+    navegarAPrincipalUsuario: () -> Unit,
+    usuarioViewModel: UsuarioViewModel? = null
 ) {
-    var usuario by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
-    val context = LocalContext.current
+    var cargando by remember { mutableStateOf(false) }
+    val contexto = LocalContext.current
+    val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
+    
+    // Debug: mostrar usuarios disponibles
+    LaunchedEffect(Unit) {
+        println("Usuarios disponibles para login: ${viewModel.usuario.value.map { it.email }}")
+    }
 
     Box(
         modifier = Modifier
@@ -72,11 +82,11 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // C usuario
+            // Campo email
             CampoTexto(
-                valor = usuario,
-                cuandoCambia = { usuario = it },
-                etiqueta = stringResource(R.string.usuario_hint),
+                valor = correo,
+                cuandoCambia = { correo = it },
+                etiqueta = "Correo electrónico",
                 modificador = Modifier.fillMaxWidth()
             )
 
@@ -106,14 +116,26 @@ fun PantallaLogin(
 
             // boton entrar
             BotonPrincipal(
-                texto = stringResource(R.string.login_button),
+                texto = if (cargando) "Iniciando sesión..." else stringResource(R.string.login_button),
                 onClick = {
-                    if (usuario == "admin" && clave == "123") {
-                        navegarAPrincipalUsuario()
-
-                    } else {
-                        Toast.makeText(context, "Acceso denegado. Admin quemado.", Toast.LENGTH_SHORT).show()
+                    if (correo.isBlank() || clave.isBlank()) {
+                        Toast.makeText(contexto, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
+                        return@BotonPrincipal
                     }
+                    
+                    cargando = true
+                    
+                    // Buscar usuario con las credenciales
+                    val usuarioEncontrado = viewModel.login(correo.trim(), clave)
+                    
+                    if (usuarioEncontrado != null) {
+                        Toast.makeText(contexto, "¡Bienvenido ${usuarioEncontrado.nombre}!", Toast.LENGTH_SHORT).show()
+                        navegarAPrincipalUsuario()
+                    } else {
+                        Toast.makeText(contexto, "Credenciales incorrectas. Verifica tu email y contraseña.", Toast.LENGTH_LONG).show()
+                    }
+                    
+                    cargando = false
                 }
             )
 

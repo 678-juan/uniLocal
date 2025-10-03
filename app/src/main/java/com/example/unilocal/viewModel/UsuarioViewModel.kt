@@ -15,11 +15,13 @@ class UsuarioViewModel : ViewModel() {
     }
 
     fun cargarUsuarios() {
+        val usuario1 = Usuario("1", "Juan Pérez", "juan123", "clave123", "juan@gmail.com", "Bogotá", "Masculino", 0)
+        val usuario2 = Usuario("2", "María García", "maria456", "clave456", "maria@gmail.com", "Medellín", "Femenino", 1)
+        val usuario3 = Usuario("3", "Pedro López", "pedro789", "clave789", "pedro@gmail.com", "Cali", "Masculino", 2)
+        val usuario4 = Usuario("4", "Ana Martínez", "ana123", "clave123", "ana@gmail.com", "Barranquilla", "Femenino", 3)
+        val usuario5 = Usuario("5", "Carlos Rodríguez", "carlos456", "clave456", "carlos@gmail.com", "Cartagena", "Masculino", 4)
 
-        val usuario1 = Usuario("1", "Juan", "juan123", "clave123", "william.henry.moody@my-own-personal-domain.com", "Ciudad A", "Masculino")
-        val usuario2 = Usuario("2", "María", "maria456", "clave456", "james.francis.byrnes@example-pet-store.com", "Ciudad B", "Femenino")
-        val usuario3 = Usuario("3", "Pedro", "pedro789", "clave789", "william.henry.moody@my-own-personal-domain.com", "Ciudad C", "Masculino")
-
+        _usuario.value = listOf(usuario1, usuario2, usuario3, usuario4, usuario5)
     }
 
     fun crearUsuario(usuario: Usuario) {

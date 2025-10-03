@@ -16,11 +16,11 @@ class ModeradorViewModel : ViewModel(){
     }
 
     fun cargarMoeradores(){
-        val moderador1 = Moderador("1", "Juan", "juan123", "james.moore.wayne@example-pet-store.com", "clave123")
-        val moderador2 = Moderador("2", "María", "maria456", "john.mckinley@examplepetstore.com", "clave456")
-        val moderador3 = Moderador("3", "Pedro", "pedro789", "william.henry.moody@my-own-personal-domain.com", "clave789")
+        val moderador1 = Moderador("1", "Juan", "juan123", "juan.moderador@gmail.com", "clave123")
+        val moderador2 = Moderador("2", "María", "maria456", "maria.moderador@gmail.com", "clave456")
+        val moderador3 = Moderador("3", "Pedro", "pedro789", "pedro.moderador@gmail.com", "clave789")
 
-
+        _moderador.value = listOf(moderador1, moderador2, moderador3)
     }
     fun crearModerador(moderador: Moderador){
         _moderador.value += moderador

@@ -33,7 +33,7 @@ fun ContentUsuario(
             Inicio()
         }
         composable<RutaTab.Busqueda> {
-            Busqueda()
+            Busqueda(navController = navController)
         }
         composable<RutaTab.CrearLugar> {
             CrearLugar()
@@ -56,17 +56,12 @@ fun ContentUsuario(
         }
 
         composable<RutaTab.LugarDetalles> {
-
-
             val args = it.toRoute<RutaTab.LugarDetalles>()
 
             LugarDetalles(
                 idLugar = args.idLugar,
-                navegacionARecomendados = {
-                    navController.navigate(RutaTab.Recomendados)
-                }
+                navController = navController
             )
-
         }
 
     }
