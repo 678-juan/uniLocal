@@ -13,23 +13,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.R
 import com.example.unilocal.ui.componentes.BotonPrincipal
 import com.example.unilocal.ui.componentes.CampoTexto
+import com.example.unilocal.viewModel.UsuarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaEditarUsuario(
-
+    navController: androidx.navigation.NavController? = null,
+    usuarioViewModel: UsuarioViewModel? = null
 ) {
+    val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
+    val usuarioActual by viewModel.usuarioActual.collectAsState()
 
-    var nombre by remember { mutableStateOf("Nombre Ejemplo") }
-    var username by remember { mutableStateOf("username_ejemplo") }
-    var email by remember { mutableStateOf("ejemplo@correo.com") }
-    var ciudad by remember { mutableStateOf("Ciudad Ejemplo") }
+    var nombre by remember { mutableStateOf(usuarioActual?.nombre ?: "") }
+    var username by remember { mutableStateOf(usuarioActual?.username ?: "") }
+    var email by remember { mutableStateOf(usuarioActual?.email ?: "") }
+    var ciudad by remember { mutableStateOf(usuarioActual?.ciudad ?: "") }
     var nuevaContrasena by remember { mutableStateOf("") }
     var confirmarNuevaContrasena by remember { mutableStateOf("") }
-
 
     var mostrarErrorContrasena by remember { mutableStateOf(false) }
 
@@ -38,7 +42,7 @@ fun PantallaEditarUsuario(
             TopAppBar(
                 title = { Text(stringResource(id = R.string.editar_datos_titulo)) },
                 navigationIcon = {
-                    IconButton(onClick = { /* Navegar hacia atrás */ }) {
+                    IconButton(onClick = { navController?.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
@@ -93,7 +97,9 @@ fun PantallaEditarUsuario(
                     if (nuevaContrasena.isNotEmpty() && nuevaContrasena != confirmarNuevaContrasena) {
                         mostrarErrorContrasena = true
                     } else {
-
+                        // Actualizar datos del usuario
+                        viewModel.actualizarUsuario(nombre, username, email, ciudad, if (nuevaContrasena.isNotEmpty()) nuevaContrasena else null)
+                        navController?.popBackStack()
                     }
                 }
             )

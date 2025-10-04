@@ -9,8 +9,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.unilocal.ui.pantallas.usuario.PantallaEditarUsuario
 import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.Busqueda
+import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.CambiarPassword
+import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.Configuracion
 import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.CrearLugar
+import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.Guardados
 import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.Inicio
 import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.LugarDetalles
 import com.example.unilocal.ui.pantallas.usuario.tapsUsuario.Perfil
@@ -66,6 +70,9 @@ fun ContentUsuario(
                 lugaresViewModel = lugaresViewModel,
                 navegarALugar = { lugarId ->
                     navController.navigate(RutaTab.LugarDetalles(lugarId))
+                },
+                navegarAConfiguracion = {
+                    navController.navigate(RutaTab.Configuracion)
                 }
             )
         }
@@ -75,6 +82,34 @@ fun ContentUsuario(
 
             LugarDetalles(
                 idLugar = args.idLugar,
+                navController = navController,
+                usuarioViewModel = viewModel
+            )
+        }
+
+        composable<RutaTab.Configuracion> {
+            Configuracion(
+                navController = navController,
+                usuarioViewModel = viewModel
+            )
+        }
+
+        composable<RutaTab.Guardados> {
+            Guardados(
+                navController = navController,
+                usuarioViewModel = viewModel
+            )
+        }
+
+        composable<RutaTab.CambiarPassword> {
+            CambiarPassword(
+                navController = navController,
+                usuarioViewModel = viewModel
+            )
+        }
+
+        composable<RutaTab.EditarUsuario> {
+            PantallaEditarUsuario(
                 navController = navController,
                 usuarioViewModel = viewModel
             )

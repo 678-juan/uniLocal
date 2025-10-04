@@ -22,6 +22,16 @@ sealed class RutaTab() {
     @Serializable
     data class LugarDetalles(val idLugar: String) : RutaTab()
 
+    @Serializable
+    data object Configuracion : RutaTab()
 
+    @Serializable
+    data object Guardados : RutaTab()
+
+    @Serializable
+    data object CambiarPassword : RutaTab()
+
+    @Serializable
+    data object EditarUsuario : RutaTab()
 
 }

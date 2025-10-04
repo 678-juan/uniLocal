@@ -51,13 +51,51 @@ class UsuarioViewModel : ViewModel() {
         _usuarioActual.value = null
     }
 
+    fun agregarFavorito(lugar: com.example.unilocal.model.entidad.Lugar) {
+        val usuario = _usuarioActual.value
+        if (usuario != null) {
+            val favoritosActualizados = usuario.favoritos + lugar
+            val usuarioActualizado = usuario.copy(favoritos = favoritosActualizados)
+            _usuarioActual.value = usuarioActualizado
+            
+            // Actualizar también en la lista de usuarios
+            _usuario.value = _usuario.value.map { 
+                if (it.id == usuario.id) usuarioActualizado else it 
+            }
+        }
+    }
 
+    fun quitarFavorito(lugarId: String) {
+        val usuario = _usuarioActual.value
+        if (usuario != null) {
+            val favoritosActualizados = usuario.favoritos.filter { it.id != lugarId }
+            val usuarioActualizado = usuario.copy(favoritos = favoritosActualizados)
+            _usuarioActual.value = usuarioActualizado
+            
+            // Actualizar también en la lista de usuarios
+            _usuario.value = _usuario.value.map { 
+                if (it.id == usuario.id) usuarioActualizado else it 
+            }
+        }
+    }
 
-
-
-
+    fun actualizarUsuario(nombre: String, username: String, email: String, ciudad: String, nuevaContrasena: String? = null) {
+        val usuario = _usuarioActual.value
+        if (usuario != null) {
+            val clave = nuevaContrasena ?: usuario.clave
+            val usuarioActualizado = usuario.copy(
+                nombre = nombre,
+                username = username,
+                email = email,
+                ciudad = ciudad,
+                clave = clave
+            )
+            _usuarioActual.value = usuarioActualizado
+            
+            // Actualizar también en la lista de usuarios
+            _usuario.value = _usuario.value.map { 
+                if (it.id == usuario.id) usuarioActualizado else it 
+            }
+        }
+    }
 }
-
-
-
-

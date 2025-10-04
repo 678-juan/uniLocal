@@ -34,7 +34,8 @@ fun Perfil(
     navegarACrearLugar: () -> Unit,
     usuarioViewModel: UsuarioViewModel? = null,
     lugaresViewModel: LugaresViewModel? = null,
-    navegarALugar: (String) -> Unit = {}
+    navegarALugar: (String) -> Unit = {},
+    navegarAConfiguracion: () -> Unit = {}
 ) {
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
     val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
@@ -125,10 +126,10 @@ fun Perfil(
             }
 
             IconButton(
-                onClick = { navegarACrearLugar() },
+                onClick = { navegarAConfiguracion() },
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
-                Icon(Icons.Default.Settings, contentDescription = "Editar Perfil")
+                Icon(Icons.Default.Settings, contentDescription = "Configuración")
             }
         }
 

@@ -1,6 +1,5 @@
 package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,39 +7,40 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.unilocal.R
-
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.res.painterResource
 import com.example.unilocal.ui.componentes.BotonPrincipal
 import com.example.unilocal.ui.componentes.CampoTexto
+import com.example.unilocal.ui.theme.VerdePrincipal
 import com.example.unilocal.viewModel.LugaresViewModel
 
 @Composable
 fun CrearLugar() {
-
-
-
-
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var horario by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
-
+    var categoriaSeleccionada by remember { mutableStateOf("") }
 
     val categorias = listOf(
         stringResource(R.string.categoria_restaurante),
@@ -54,160 +54,356 @@ fun CrearLugar() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFF8F9FA))
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 15.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-
     ) {
-
-        Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = stringResource(R.string.app_name),
-            modifier = Modifier
-                .size(190.dp)
-
-        )
-
-
-        Text(
-            text = stringResource(R.string.crea_nuevo_hogar),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-        Divider(modifier = Modifier.padding(vertical = 8.dp), color = Color.Gray)
-
-        // categoria
-        Text(
-            text = stringResource(R.string.selecciona_categoria),
-            fontWeight = FontWeight.Medium,
-            color = Color.Black,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            categorias.forEach { cat ->
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .background(Color(0xFFFFEB3B), shape = RoundedCornerShape(50))
-                        .border(2.dp, Color.DarkGray, shape = RoundedCornerShape(50))
-                        .clickable { /* seleccionar categoría */ }
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(text = cat, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Campos de texto
-        CampoTexto(
-            valor = nombre,
-            cuandoCambia = { nombre = it },
-            etiqueta = stringResource(R.string.nombre_lugar)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        CampoTexto(
-            valor = descripcion,
-            cuandoCambia = { descripcion = it },
-            etiqueta = stringResource(R.string.descripcion_lugar)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        CampoTexto(
-            valor = horario,
-            cuandoCambia = { horario = it },
-            etiqueta = stringResource(R.string.horario_atencion)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        CampoTexto(
-            valor = telefono,
-            cuandoCambia = { telefono = it },
-            etiqueta = stringResource(R.string.telefono_lugar)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            color = Color.Gray,
-            thickness = 1.dp
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            CampoTexto(
-                valor = direccion,
-                cuandoCambia = { direccion = it },
-                etiqueta = stringResource(R.string.marca_direccion),
-                modificador = Modifier.weight(1f)
-            )
-            IconButton(
-                onClick = { /* abrir mapa */ },
-                modifier = Modifier.align(Alignment.Bottom)
-            ) {
-                Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar en mapa")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // mapa
+        // Header con gradiente
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .background(Color.LightGray, RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center
+                .background(
+                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                        colors = listOf(VerdePrincipal, VerdePrincipal.copy(alpha = 0.8f))
+                    )
+                )
         ) {
-            Text(text = "Mapa de Google (placeholder)")
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                // Icono principal
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .background(Color.White.copy(alpha = 0.2f), CircleShape)
+                        .clip(CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Crear lugar",
+                        tint = Color.White,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = stringResource(R.string.crea_nuevo_hogar),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+                
+                Text(
+                    text = "Comparte tu lugar favorito con la comunidad",
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.9f),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Divider(color = Color.Gray, thickness = 1.dp)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // galeria
-        Text(
-            text = stringResource(R.string.selecciona_foto),
-            fontWeight = FontWeight.Medium,
-            color = Color.Black,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Box(
+        // Contenido principal
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .background(Color.LightGray, RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(20.dp)
         ) {
-            Text(text = "Galería de fotos (placeholder)")
+            // Sección de categoría
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "📂 Categoría",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Text(
+                        text = stringResource(R.string.selecciona_categoria),
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        categorias.forEach { categoria ->
+                            val isSelected = categoriaSeleccionada == categoria
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .background(
+                                        if (isSelected) VerdePrincipal else Color(0xFFF0F0F0),
+                                        shape = RoundedCornerShape(25.dp)
+                                    )
+                                    .border(
+                                        if (isSelected) 0.dp else 1.dp,
+                                        if (isSelected) Color.Transparent else Color.LightGray,
+                                        shape = RoundedCornerShape(25.dp)
+                                    )
+                                    .clickable { categoriaSeleccionada = categoria }
+                                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                            ) {
+                                Text(
+                                    text = categoria,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = if (isSelected) Color.White else Color.Black
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Sección de información básica
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "📝 Información Básica",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    CampoTexto(
+                        valor = nombre,
+                        cuandoCambia = { nombre = it },
+                        etiqueta = stringResource(R.string.nombre_lugar)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    CampoTexto(
+                        valor = descripcion,
+                        cuandoCambia = { descripcion = it },
+                        etiqueta = stringResource(R.string.descripcion_lugar)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    CampoTexto(
+                        valor = horario,
+                        cuandoCambia = { horario = it },
+                        etiqueta = stringResource(R.string.horario_atencion)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    CampoTexto(
+                        valor = telefono,
+                        cuandoCambia = { telefono = it },
+                        etiqueta = stringResource(R.string.telefono_lugar)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Sección de ubicación
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "📍 Ubicación",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CampoTexto(
+                            valor = direccion,
+                            cuandoCambia = { direccion = it },
+                            etiqueta = stringResource(R.string.marca_direccion),
+                            modificador = Modifier.weight(1f)
+                        )
+                        
+                        Button(
+                            onClick = { /* abrir mapa */ },
+                            colors = ButtonDefaults.buttonColors(containerColor = VerdePrincipal),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.height(56.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.LocationOn,
+                                contentDescription = "Buscar en mapa",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Mapa placeholder mejorado
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .background(
+                                Color(0xFFE8F5E8),
+                                RoundedCornerShape(12.dp)
+                            )
+                            .border(
+                                2.dp,
+                                VerdePrincipal.copy(alpha = 0.3f),
+                                RoundedCornerShape(12.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.LocationOn,
+                                contentDescription = "Mapa",
+                                tint = VerdePrincipal,
+                                modifier = Modifier.size(40.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Mapa interactivo",
+                                fontSize = 14.sp,
+                                color = VerdePrincipal,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Sección de fotos
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "📸 Fotos del Lugar",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .background(
+                                Color(0xFFF8F9FA),
+                                RoundedCornerShape(12.dp)
+                            )
+                            .border(
+                                2.dp,
+                                Color.LightGray,
+                                RoundedCornerShape(12.dp)
+                            )
+                            .clickable { /* abrir galería */ },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.PhotoCamera,
+                                contentDescription = "Agregar fotos",
+                                tint = Color.Gray,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Toca para agregar fotos",
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Botón de guardar mejorado
+            Button(
+                onClick = { /* guardar lugar */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = VerdePrincipal),
+                shape = RoundedCornerShape(16.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Crear",
+                        tint = Color.White
+                    )
+                    Text(
+                        text = stringResource(R.string.boton_guardar),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        BotonPrincipal(
-            texto = stringResource(R.string.boton_guardar),
-            onClick = { /* guardar */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-        )
     }
 }
