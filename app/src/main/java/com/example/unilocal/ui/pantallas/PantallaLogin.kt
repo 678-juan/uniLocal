@@ -24,18 +24,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.R
 import com.example.unilocal.viewModel.UsuarioViewModel
+import com.example.unilocal.viewModel.ModeradorViewModel
 
 @Composable
 fun PantallaLogin(
     navegarARegistro: () -> Unit,
     navegarAPrincipalUsuario: () -> Unit,
-    usuarioViewModel: UsuarioViewModel? = null
+    navegarAPrincipalAdmin: (String) -> Unit,
+    usuarioViewModel: UsuarioViewModel? = null,
+    moderadorViewModel: ModeradorViewModel = viewModel()
 ) {
     var correo by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
     var cargando by remember { mutableStateOf(false) }
     val contexto = LocalContext.current
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
+    var esModerador by remember { mutableStateOf(false) }
     
     // Debug: mostrar usuarios disponibles
     LaunchedEffect(Unit) {
@@ -114,6 +118,15 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // switch moderador
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = esModerador, onCheckedChange = { esModerador = it })
+                Spacer(Modifier.width(8.dp))
+                Text("Soy moderador")
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             // boton entrar
             BotonPrincipal(
                 texto = if (cargando) "Iniciando sesión..." else stringResource(R.string.login_button),
@@ -125,14 +138,22 @@ fun PantallaLogin(
                     
                     cargando = true
                     
-                    // Buscar usuario con las credenciales
-                    val usuarioEncontrado = viewModel.login(correo.trim(), clave)
-                    
-                    if (usuarioEncontrado != null) {
-                        Toast.makeText(contexto, "¡Bienvenido ${usuarioEncontrado.nombre}!", Toast.LENGTH_SHORT).show()
-                        navegarAPrincipalUsuario()
+                    if (esModerador) {
+                        val mod = moderadorViewModel.login(correo.trim(), clave)
+                        if (mod != null) {
+                            Toast.makeText(contexto, "¡Bienvenido ${mod.nombre} (moderador)!", Toast.LENGTH_SHORT).show()
+                            navegarAPrincipalAdmin(mod.id)
+                        } else {
+                            Toast.makeText(contexto, "Credenciales de moderador inválidas", Toast.LENGTH_LONG).show()
+                        }
                     } else {
-                        Toast.makeText(contexto, "Credenciales incorrectas. Verifica tu email y contraseña.", Toast.LENGTH_LONG).show()
+                        val usuarioEncontrado = viewModel.login(correo.trim(), clave)
+                        if (usuarioEncontrado != null) {
+                            Toast.makeText(contexto, "¡Bienvenido ${usuarioEncontrado.nombre}!", Toast.LENGTH_SHORT).show()
+                            navegarAPrincipalUsuario()
+                        } else {
+                            Toast.makeText(contexto, "Credenciales incorrectas. Verifica tu email y contraseña.", Toast.LENGTH_LONG).show()
+                        }
                     }
                     
                     cargando = false

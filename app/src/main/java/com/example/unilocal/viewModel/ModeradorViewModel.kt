@@ -11,6 +11,9 @@ class ModeradorViewModel : ViewModel(){
     private val _moderador = MutableStateFlow(emptyList<Moderador>())
     val moderador: StateFlow<List<Moderador>> = _moderador.asStateFlow()
 
+    private val _moderadorActual = MutableStateFlow<Moderador?>(null)
+    val moderadorActual: StateFlow<Moderador?> = _moderadorActual.asStateFlow()
+
     init{
         cargarMoeradores()
     }
@@ -34,7 +37,10 @@ class ModeradorViewModel : ViewModel(){
     }
 
     fun login(email: String, password: String): Moderador? {
-        return _moderador.value.find { it.email == email && it.clave == password }
-
+        val encontrado = _moderador.value.find { it.email == email && it.clave == password }
+        if (encontrado != null) {
+            _moderadorActual.value = encontrado
+        }
+        return encontrado
     }
 }
