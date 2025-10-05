@@ -27,20 +27,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import com.example.unilocal.R
 import com.example.unilocal.ui.componentes.BotonPrincipal
 import com.example.unilocal.ui.componentes.CampoTexto
 import com.example.unilocal.ui.theme.VerdePrincipal
 import com.example.unilocal.viewModel.LugaresViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.unilocal.model.entidad.EstadoLugar
+import com.example.unilocal.model.entidad.Lugar
+import com.example.unilocal.model.entidad.Ubicacion
+import com.example.unilocal.viewModel.UsuarioViewModel
 
 @Composable
-fun CrearLugar() {
+fun CrearLugar(
+    navController: NavController? = null,
+    lugaresViewModel: LugaresViewModel = viewModel(),
+    usuarioViewModel: UsuarioViewModel = viewModel()
+) {
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var horario by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf("") }
+    val usuarioActual = usuarioViewModel.usuarioActual.collectAsState().value
+    val context = LocalContext.current
 
     val categorias = listOf(
         stringResource(R.string.categoria_restaurante),
@@ -377,7 +390,42 @@ fun CrearLugar() {
 
             // Botón de guardar mejorado
             Button(
-                onClick = { /* guardar lugar */ },
+                onClick = {
+                    if (nombre.isBlank() || descripcion.isBlank() || telefono.isBlank() || direccion.isBlank() || categoriaSeleccionada.isBlank()) {
+                        android.widget.Toast.makeText(
+                            context,
+                            "Completa todos los campos",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                        return@Button
+                    }
+
+                    val nuevoLugar = Lugar(
+                        id = System.currentTimeMillis().toString(),
+                        nombre = nombre,
+                        descripcion = descripcion,
+                        direccion = direccion,
+                        categoria = categoriaSeleccionada,
+                        horario = emptyMap(),
+                        telefono = telefono,
+                        imagenResId = R.drawable.logo, // placeholder
+                        likes = 0,
+                        longitud = 0.0,
+                        estado = EstadoLugar.PENDIENTE,
+                        creadorId = usuarioActual?.id ?: "anon",
+                        calificacionPromedio = 0.0,
+                        ubicacion = Ubicacion(latitud = 0.0, longitud = 0.0),
+                        comentarios = emptyList()
+                    )
+
+                    lugaresViewModel.crearLugar(nuevoLugar)
+                    android.widget.Toast.makeText(
+                        context,
+                        "Lugar enviado para moderación",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    navController?.popBackStack()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
