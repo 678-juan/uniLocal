@@ -10,7 +10,7 @@ data class Lugar(
     val categoria: String,
     val horario: Map<String, Pair<String, String>> = emptyMap(),
     val telefono: String,
-    val imagenResId: Int,
+    val imagenUri: String,
     var likes: Int,
     val longitud: Double,
     val estado: EstadoLugar = EstadoLugar.PENDIENTE,

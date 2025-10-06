@@ -25,6 +25,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.R
 import com.example.unilocal.viewModel.UsuarioViewModel
 import com.example.unilocal.viewModel.ModeradorViewModel
+import com.example.unilocal.model.entidad.Usuario
+import com.example.unilocal.model.entidad.Moderador
 
 @Composable
 fun PantallaLogin(
@@ -39,7 +41,6 @@ fun PantallaLogin(
     var cargando by remember { mutableStateOf(false) }
     val contexto = LocalContext.current
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
-    var esModerador by remember { mutableStateOf(false) }
     
     // Debug: mostrar usuarios disponibles
     LaunchedEffect(Unit) {
@@ -118,15 +119,6 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // switch moderador
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = esModerador, onCheckedChange = { esModerador = it })
-                Spacer(Modifier.width(8.dp))
-                Text("Soy moderador")
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             // boton entrar
             BotonPrincipal(
                 texto = if (cargando) "Iniciando sesión..." else stringResource(R.string.login_button),
@@ -138,15 +130,13 @@ fun PantallaLogin(
                     
                     cargando = true
                     
-                    if (esModerador) {
-                        val mod = moderadorViewModel.login(correo.trim(), clave)
-                        if (mod != null) {
-                            Toast.makeText(contexto, "¡Bienvenido ${mod.nombre} (moderador)!", Toast.LENGTH_SHORT).show()
-                            navegarAPrincipalAdmin(mod.id)
-                        } else {
-                            Toast.makeText(contexto, "Credenciales de moderador inválidas", Toast.LENGTH_LONG).show()
-                        }
+                    // Intentar login como moderador primero
+                    val moderador = moderadorViewModel.login(correo.trim(), clave)
+                    if (moderador != null) {
+                        Toast.makeText(contexto, "¡Bienvenido ${moderador.nombre} (moderador)!", Toast.LENGTH_SHORT).show()
+                        navegarAPrincipalAdmin(moderador.id)
                     } else {
+                        // Si no es moderador, intentar como usuario
                         val usuarioEncontrado = viewModel.login(correo.trim(), clave)
                         if (usuarioEncontrado != null) {
                             Toast.makeText(contexto, "¡Bienvenido ${usuarioEncontrado.nombre}!", Toast.LENGTH_SHORT).show()

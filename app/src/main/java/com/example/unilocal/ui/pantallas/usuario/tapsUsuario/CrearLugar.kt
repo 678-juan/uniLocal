@@ -39,6 +39,13 @@ import com.example.unilocal.model.entidad.EstadoLugar
 import com.example.unilocal.model.entidad.Lugar
 import com.example.unilocal.model.entidad.Ubicacion
 import com.example.unilocal.viewModel.UsuarioViewModel
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun CrearLugar(
@@ -52,6 +59,7 @@ fun CrearLugar(
     var telefono by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf("") }
+    var imagenSeleccionada by remember { mutableStateOf<android.net.Uri?>(null) }
     val usuarioActual = usuarioViewModel.usuarioActual.collectAsState().value
     val context = LocalContext.current
 
@@ -63,6 +71,13 @@ fun CrearLugar(
         stringResource(R.string.categoria_comida_rapida),
         stringResource(R.string.categoria_pasada)
     )
+
+    // Launcher para seleccionar imagen
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        imagenSeleccionada = uri
+    }
 
     Column(
         modifier = Modifier
@@ -193,6 +208,124 @@ fun CrearLugar(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Sección de imagen
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "📷 Imagen del Lugar",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Text(
+                        text = "Selecciona una imagen que represente tu lugar",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Preview de imagen o botón para seleccionar
+                    if (imagenSeleccionada != null) {
+                        // Mostrar imagen seleccionada
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .background(
+                                    Color(0xFFF5F5F5),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .border(
+                                    2.dp,
+                                    VerdePrincipal,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .clickable { launcher.launch("image/*") },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    Icons.Default.PhotoCamera,
+                                    contentDescription = "Imagen seleccionada",
+                                    tint = VerdePrincipal,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Imagen seleccionada",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = VerdePrincipal
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Toca para cambiar",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    } else {
+                        // Botón para seleccionar imagen
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .background(
+                                    Color(0xFFF5F5F5),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .border(
+                                    2.dp,
+                                    Color.LightGray,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .clickable { launcher.launch("image/*") },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    Icons.Default.PhotoCamera,
+                                    contentDescription = "Seleccionar imagen",
+                                    tint = Color.Gray,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Toca para seleccionar imagen",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Gray
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "JPG, PNG o GIF",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             // Sección de información básica
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -292,7 +425,7 @@ fun CrearLugar(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Mapa placeholder mejorado
+                    // Mapa placeholder
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -331,62 +464,9 @@ fun CrearLugar(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Sección de fotos
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp)
-                ) {
-                    Text(
-                        text = "📸 Fotos del Lugar",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp)
-                            .background(
-                                Color(0xFFF8F9FA),
-                                RoundedCornerShape(12.dp)
-                            )
-                            .border(
-                                2.dp,
-                                Color.LightGray,
-                                RoundedCornerShape(12.dp)
-                            )
-                            .clickable { /* abrir galería */ },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                Icons.Default.PhotoCamera,
-                                contentDescription = "Agregar fotos",
-                                tint = Color.Gray,
-                                modifier = Modifier.size(32.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Toca para agregar fotos",
-                                fontSize = 14.sp,
-                                color = Color.Gray
-                            )
-                        }
-                    }
-                }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+
+
 
             // Botón de guardar mejorado
             Button(
@@ -408,7 +488,7 @@ fun CrearLugar(
                         categoria = categoriaSeleccionada,
                         horario = emptyMap(),
                         telefono = telefono,
-                        imagenResId = R.drawable.logo, // placeholder
+                        imagenUri = imagenSeleccionada?.toString() ?: "default_image",
                         likes = 0,
                         longitud = 0.0,
                         estado = EstadoLugar.PENDIENTE,

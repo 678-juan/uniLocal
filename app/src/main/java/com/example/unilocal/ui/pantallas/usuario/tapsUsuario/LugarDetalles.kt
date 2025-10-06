@@ -3,7 +3,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -13,9 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-
 import com.example.unilocal.model.entidad.Lugar
 import com.example.unilocal.ui.componentes.FichaInformacion
 import com.example.unilocal.ui.componentes.PublicacionUno
@@ -52,6 +51,7 @@ fun LugarDetalles(
     val lugar: Lugar? = lugares.find { it.id == idLugar }
 
     var nuevoComentario by remember { mutableStateOf("") }
+    var estrellasSeleccionadas by remember { mutableStateOf(0) }
 
     LazyColumn(
         modifier = Modifier
@@ -95,7 +95,7 @@ fun LugarDetalles(
 
             item { FichaInformacion(lugar = lugarActual) }
 
-            // 🔹 Sección de comentarios
+            // Sección de comentarios
             item {
                 Text(
                     text = "Comentarios",
@@ -114,6 +114,50 @@ fun LugarDetalles(
                 )
             }
 
+            // Selector de estrellas
+            item {
+                Column {
+                    Text(
+                        text = "Califica este lugar:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        repeat(5) { index ->
+                            val estrellaActual = index + 1
+                            Icon(
+                                imageVector = if (estrellaActual <= estrellasSeleccionadas) {
+                                    Icons.Filled.Star
+                                } else {
+                                    Icons.Outlined.Star
+                                },
+                                contentDescription = "Estrella $estrellaActual",
+                                tint = if (estrellaActual <= estrellasSeleccionadas) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.outline
+                                },
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clickable {
+                                        estrellasSeleccionadas = estrellaActual
+                                    }
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (estrellasSeleccionadas > 0) "$estrellasSeleccionadas de 5 estrellas" else "Selecciona una calificación",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             // Botón agregar
             item {
                 Row(
@@ -122,19 +166,21 @@ fun LugarDetalles(
                 ) {
                     Button(
                         onClick = {
-                            if (nuevoComentario.isNotBlank()) {
+                            if (nuevoComentario.isNotBlank() && estrellasSeleccionadas > 0) {
                                 val comentario = Comentario(
                                     id = UUID.randomUUID().toString(),
                                     usuarioId = usuarioViewModel?.usuarioActual?.value?.id ?: "usuario_anonimo",
                                     lugarId = lugarActual.id,
                                     texto = nuevoComentario.trim(),
-                                    estrellas = 5,
+                                    estrellas = estrellasSeleccionadas,
                                     fecha = System.currentTimeMillis()
                                 )
                                 lugarViewModel.agregarComentario(lugarActual.id, comentario)
                                 nuevoComentario = ""
+                                estrellasSeleccionadas = 0
                             }
-                        }
+                        },
+                        enabled = nuevoComentario.isNotBlank() && estrellasSeleccionadas > 0
                     ) {
                         Text("Agregar")
                     }

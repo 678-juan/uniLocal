@@ -1,6 +1,7 @@
 package com.example.unilocal.ui.pantallas.admin.tapsAdmin
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -20,6 +21,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.viewModel.LugaresViewModel
 import com.example.unilocal.viewModel.ModeracionViewModel
 import com.example.unilocal.model.entidad.EstadoLugar
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.unilocal.R
 
 @Composable
 fun SolicitudesAdmin(
@@ -52,8 +57,11 @@ fun SolicitudesAdmin(
 
         if (pendientes.isEmpty()) {
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color.Black, androidx.compose.foundation.shape.RoundedCornerShape(16.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -78,21 +86,47 @@ fun SolicitudesAdmin(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .border(1.dp, Color.Black, androidx.compose.foundation.shape.RoundedCornerShape(16.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
             ) {
                 Column {
                     // Imagen del lugar
-                    if (lugar.imagenResId != 0) {
-                        Image(
-                            painter = painterResource(id = lugar.imagenResId),
-                            contentDescription = lugar.nombre,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp),
-                            contentScale = ContentScale.Crop
-                        )
+                    if (lugar.imagenUri != "default_image") {
+                        if (lugar.imagenUri.startsWith("content://") || lugar.imagenUri.startsWith("file://")) {
+                            // Es una URI de imagen seleccionada
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(lugar.imagenUri)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = lugar.nombre,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            // Es un recurso drawable
+                            Image(
+                                painter = painterResource(id = when (lugar.imagenUri) {
+                                    "restaurante_mex" -> R.drawable.restaurante_mex
+                                    "cafeteria_moderna" -> R.drawable.cafeteria_moderna
+                                    "gimnasio" -> R.drawable.gimnasio
+                                    "libreria" -> R.drawable.libreria
+                                    "farmacia" -> R.drawable.farmacia
+                                    "bar" -> R.drawable.bar
+                                    else -> R.drawable.logo
+                                }),
+                                contentDescription = lugar.nombre,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     }
                     
                     // Contenido de la tarjeta

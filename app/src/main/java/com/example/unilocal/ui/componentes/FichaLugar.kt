@@ -19,6 +19,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.example.unilocal.model.entidad.Lugar
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.unilocal.R
 
 
 @Composable
@@ -39,12 +43,34 @@ fun FichaLugar(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box {
-            Image(
-                painter = painterResource(id = lugar.imagenResId),
-                contentDescription = lugar.nombre,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
+            if (lugar.imagenUri.startsWith("content://") || lugar.imagenUri.startsWith("file://")) {
+                // Es una URI de imagen seleccionada
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(lugar.imagenUri)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = lugar.nombre,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                // Es un recurso drawable
+                Image(
+                    painter = painterResource(id = when (lugar.imagenUri) {
+                        "restaurante_mex" -> R.drawable.restaurante_mex
+                        "cafeteria_moderna" -> R.drawable.cafeteria_moderna
+                        "gimnasio" -> R.drawable.gimnasio
+                        "libreria" -> R.drawable.libreria
+                        "farmacia" -> R.drawable.farmacia
+                        "bar" -> R.drawable.bar
+                        else -> R.drawable.logo
+                    }),
+                    contentDescription = lugar.nombre,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
             Text(
                 text = lugar.nombre,
                 modifier = Modifier

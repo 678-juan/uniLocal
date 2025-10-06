@@ -10,7 +10,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -29,6 +31,57 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.R
 import com.example.unilocal.model.entidad.Lugar
 import com.example.unilocal.viewModel.UsuarioViewModel
+import kotlin.math.roundToInt
+
+// Función para calcular el promedio de estrellas
+fun calcularPromedioEstrellas(lugar: Lugar): Double {
+    return if (lugar.comentarios.isNotEmpty()) {
+        lugar.comentarios.map { it.estrellas }.average()
+    } else {
+        0.0
+    }
+}
+
+// Componente para mostrar las estrellas
+@Composable
+fun MostrarEstrellas(
+    promedio: Double,
+    modifier: Modifier = Modifier
+) {
+    val promedioRedondeado = promedio.roundToInt()
+    val tieneDecimales = promedio % 1 != 0.0
+    
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        repeat(5) { index ->
+            val estrellaActual = index + 1
+            Icon(
+                imageVector = if (estrellaActual <= promedioRedondeado) {
+                    Icons.Filled.Star
+                } else {
+                    Icons.Outlined.Star
+                },
+                contentDescription = "Estrella $estrellaActual",
+                tint = if (estrellaActual <= promedioRedondeado) {
+                    Color(0xFFFFD700) // Color dorado para estrellas llenas
+                } else {
+                    Color.Gray
+                },
+                modifier = Modifier.size(16.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = String.format("%.1f", promedio),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Gray
+        )
+    }
+}
 
 @Composable
 fun PublicacionUno(
@@ -89,6 +142,10 @@ fun PublicacionUno(
                         text = lugar.estado.name,
                         fontSize = 12.sp,
                         color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    MostrarEstrellas(
+                        promedio = calcularPromedioEstrellas(lugar)
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))

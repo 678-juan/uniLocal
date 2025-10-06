@@ -22,8 +22,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.unilocal.model.entidad.Lugar
+import com.example.unilocal.model.entidad.EstadoLugar
 import com.example.unilocal.ui.componentes.FichaInformacion
 import com.example.unilocal.ui.componentes.PublicacionUno
 import com.example.unilocal.viewModel.LugaresViewModel
@@ -37,6 +39,9 @@ fun Recomendaciones(
     usuarioViewModel: UsuarioViewModel? = null
 ) {
     val lugares by lugaresViewModel.lugares.collectAsState()
+    
+    // Filtrar solo lugares autorizados
+    val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }
 
     LazyColumn(
         modifier = Modifier
@@ -62,13 +67,23 @@ fun Recomendaciones(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-
-        items(lugares) { lugar ->
-            PublicacionUno(
-                lugar = lugar,
-                onClick = { navegarALugar(lugar.id) },
-                usuarioViewModel = usuarioViewModel
-            )
+        if (lugaresAutorizados.isEmpty()) {
+            item {
+                Text(
+                    text = "No hay recomendaciones disponibles en este momento",
+                    fontSize = 16.sp,
+                    color = androidx.compose.ui.graphics.Color.Gray,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        } else {
+            items(lugaresAutorizados) { lugar ->
+                PublicacionUno(
+                    lugar = lugar,
+                    onClick = { navegarALugar(lugar.id) },
+                    usuarioViewModel = usuarioViewModel
+                )
+            }
         }
     }
 }

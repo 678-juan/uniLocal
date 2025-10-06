@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.ui.componentes.PublicacionUno
 import com.example.unilocal.viewModel.LugaresViewModel
 import com.example.unilocal.viewModel.UsuarioViewModel
+import com.example.unilocal.model.entidad.EstadoLugar
 
 @Composable
 fun Inicio(
@@ -25,6 +26,9 @@ fun Inicio(
     val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
     val lugares by lugaresVM.lugares.collectAsState()
     
+    // Filtrar solo lugares autorizados
+    val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }
+    
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -32,22 +36,33 @@ fun Inicio(
     ) {
         item {
             Text(
-                text = "Todos los lugares",
+                text = "Lugares disponibles",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
         
-        items(lugares) { lugar ->
-            PublicacionUno(
-                lugar = lugar,
-                onClick = { 
-                    println("DEBUG: Click en PublicacionUno - ${lugar.nombre}")
-                    navegarALugar(lugar.id) 
-                },
-                usuarioViewModel = usuarioViewModel
-            )
+        if (lugaresAutorizados.isEmpty()) {
+            item {
+                Text(
+                    text = "No hay lugares disponibles en este momento",
+                    fontSize = 16.sp,
+                    color = androidx.compose.ui.graphics.Color.Gray,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        } else {
+            items(lugaresAutorizados) { lugar ->
+                PublicacionUno(
+                    lugar = lugar,
+                    onClick = { 
+                        println("DEBUG: Click en PublicacionUno - ${lugar.nombre}")
+                        navegarALugar(lugar.id) 
+                    },
+                    usuarioViewModel = usuarioViewModel
+                )
+            }
         }
     }
 }

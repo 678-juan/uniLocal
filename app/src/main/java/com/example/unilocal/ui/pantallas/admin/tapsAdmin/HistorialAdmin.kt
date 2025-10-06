@@ -1,5 +1,6 @@
 package com.example.unilocal.ui.pantallas.admin.tapsAdmin
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -7,9 +8,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.viewModel.ModeracionViewModel
+import com.example.unilocal.model.entidad.Solicitud
 
 @Composable
 fun HistorialAdmin(
@@ -30,7 +33,15 @@ fun HistorialAdmin(
             Text("Sin registros todavía")
         } else {
             historial.forEach { reg ->
-                ElevatedCard(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                        .border(1.dp, Color.Black, androidx.compose.foundation.shape.RoundedCornerShape(12.dp)),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                ) {
                     Column(Modifier.padding(12.dp)) {
                         Text(reg.lugarNombre, style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(6.dp))

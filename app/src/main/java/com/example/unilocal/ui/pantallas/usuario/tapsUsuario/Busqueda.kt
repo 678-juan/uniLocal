@@ -15,6 +15,7 @@ import com.example.unilocal.ui.componentes.CampoMinimalista
 import com.example.unilocal.ui.componentes.FichaLugar
 import com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab
 import com.example.unilocal.viewModel.LugaresViewModel
+import com.example.unilocal.model.entidad.EstadoLugar
 
 @Composable
 fun Busqueda(
@@ -26,10 +27,12 @@ fun Busqueda(
     
     // Filtrar lugares por categoría basado en el texto de búsqueda
     val lugaresFiltrados = remember(textoBusqueda, lugares) {
+        val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }
+        
         if (textoBusqueda.isBlank()) {
-            lugares
+            lugaresAutorizados
         } else {
-            lugares.filter { lugar ->
+            lugaresAutorizados.filter { lugar ->
                 lugar.categoria.contains(textoBusqueda, ignoreCase = true) ||
                 lugar.nombre.contains(textoBusqueda, ignoreCase = true) ||
                 lugar.descripcion.contains(textoBusqueda, ignoreCase = true)

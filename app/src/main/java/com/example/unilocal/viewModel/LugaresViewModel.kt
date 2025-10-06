@@ -28,7 +28,7 @@ class LugaresViewModel : ViewModel() {
             categoria = "Restaurante",
             horario = mapOf("Lunes-Viernes" to ("08:00" to "20:00")),
             telefono = "3001234567",
-            imagenResId = R.drawable.restaurante_mex,
+            imagenUri = "restaurante_mex",
             likes = 25,
             longitud = -74.08175,
             estado = EstadoLugar.AUTORIZADO,
@@ -71,7 +71,7 @@ class LugaresViewModel : ViewModel() {
                 "Domingo" to ("07:00" to "22:00")
             ),
             telefono = "3019876543",
-            imagenResId = R.drawable.cafeteria_moderna,
+            imagenUri = "cafeteria_moderna",
             likes = 15,
             longitud = -75.56359,
             estado = EstadoLugar.AUTORIZADO,
@@ -101,7 +101,7 @@ class LugaresViewModel : ViewModel() {
                 "Sábado-Domingo" to ("06:00" to "20:00")
             ),
             telefono = "3005551234",
-            imagenResId = R.drawable.gimnasio,
+            imagenUri = "gimnasio",
             likes = 42,
             longitud = -74.08175,
             estado = EstadoLugar.AUTORIZADO,
@@ -131,7 +131,7 @@ class LugaresViewModel : ViewModel() {
                 "Domingo" to ("10:00" to "16:00")
             ),
             telefono = "3007778888",
-            imagenResId = R.drawable.libreria,
+            imagenUri = "libreria",
             likes = 18,
             longitud = -74.08175,
             estado = EstadoLugar.AUTORIZADO,
@@ -151,7 +151,7 @@ class LugaresViewModel : ViewModel() {
                 "Lunes-Domingo" to ("00:00" to "23:59")
             ),
             telefono = "3009990000",
-            imagenResId = R.drawable.farmacia,
+            imagenUri = "farmacia",
             likes = 35,
             longitud = -74.08175,
             estado = EstadoLugar.AUTORIZADO,
@@ -173,7 +173,7 @@ class LugaresViewModel : ViewModel() {
             ),
 
             telefono = "3001112222",
-            imagenResId = R.drawable.bar,
+            imagenUri = "bar",
             likes = 28,
             longitud = -74.08175,
             estado = EstadoLugar.AUTORIZADO,

@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.unilocal.R
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.unilocal.ui.theme.AzulEnlaces
 import com.example.unilocal.viewModel.UsuarioViewModel
 import com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab
@@ -217,15 +220,40 @@ fun LugarGuardadoItem(
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column {
-            Image(
-                painter = painterResource(id = lugar.imagenResId),
-                contentDescription = lugar.nombre,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-            )
+            if (lugar.imagenUri.startsWith("content://") || lugar.imagenUri.startsWith("file://")) {
+                // Es una URI de imagen seleccionada
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(lugar.imagenUri)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = lugar.nombre,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                )
+            } else {
+                // Es un recurso drawable
+                Image(
+                    painter = painterResource(id = when (lugar.imagenUri) {
+                        "restaurante_mex" -> R.drawable.restaurante_mex
+                        "cafeteria_moderna" -> R.drawable.cafeteria_moderna
+                        "gimnasio" -> R.drawable.gimnasio
+                        "libreria" -> R.drawable.libreria
+                        "farmacia" -> R.drawable.farmacia
+                        "bar" -> R.drawable.bar
+                        else -> R.drawable.logo
+                    }),
+                    contentDescription = lugar.nombre,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                )
+            }
             
             Text(
                 text = lugar.nombre,
