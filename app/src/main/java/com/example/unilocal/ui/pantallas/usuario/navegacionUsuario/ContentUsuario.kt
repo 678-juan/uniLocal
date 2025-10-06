@@ -49,7 +49,10 @@ fun ContentUsuario(
             )
         }
         composable<RutaTab.Busqueda> {
-            Busqueda(navController = navController)
+            Busqueda(
+                navController = navController,
+                lugaresViewModel = lugaresViewModelInstance
+            )
         }
         composable<RutaTab.CrearLugar> {
             CrearLugar(

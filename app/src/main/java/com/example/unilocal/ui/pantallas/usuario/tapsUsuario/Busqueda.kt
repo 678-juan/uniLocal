@@ -19,11 +19,12 @@ import com.example.unilocal.model.entidad.EstadoLugar
 
 @Composable
 fun Busqueda(
-    navController: NavController? = null
+    navController: NavController? = null,
+    lugaresViewModel: LugaresViewModel? = null
 ) {
     var textoBusqueda by remember { mutableStateOf("") }
-    val lugaresViewModel: LugaresViewModel = viewModel()
-    val lugares by lugaresViewModel.lugares.collectAsState()
+    val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
+    val lugares by lugaresVM.lugares.collectAsState()
     
     // filtrar lugares
     val lugaresFiltrados = remember(textoBusqueda, lugares) {

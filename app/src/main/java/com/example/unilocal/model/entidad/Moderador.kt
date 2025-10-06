@@ -9,5 +9,5 @@ data class Moderador(
     val email: String,
     val clave: String,
     val historial: List<Solicitud> = emptyList(),
-    val lugares: List<String> = emptyList() // IDs de lugares autorizados
+    val lugares: List<String> = emptyList() // IDs de lugares autorizados da 
 )

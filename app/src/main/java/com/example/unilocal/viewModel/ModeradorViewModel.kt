@@ -94,7 +94,8 @@ class ModeradorViewModel : ViewModel(){
         lugar: Lugar,
         moderadorId: String,
         nuevaDecision: EstadoLugar,
-        motivo: String = ""
+        motivo: String = "",
+        lugaresViewModel: LugaresViewModel? = null
     ) {
         val moderador = _moderadorActual.value
         if (moderador != null) {
@@ -136,6 +137,9 @@ class ModeradorViewModel : ViewModel(){
             
             // actualizar moderador actual
             _moderadorActual.value = moderadorActualizado
+            
+            // actualizar estado del lugar en LugaresViewModel
+            lugaresViewModel?.actualizarEstado(lugar.id, nuevaDecision)
         }
     }
 }
