@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
     implementation(libs.androidx.foundation)
+    implementation(libs.material3)
 
 
     testImplementation(libs.junit)

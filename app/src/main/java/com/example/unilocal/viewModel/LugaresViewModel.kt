@@ -35,7 +35,24 @@ class LugaresViewModel : ViewModel() {
             creadorId = "1",
             calificacionPromedio = 4.5,
             ubicacion = Ubicacion(4.60971, -74.08175),
-            comentarios = emptyList()
+            comentarios = listOf(
+                Comentario(
+                    id = "c1",
+                    usuarioId = "2",
+                    lugarId = "l1",
+                    texto = "Excelente comida y muy buen servicio. La atención es muy amable y los precios son justos.",
+                    estrellas = 5,
+                    fecha = System.currentTimeMillis() - 86400000 // Hace 1 día
+                ),
+                Comentario(
+                    id = "c2",
+                    usuarioId = "3",
+                    lugarId = "l1",
+                    texto = "Muy buena experiencia, la comida está deliciosa. Recomiendo el plato especial.",
+                    estrellas = 4,
+                    fecha = System.currentTimeMillis() - 172800000 // Hace 2 días
+                )
+            )
         )
 
         val lugar2 = Lugar(
@@ -61,7 +78,16 @@ class LugaresViewModel : ViewModel() {
             creadorId = "2",
             calificacionPromedio = 4.7,
             ubicacion = Ubicacion(6.25184, -75.56359),
-            comentarios = emptyList()
+            comentarios = listOf(
+                Comentario(
+                    id = "c3",
+                    usuarioId = "1",
+                    lugarId = "l2",
+                    texto = "El mejor café de la ciudad. Ambiente muy acogedor y el personal es muy amable.",
+                    estrellas = 5,
+                    fecha = System.currentTimeMillis() - 259200000 // Hace 3 días
+                )
+            )
         )
 
         val lugar3 = Lugar(
@@ -82,7 +108,16 @@ class LugaresViewModel : ViewModel() {
             creadorId = "1",
             calificacionPromedio = 4.3,
             ubicacion = Ubicacion(4.60971, -74.08175),
-            comentarios = emptyList()
+            comentarios = listOf(
+                Comentario(
+                    id = "c4",
+                    usuarioId = "4",
+                    lugarId = "l3",
+                    texto = "Excelente gimnasio con equipos modernos. Los entrenadores son muy profesionales.",
+                    estrellas = 5,
+                    fecha = System.currentTimeMillis() - 432000000 // Hace 5 días
+                )
+            )
         )
 
         val lugar4 = Lugar(
@@ -173,9 +208,21 @@ class LugaresViewModel : ViewModel() {
         }
     }
 
-    fun agregarComentario(id: String, comentario: Comentario) {
-        _lugares.value = _lugares.value.map {
-            if (it.id == id) it.copy(comentarios = it.comentarios + comentario) else it
+    fun agregarComentario(idLugar: String, nuevoComentario: Comentario) {
+        _lugares.value = _lugares.value.map { lugar ->
+            if (lugar.id == idLugar) {
+                lugar.copy(comentarios = lugar.comentarios + nuevoComentario)
+            } else {
+                lugar
+            }
         }
     }
+
+    private fun actualizarLugar(lugarActualizado: Lugar) {
+        _lugares.value = _lugares.value.map { lugar ->
+            if (lugar.id == lugarActualizado.id) lugarActualizado else lugar
+        }
+    }
+
+
 }

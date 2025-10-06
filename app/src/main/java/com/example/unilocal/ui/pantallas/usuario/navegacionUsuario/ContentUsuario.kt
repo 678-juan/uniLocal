@@ -29,8 +29,9 @@ fun ContentUsuario(
     usuarioViewModel: UsuarioViewModel? = null,
     lugaresViewModel: LugaresViewModel? = null
 ) {
-    val lugaresViewModelInstance: LugaresViewModel = lugaresViewModel ?: viewModel()
-    val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
+    // Usar los ViewModels pasados como parámetros para mantener consistencia
+    val lugaresViewModelInstance = lugaresViewModel ?: throw IllegalStateException("LugaresViewModel es requerido")
+    val viewModel = usuarioViewModel ?: throw IllegalStateException("UsuarioViewModel es requerido")
 
     NavHost(
         modifier = Modifier.padding(padding),
@@ -42,7 +43,6 @@ fun ContentUsuario(
                 lugaresViewModel = lugaresViewModelInstance,
                 usuarioViewModel = viewModel,
                 navegarALugar = { lugarId ->
-                    println("DEBUG: Navegando a detalles del lugar: $lugarId")
                     navController.navigate(RutaTab.LugarDetalles(lugarId))
                 }
             )
@@ -88,7 +88,8 @@ fun ContentUsuario(
             LugarDetalles(
                 idLugar = args.idLugar,
                 navController = navController,
-                usuarioViewModel = viewModel
+                usuarioViewModel = viewModel,
+                lugaresViewModel = lugaresViewModelInstance
             )
         }
 

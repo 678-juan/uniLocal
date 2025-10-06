@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import com.example.unilocal.R
 import com.example.unilocal.ui.theme.AzulEnlaces
 import com.example.unilocal.viewModel.UsuarioViewModel
+import com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab
 
 @Composable
 fun Guardados(
@@ -148,7 +149,10 @@ fun Guardados(
                     items(lugaresGuardados) { lugar ->
                         LugarGuardadoItem(
                             lugar = lugar,
-                            onClick = { /* TODO: Navegar a detalles del lugar */ }
+                            onClick = { 
+                                // Navegar a detalles del lugar
+                                navController.navigate(RutaTab.LugarDetalles(lugar.id))
+                            }
                         )
                     }
                 }
