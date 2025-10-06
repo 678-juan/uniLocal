@@ -18,11 +18,13 @@ import com.example.unilocal.ui.pantallas.usuario.bottonBarUsuario.BottonBarUsuar
 import com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.ContentUsuario
 import com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab
 import com.example.unilocal.viewModel.UsuarioViewModel
+import com.example.unilocal.viewModel.LugaresViewModel
 
 
 @Composable
 fun PrincipalUsuario(
-    usuarioViewModel: UsuarioViewModel? = null
+    usuarioViewModel: UsuarioViewModel? = null,
+    lugaresViewModel: LugaresViewModel? = null
 ) {
     val navController = rememberNavController()
 
@@ -43,7 +45,8 @@ fun PrincipalUsuario(
         ContentUsuario(
             navController = navController,
             padding = padding,
-            usuarioViewModel = usuarioViewModel
+            usuarioViewModel = usuarioViewModel,
+            lugaresViewModel = lugaresViewModel
         )
 
     }

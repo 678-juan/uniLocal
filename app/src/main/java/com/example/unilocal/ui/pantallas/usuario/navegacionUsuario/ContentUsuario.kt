@@ -26,9 +26,10 @@ import com.example.unilocal.viewModel.UsuarioViewModel
 fun ContentUsuario(
     navController: NavHostController,
     padding: PaddingValues,
-    usuarioViewModel: UsuarioViewModel? = null
+    usuarioViewModel: UsuarioViewModel? = null,
+    lugaresViewModel: LugaresViewModel? = null
 ) {
-    val lugaresViewModel:LugaresViewModel = viewModel()
+    val lugaresViewModelInstance: LugaresViewModel = lugaresViewModel ?: viewModel()
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
 
     NavHost(
@@ -38,7 +39,7 @@ fun ContentUsuario(
     ){
         composable<RutaTab.InicioUsuario> {
             Inicio(
-                lugaresViewModel = lugaresViewModel,
+                lugaresViewModel = lugaresViewModelInstance,
                 usuarioViewModel = viewModel,
                 navegarALugar = { lugarId ->
                     println("DEBUG: Navegando a detalles del lugar: $lugarId")
@@ -50,11 +51,15 @@ fun ContentUsuario(
             Busqueda(navController = navController)
         }
         composable<RutaTab.CrearLugar> {
-            CrearLugar()
+            CrearLugar(
+                navController = navController,
+                usuarioViewModel = viewModel,
+                lugaresViewModel = lugaresViewModelInstance
+            )
         }
         composable<RutaTab.Recomendados> {
             Recomendaciones(
-                lugaresViewModel = lugaresViewModel,
+                lugaresViewModel = lugaresViewModelInstance,
                 navegarALugar = {
                     navController.navigate(RutaTab.LugarDetalles(it))
                 },
@@ -67,7 +72,7 @@ fun ContentUsuario(
                     navController.navigate(RutaTab.CrearLugar)
                 },
                 usuarioViewModel = viewModel,
-                lugaresViewModel = lugaresViewModel,
+                lugaresViewModel = lugaresViewModelInstance,
                 navegarALugar = { lugarId ->
                     navController.navigate(RutaTab.LugarDetalles(lugarId))
                 },

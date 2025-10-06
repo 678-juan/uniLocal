@@ -30,12 +30,19 @@ fun HistorialAdmin(
             Text("Sin registros todavía")
         } else {
             historial.forEach { reg ->
-                ListItem(
-                    headlineContent = { Text(reg.lugarNombre) },
-                    supportingContent = {
-                        Text("${reg.accion} • ${reg.fechaIso}")
+                ElevatedCard(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+                    Column(Modifier.padding(12.dp)) {
+                        Text(reg.lugarNombre, style = MaterialTheme.typography.titleMedium)
+                        Spacer(Modifier.height(6.dp))
+                        AssistChip(onClick = {}, label = { Text(reg.accion.name) })
+                        Spacer(Modifier.height(6.dp))
+                        Text(reg.fechaIso, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                        if (reg.motivo.isNotBlank()) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(reg.motivo, style = MaterialTheme.typography.bodySmall)
+                        }
                     }
-                )
+                }
                 Divider()
             }
         }

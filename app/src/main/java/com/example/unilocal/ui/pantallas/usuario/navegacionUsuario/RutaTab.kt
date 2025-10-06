@@ -34,4 +34,5 @@ sealed class RutaTab() {
     @Serializable
     data object EditarUsuario : RutaTab()
 
+
 }

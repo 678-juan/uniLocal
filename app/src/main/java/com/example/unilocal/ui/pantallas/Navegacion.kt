@@ -9,12 +9,16 @@ import com.example.unilocal.ui.configuracion.RutasPantallas
 import com.example.unilocal.ui.pantallas.usuario.PrincipalUsuario
 import com.example.unilocal.ui.pantallas.admin.PrincipalAdmin
 import com.example.unilocal.viewModel.UsuarioViewModel
+import com.example.unilocal.viewModel.LugaresViewModel
+import com.example.unilocal.viewModel.ModeradorViewModel
 
 
 @Composable
 fun Navegacion() {
     val navController = rememberNavController()
     val usuarioViewModel: UsuarioViewModel = viewModel()
+    val lugaresViewModel: LugaresViewModel = viewModel()
+    val moderadorViewModel: ModeradorViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -31,7 +35,8 @@ fun Navegacion() {
                 navegarARegistro = {
                     navController.navigate(RutasPantallas.Registro)
                 },
-                usuarioViewModel = usuarioViewModel
+                usuarioViewModel = usuarioViewModel,
+                moderadorViewModel = moderadorViewModel
             )
         }
         composable<RutasPantallas.Registro> {
@@ -44,11 +49,11 @@ fun Navegacion() {
         }
 
         composable<RutasPantallas.PrincipalUsuarios> {
-            PrincipalUsuario(usuarioViewModel = usuarioViewModel)
+            PrincipalUsuario(usuarioViewModel = usuarioViewModel, lugaresViewModel = lugaresViewModel)
         }
 
         composable<RutasPantallas.PrincipalAdministrador> {
-            PrincipalAdmin(moderadorId = "mod1")
+            PrincipalAdmin(moderadorId = "mod1", lugaresViewModel = lugaresViewModel)
         }
 
 
