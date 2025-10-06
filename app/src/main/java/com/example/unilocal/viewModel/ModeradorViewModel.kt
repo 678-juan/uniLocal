@@ -8,6 +8,12 @@ import com.example.unilocal.model.entidad.Solicitud
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 class ModeradorViewModel : ViewModel(){
 
@@ -18,12 +24,28 @@ class ModeradorViewModel : ViewModel(){
     private val _moderadorActual = MutableStateFlow<Moderador?>(null)
     val moderadorActual: StateFlow<Moderador?> = _moderadorActual.asStateFlow()
 
-    // historial y lugares autorizados
-    private val _historial = MutableStateFlow<List<Solicitud>>(emptyList())
-    val historial: StateFlow<List<Solicitud>> = _historial.asStateFlow()
+    // historial y lugares autorizados del moderador actual
+    val historial: StateFlow<List<Solicitud>> = _moderadorActual.map { it?.historial ?: emptyList() }.stateIn(
+        scope = CoroutineScope(Dispatchers.Main),
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
     
-    private val _misAutorizados = MutableStateFlow<List<Lugar>>(emptyList())
-    val misAutorizados: StateFlow<List<Lugar>> = _misAutorizados.asStateFlow()
+    // necesitamos acceso a los lugares para obtener los objetos completos
+    private val _lugares = MutableStateFlow<List<Lugar>>(emptyList())
+    val misAutorizados: StateFlow<List<Lugar>> = combine(_moderadorActual, _lugares) { moderador, lugares ->
+        if (moderador != null) {
+            lugares.filter { lugar -> 
+                moderador.lugares.contains(lugar.id) 
+            }
+        } else {
+            emptyList()
+        }
+    }.stateIn(
+        scope = CoroutineScope(Dispatchers.Main),
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     init{
         cargarModeradores()
@@ -60,8 +82,11 @@ class ModeradorViewModel : ViewModel(){
 
     fun cerrarSesion() {
         _moderadorActual.value = null
-        _historial.value = emptyList()
-        _misAutorizados.value = emptyList()
+    }
+
+    // actualizar lugares (necesario para misAutorizados)
+    fun actualizarLugares(lugares: List<Lugar>) {
+        _lugares.value = lugares
     }
 
     // moderar lugares
@@ -71,19 +96,46 @@ class ModeradorViewModel : ViewModel(){
         nuevaDecision: EstadoLugar,
         motivo: String = ""
     ) {
-        val solicitud = Solicitud(
-            lugarId = lugar.id,
-            lugarNombre = lugar.nombre,
-            moderadorId = moderadorId,
-            accion = nuevaDecision,
-            motivo = motivo,
-            fechaIso = System.currentTimeMillis().toString()
-        )
-        
-        _historial.value = _historial.value + solicitud
-        
-        if (nuevaDecision == EstadoLugar.AUTORIZADO) {
-            _misAutorizados.value = _misAutorizados.value + lugar
+        val moderador = _moderadorActual.value
+        if (moderador != null) {
+            val solicitud = Solicitud(
+                lugarId = lugar.id,
+                lugarNombre = lugar.nombre,
+                moderadorId = moderadorId,
+                accion = nuevaDecision,
+                motivo = motivo,
+                fechaIso = System.currentTimeMillis().toString()
+            )
+            
+            // actualizar historial del moderador
+            val nuevoHistorial = moderador.historial + solicitud
+            
+            // actualizar lugares autorizados
+            val nuevosLugares = if (nuevaDecision == EstadoLugar.AUTORIZADO) {
+                if (!moderador.lugares.contains(lugar.id)) {
+                    moderador.lugares + lugar.id
+                } else {
+                    moderador.lugares
+                }
+            } else if (nuevaDecision == EstadoLugar.RECHAZADO) {
+                moderador.lugares.filter { it != lugar.id }
+            } else {
+                moderador.lugares
+            }
+            
+            // actualizar moderador
+            val moderadorActualizado = moderador.copy(
+                historial = nuevoHistorial,
+                lugares = nuevosLugares
+            )
+            
+            // actualizar en la lista de moderadores
+            _moderador.value = _moderador.value.map { 
+                if (it.id == moderador.id) moderadorActualizado else it 
+            }
+            
+            // actualizar moderador actual
+            _moderadorActual.value = moderadorActualizado
         }
     }
 }

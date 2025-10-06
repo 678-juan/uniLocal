@@ -27,8 +27,11 @@ fun PrincipalAdmin(
     val lugaresViewModelInstance = lugaresViewModel ?: androidx.lifecycle.viewmodel.compose.viewModel<LugaresViewModel>()
     val moderadorViewModelInstance = moderadorViewModel ?: androidx.lifecycle.viewmodel.compose.viewModel<ModeradorViewModel>()
 
-    // ya no necesitamos actualizar lugares en el moderador viewmodel
-    // porque ahora usamos estados independientes
+    // actualizar lugares en el moderador viewmodel
+    val lugares by lugaresViewModelInstance.lugares.collectAsState()
+    LaunchedEffect(lugares) {
+        moderadorViewModelInstance.actualizarLugares(lugares)
+    }
     
     ContentAdmin(
         navController = navController,
