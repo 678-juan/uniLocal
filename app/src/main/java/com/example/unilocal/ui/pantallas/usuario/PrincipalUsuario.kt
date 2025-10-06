@@ -24,7 +24,8 @@ import com.example.unilocal.viewModel.LugaresViewModel
 @Composable
 fun PrincipalUsuario(
     usuarioViewModel: UsuarioViewModel? = null,
-    lugaresViewModel: LugaresViewModel? = null
+    lugaresViewModel: LugaresViewModel? = null,
+    navegarALogin: () -> Unit = {}
 ) {
     val navController = rememberNavController()
 
@@ -46,7 +47,8 @@ fun PrincipalUsuario(
             navController = navController,
             padding = padding,
             usuarioViewModel = usuarioViewModel,
-            lugaresViewModel = lugaresViewModel
+            lugaresViewModel = lugaresViewModel,
+            navegarALogin = navegarALogin
         )
 
     }

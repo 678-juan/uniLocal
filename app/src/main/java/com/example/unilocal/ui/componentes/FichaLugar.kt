@@ -44,7 +44,7 @@ fun FichaLugar(
     ) {
         Box {
             if (lugar.imagenUri.startsWith("content://") || lugar.imagenUri.startsWith("file://")) {
-                // Es una URI de imagen seleccionada
+                // uri de imagen seleccionada
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(lugar.imagenUri)
@@ -55,7 +55,7 @@ fun FichaLugar(
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                // Es un recurso drawable
+                // recurso drawable
                 Image(
                     painter = painterResource(id = when (lugar.imagenUri) {
                         "restaurante_mex" -> R.drawable.restaurante_mex

@@ -27,7 +27,8 @@ fun ContentUsuario(
     navController: NavHostController,
     padding: PaddingValues,
     usuarioViewModel: UsuarioViewModel? = null,
-    lugaresViewModel: LugaresViewModel? = null
+    lugaresViewModel: LugaresViewModel? = null,
+    navegarALogin: () -> Unit = {}
 ) {
     // Usar los ViewModels pasados como parámetros para mantener consistencia
     val lugaresViewModelInstance = lugaresViewModel ?: throw IllegalStateException("LugaresViewModel es requerido")
@@ -96,7 +97,8 @@ fun ContentUsuario(
         composable<RutaTab.Configuracion> {
             Configuracion(
                 navController = navController,
-                usuarioViewModel = viewModel
+                usuarioViewModel = viewModel,
+                navegarALogin = navegarALogin
             )
         }
 

@@ -26,7 +26,7 @@ fun Inicio(
     val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
     val lugares by lugaresVM.lugares.collectAsState()
     
-    // Filtrar solo lugares autorizados
+    // solo lugares autorizados
     val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }
     
     LazyColumn(
@@ -57,7 +57,6 @@ fun Inicio(
                 PublicacionUno(
                     lugar = lugar,
                     onClick = { 
-                        println("DEBUG: Click en PublicacionUno - ${lugar.nombre}")
                         navegarALugar(lugar.id) 
                     },
                     usuarioViewModel = usuarioViewModel

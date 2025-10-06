@@ -8,5 +8,4 @@ data class Moderador(
     val username: String ,
     val email: String,
     val clave: String
-
 )

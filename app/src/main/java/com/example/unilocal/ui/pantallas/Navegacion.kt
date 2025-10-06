@@ -49,11 +49,28 @@ fun Navegacion() {
         }
 
         composable<RutasPantallas.PrincipalUsuarios> {
-            PrincipalUsuario(usuarioViewModel = usuarioViewModel, lugaresViewModel = lugaresViewModel)
+            PrincipalUsuario(
+                usuarioViewModel = usuarioViewModel, 
+                lugaresViewModel = lugaresViewModel,
+                navegarALogin = {
+                    navController.navigate(RutasPantallas.Login) {
+                        popUpTo(RutasPantallas.Login) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable<RutasPantallas.PrincipalAdministrador> {
-            PrincipalAdmin(moderadorId = "mod1", lugaresViewModel = lugaresViewModel)
+            PrincipalAdmin(
+                moderadorId = "mod1", 
+                lugaresViewModel = lugaresViewModel,
+                moderadorViewModel = moderadorViewModel,
+                navegarALogin = {
+                    navController.navigate(RutasPantallas.Login) {
+                        popUpTo(RutasPantallas.Login) { inclusive = true }
+                    }
+                }
+            )
         }
 
 

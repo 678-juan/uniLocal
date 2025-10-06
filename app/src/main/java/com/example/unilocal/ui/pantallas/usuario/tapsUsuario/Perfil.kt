@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import com.example.unilocal.R
 import com.example.unilocal.ui.configuracion.RutasPantallas
 import com.example.unilocal.ui.componentes.FichaLugar
+import com.example.unilocal.ui.componentes.FichaLugarPerfil
 import com.example.unilocal.viewModel.UsuarioViewModel
 import com.example.unilocal.viewModel.LugaresViewModel
 
@@ -165,9 +166,10 @@ fun Perfil(
                 modifier = Modifier.padding(horizontal = 16.dp)
             ) {
                 lugaresDelUsuario.forEach { lugar ->
-                    FichaLugar(
+                    FichaLugarPerfil(
                         lugar = lugar,
-                        onClick = { navegarALugar(lugar.id) }
+                        onClick = { navegarALugar(lugar.id) },
+                        onBorrar = { lugaresVM.borrarLugar(lugar.id) }
                     )
                 }
             }

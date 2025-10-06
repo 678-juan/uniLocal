@@ -34,7 +34,7 @@ fun PantallaLogin(
     navegarAPrincipalUsuario: () -> Unit,
     navegarAPrincipalAdmin: (String) -> Unit,
     usuarioViewModel: UsuarioViewModel? = null,
-    moderadorViewModel: ModeradorViewModel = viewModel()
+    moderadorViewModel: ModeradorViewModel? = null
 ) {
     var correo by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
@@ -131,7 +131,7 @@ fun PantallaLogin(
                     cargando = true
                     
                     // Intentar login como moderador primero
-                    val moderador = moderadorViewModel.login(correo.trim(), clave)
+                    val moderador = moderadorViewModel?.login(correo.trim(), clave)
                     if (moderador != null) {
                         Toast.makeText(contexto, "¡Bienvenido ${moderador.nombre} (moderador)!", Toast.LENGTH_SHORT).show()
                         navegarAPrincipalAdmin(moderador.id)

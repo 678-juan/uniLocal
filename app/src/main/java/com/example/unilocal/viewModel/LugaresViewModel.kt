@@ -42,7 +42,7 @@ class LugaresViewModel : ViewModel() {
                     lugarId = "l1",
                     texto = "Excelente comida y muy buen servicio. La atención es muy amable y los precios son justos.",
                     estrellas = 5,
-                    fecha = System.currentTimeMillis() - 86400000 // Hace 1 día
+                    fecha = System.currentTimeMillis() - 86400000
                 ),
                 Comentario(
                     id = "c2",
@@ -50,7 +50,7 @@ class LugaresViewModel : ViewModel() {
                     lugarId = "l1",
                     texto = "Muy buena experiencia, la comida está deliciosa. Recomiendo el plato especial.",
                     estrellas = 4,
-                    fecha = System.currentTimeMillis() - 172800000 // Hace 2 días
+                    fecha = System.currentTimeMillis() - 172800000
                 )
             )
         )
@@ -85,7 +85,7 @@ class LugaresViewModel : ViewModel() {
                     lugarId = "l2",
                     texto = "El mejor café de la ciudad. Ambiente muy acogedor y el personal es muy amable.",
                     estrellas = 5,
-                    fecha = System.currentTimeMillis() - 259200000 // Hace 3 días
+                    fecha = System.currentTimeMillis() - 259200000
                 )
             )
         )
@@ -134,7 +134,7 @@ class LugaresViewModel : ViewModel() {
             imagenUri = "libreria",
             likes = 18,
             longitud = -74.08175,
-            estado = EstadoLugar.AUTORIZADO,
+            estado = EstadoLugar.PENDIENTE,
             creadorId = "3",
             calificacionPromedio = 4.6,
             ubicacion = Ubicacion(4.60971, -74.08175),
@@ -154,7 +154,7 @@ class LugaresViewModel : ViewModel() {
             imagenUri = "farmacia",
             likes = 35,
             longitud = -74.08175,
-            estado = EstadoLugar.AUTORIZADO,
+            estado = EstadoLugar.PENDIENTE,
             creadorId = "2",
             calificacionPromedio = 4.4,
             ubicacion = Ubicacion(4.60971, -74.08175),
@@ -224,5 +224,8 @@ class LugaresViewModel : ViewModel() {
         }
     }
 
+    fun borrarLugar(lugarId: String) {
+        _lugares.value = _lugares.value.filter { it.id != lugarId }
+    }
 
 }

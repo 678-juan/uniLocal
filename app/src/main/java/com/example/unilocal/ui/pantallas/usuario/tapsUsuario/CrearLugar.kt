@@ -60,6 +60,21 @@ fun CrearLugar(
     var direccion by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf("") }
     var imagenSeleccionada by remember { mutableStateOf<android.net.Uri?>(null) }
+    
+    // horarios
+    var horarios by remember { 
+        mutableStateOf(
+            mapOf(
+                "Lunes" to "",
+                "Martes" to "",
+                "Miércoles" to "",
+                "Jueves" to "",
+                "Viernes" to "",
+                "Sábado" to "",
+                "Domingo" to ""
+            )
+        )
+    }
     val usuarioActual = usuarioViewModel.usuarioActual.collectAsState().value
     val context = LocalContext.current
 
@@ -72,7 +87,27 @@ fun CrearLugar(
         stringResource(R.string.categoria_pasada)
     )
 
-    // Launcher para seleccionar imagen
+    // convertir horarios
+    fun convertirHorariosAPair(horariosTexto: Map<String, String>): Map<String, Pair<String, String>> {
+        return horariosTexto.mapValues { (_, horarioTexto) ->
+            if (horarioTexto.isBlank() || horarioTexto.lowercase().contains("cerrado")) {
+                Pair("Cerrado", "Cerrado")
+            } else {
+                // buscar horarios
+                val patron = Regex("""(.+?)\s*[-–—]\s*(.+)""")
+                val match = patron.find(horarioTexto)
+                
+                if (match != null) {
+                    Pair(match.groupValues[1].trim(), match.groupValues[2].trim())
+                } else {
+                    // si no encuentra patrón, usar todo como apertura
+                    Pair(horarioTexto.trim(), horarioTexto.trim())
+                }
+            }
+        }
+    }
+
+    // para seleccionar imagen
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: android.net.Uri? ->
@@ -85,7 +120,7 @@ fun CrearLugar(
             .background(Color(0xFFF8F9FA))
             .verticalScroll(rememberScrollState())
     ) {
-        // Header con gradiente
+        // header con gradiente
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -103,7 +138,7 @@ fun CrearLugar(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Icono principal
+                // icono principal
                 Box(
                     modifier = Modifier
                         .size(80.dp)
@@ -138,13 +173,13 @@ fun CrearLugar(
             }
         }
 
-        // Contenido principal
+        // contenido principal
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(20.dp)
         ) {
-            // Sección de categoría
+            // categoría
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -208,7 +243,7 @@ fun CrearLugar(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Sección de imagen
+            // imagen
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -235,9 +270,9 @@ fun CrearLugar(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Preview de imagen o botón para seleccionar
+                    // preview de imagen o botón para seleccionar
                     if (imagenSeleccionada != null) {
-                        // Mostrar imagen seleccionada
+                        // mostrar imagen seleccionada
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -279,7 +314,7 @@ fun CrearLugar(
                             }
                         }
                     } else {
-                        // Botón para seleccionar imagen
+                        // botón para seleccionar imagen
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -326,7 +361,7 @@ fun CrearLugar(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Sección de información básica
+            // información básica
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -379,7 +414,98 @@ fun CrearLugar(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Sección de ubicación
+            // horarios
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = "🕒 Horarios de Atención",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Text(
+                        text = "Ingresa el horario para cada día (ej: 8:00 AM - 6:00 PM o Cerrado)",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // lista de horarios por día
+                    horarios.forEach { (dia, horario) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // nombre del día
+                            Text(
+                                text = dia,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.Black,
+                                modifier = Modifier.width(90.dp)
+                            )
+                            
+                            // campo de horario
+                            OutlinedTextField(
+                                value = horario,
+                                onValueChange = { nuevoHorario ->
+                                    horarios = horarios.toMutableMap().apply {
+                                        put(dia, nuevoHorario)
+                                    }
+                                },
+                                placeholder = { Text("8:00 AM - 6:00 PM", fontSize = 14.sp) },
+                                modifier = Modifier.weight(1f),
+                                singleLine = true,
+                                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 14.sp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = VerdePrincipal,
+                                    unfocusedBorderColor = Color.Gray
+                                )
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // botón de conveniencia
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(
+                            onClick = {
+                                horarios = horarios.mapValues { "8:00 AM - 6:00 PM" }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = VerdePrincipal),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = "Llenar todos",
+                                fontSize = 14.sp,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ubicación
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -425,7 +551,7 @@ fun CrearLugar(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Mapa placeholder
+                    // mapa placeholder
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -468,7 +594,7 @@ fun CrearLugar(
 
 
 
-            // Botón de guardar mejorado
+            // botón de guardar
             Button(
                 onClick = {
                     if (nombre.isBlank() || descripcion.isBlank() || telefono.isBlank() || direccion.isBlank() || categoriaSeleccionada.isBlank()) {
@@ -486,7 +612,7 @@ fun CrearLugar(
                         descripcion = descripcion,
                         direccion = direccion,
                         categoria = categoriaSeleccionada,
-                        horario = emptyMap(),
+                        horario = convertirHorariosAPair(horarios),
                         telefono = telefono,
                         imagenUri = imagenSeleccionada?.toString() ?: "default_image",
                         likes = 0,

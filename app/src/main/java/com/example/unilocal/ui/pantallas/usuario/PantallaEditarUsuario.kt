@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -75,11 +76,18 @@ fun PantallaEditarUsuario(
                 etiqueta = stringResource(id = R.string.username_hint)
             )
 
-            // Email
-            CampoTexto(
-                valor = email,
-                cuandoCambia = { email = it },
-                etiqueta = stringResource(id = R.string.email_usuario)
+            // Email (solo lectura)
+            OutlinedTextField(
+                value = email,
+                onValueChange = { }, // no permite cambios
+                label = { Text(stringResource(id = R.string.email_usuario)) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = false, // campo deshabilitado
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = Color.Gray,
+                    disabledBorderColor = Color.LightGray,
+                    disabledLabelColor = Color.Gray
+                )
             )
 
             // Ciudad

@@ -31,7 +31,8 @@ import com.example.unilocal.viewModel.UsuarioViewModel
 @Composable
 fun Configuracion(
     navController: NavController,
-    usuarioViewModel: UsuarioViewModel? = null
+    usuarioViewModel: UsuarioViewModel? = null,
+    navegarALogin: () -> Unit = {}
 ) {
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
     val usuarioActual by viewModel.usuarioActual.collectAsState()
@@ -179,7 +180,7 @@ fun Configuracion(
                     text = "Cerrar sesión",
                     onClick = { 
                         viewModel.cerrarSesion()
-                        // TODO: Navegar a pantalla de login
+                        navegarALogin()
                     },
                     textColor = Color.Red
                 )
@@ -188,7 +189,7 @@ fun Configuracion(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Footer con ayuda
+        //texto abajo
         Row(
             modifier = Modifier
                 .fillMaxWidth()

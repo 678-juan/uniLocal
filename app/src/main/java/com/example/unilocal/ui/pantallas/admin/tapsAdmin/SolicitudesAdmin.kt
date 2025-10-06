@@ -19,7 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.viewModel.LugaresViewModel
-import com.example.unilocal.viewModel.ModeracionViewModel
+import com.example.unilocal.viewModel.ModeradorViewModel
 import com.example.unilocal.model.entidad.EstadoLugar
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
@@ -30,12 +30,12 @@ import com.example.unilocal.R
 fun SolicitudesAdmin(
     moderadorId: String,
     lugaresViewModel: LugaresViewModel = viewModel(),
-    moderacionViewModel: ModeracionViewModel = viewModel()
+    moderadorViewModel: ModeradorViewModel = viewModel()
 ) {
     val pendientes = lugaresViewModel.lugares.collectAsState().value
         .filter { it.estado == EstadoLugar.PENDIENTE }
 
-    // Debug: mostrar información
+    // debug: mostrar información
     LaunchedEffect(pendientes.size) {
         println("DEBUG: Lugares pendientes encontrados: ${pendientes.size}")
         pendientes.forEach { lugar ->
@@ -93,10 +93,10 @@ fun SolicitudesAdmin(
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
             ) {
                 Column {
-                    // Imagen del lugar
+                    // imagen del lugar
                     if (lugar.imagenUri != "default_image") {
                         if (lugar.imagenUri.startsWith("content://") || lugar.imagenUri.startsWith("file://")) {
-                            // Es una URI de imagen seleccionada
+                            // uri de imagen seleccionada
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
                                     .data(lugar.imagenUri)
@@ -109,7 +109,7 @@ fun SolicitudesAdmin(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            // Es un recurso drawable
+                            // recurso drawable
                             Image(
                                 painter = painterResource(id = when (lugar.imagenUri) {
                                     "restaurante_mex" -> R.drawable.restaurante_mex
@@ -129,9 +129,9 @@ fun SolicitudesAdmin(
                         }
                     }
                     
-                    // Contenido de la tarjeta
+                    // contenido de la tarjeta
                     Column(Modifier.padding(16.dp)) {
-                        // Header con nombre y categoría
+                        // header con nombre y categoría
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -151,7 +151,7 @@ fun SolicitudesAdmin(
                                 )
                             }
                             
-                            // Badge de estado
+                            // badge de estado
                             androidx.compose.material3.AssistChip(
                                 onClick = { },
                                 label = { Text("Pendiente") },
@@ -164,7 +164,7 @@ fun SolicitudesAdmin(
                         
                         Spacer(Modifier.height(12.dp))
                         
-                        // Descripción
+                        // descripción
                         Text(
                             text = lugar.descripcion,
                             style = MaterialTheme.typography.bodyMedium,
@@ -175,7 +175,7 @@ fun SolicitudesAdmin(
                         
                         Spacer(Modifier.height(8.dp))
                         
-                        // Información adicional
+                        // información adicional
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -205,7 +205,7 @@ fun SolicitudesAdmin(
                         
                         Spacer(Modifier.height(16.dp))
                         
-                        // Botones de acción
+                        // botones de acción
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -213,7 +213,7 @@ fun SolicitudesAdmin(
                             Button(
                                 onClick = {
                                     lugaresViewModel.actualizarEstado(lugar.id, EstadoLugar.AUTORIZADO)
-                                    moderacionViewModel.registrarDecision(lugar, moderadorId, EstadoLugar.AUTORIZADO)
+                                    moderadorViewModel.registrarDecision(lugar, moderadorId, EstadoLugar.AUTORIZADO)
                                 },
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
@@ -225,7 +225,7 @@ fun SolicitudesAdmin(
                             OutlinedButton(
                                 onClick = {
                                     lugaresViewModel.actualizarEstado(lugar.id, EstadoLugar.RECHAZADO)
-                                    moderacionViewModel.registrarDecision(lugar, moderadorId, EstadoLugar.RECHAZADO)
+                                    moderadorViewModel.registrarDecision(lugar, moderadorId, EstadoLugar.RECHAZADO)
                                 },
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFD32F2F)),

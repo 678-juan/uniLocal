@@ -50,7 +50,7 @@ fun Guardados(
     val usuarioUsername = usuarioActual?.username ?: "@vawlte"
     val avatarId = (usuarioActual?.avatar ?: 0).coerceIn(0, avatares.size - 1)
 
-    // Obtener lugares guardados del usuario actual
+    // obtener lugares guardados del usuario actual
     val lugaresGuardados = usuarioActual?.favoritos ?: emptyList()
 
     Column(
@@ -58,7 +58,7 @@ fun Guardados(
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
-        // Header con flecha de regreso y título
+        // header con flecha de regreso y título
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -83,7 +83,7 @@ fun Guardados(
             )
         }
 
-        // Línea decorativa
+        // línea decorativa
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -91,7 +91,7 @@ fun Guardados(
                 .background(Color.LightGray)
         )
 
-        // Tarjeta de cuenta de usuario
+        // tarjeta de cuenta de usuario
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -134,7 +134,7 @@ fun Guardados(
             }
         }
 
-        // Grid de lugares guardados
+        // grid de lugares guardados
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -153,14 +153,14 @@ fun Guardados(
                         LugarGuardadoItem(
                             lugar = lugar,
                             onClick = { 
-                                // Navegar a detalles del lugar
+                                // navegar a detalles del lugar
                                 navController.navigate(RutaTab.LugarDetalles(lugar.id))
                             }
                         )
                     }
                 }
             } else {
-                // Mostrar mensaje cuando no hay lugares guardados
+                // mostrar mensaje cuando no hay lugares guardados
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -185,25 +185,8 @@ fun Guardados(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Footer con ayuda
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Necesitas ayuda. ",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-            Text(
-                text = "ayuda.",
-                fontSize = 14.sp,
-                color = AzulEnlaces,
-                modifier = Modifier.clickable { /* TODO: Implementar ayuda */ }
-            )
-        }
+
+
     }
 }
 
@@ -221,7 +204,7 @@ fun LugarGuardadoItem(
     ) {
         Column {
             if (lugar.imagenUri.startsWith("content://") || lugar.imagenUri.startsWith("file://")) {
-                // Es una URI de imagen seleccionada
+                // uri de imagen seleccionada
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(lugar.imagenUri)
@@ -235,7 +218,7 @@ fun LugarGuardadoItem(
                         .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                 )
             } else {
-                // Es un recurso drawable
+                // recurso drawable
                 Image(
                     painter = painterResource(id = when (lugar.imagenUri) {
                         "restaurante_mex" -> R.drawable.restaurante_mex

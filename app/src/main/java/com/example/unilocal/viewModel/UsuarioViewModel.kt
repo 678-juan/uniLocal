@@ -12,6 +12,14 @@ class UsuarioViewModel : ViewModel() {
     
     private val _usuarioActual = MutableStateFlow<Usuario?>(null)
     val usuarioActual: StateFlow<Usuario?> = _usuarioActual.asStateFlow()
+    
+    // likes
+    private val _likesDados = MutableStateFlow(setOf<String>())
+    val likesDados: StateFlow<Set<String>> = _likesDados.asStateFlow()
+    
+    // favoritos
+    private val _favoritosGuardados = MutableStateFlow(setOf<String>())
+    val favoritosGuardados: StateFlow<Set<String>> = _favoritosGuardados.asStateFlow()
 
     init {
         cargarUsuarios()
@@ -58,24 +66,34 @@ class UsuarioViewModel : ViewModel() {
             val usuarioActualizado = usuario.copy(favoritos = favoritosActualizados)
             _usuarioActual.value = usuarioActualizado
             
-            // Actualizar también en la lista de usuarios
+            // actualizar lista de usuarios
             _usuario.value = _usuario.value.map { 
                 if (it.id == usuario.id) usuarioActualizado else it 
             }
+            
+            // guardar en favoritos
+            val favoritosActuales = _favoritosGuardados.value.toMutableSet()
+            favoritosActuales.add(lugar.id)
+            _favoritosGuardados.value = favoritosActuales
         }
     }
 
-    fun quitarFavorito(lugarId: String) {
+    fun quitarFavorito(lugar: com.example.unilocal.model.entidad.Lugar) {
         val usuario = _usuarioActual.value
         if (usuario != null) {
-            val favoritosActualizados = usuario.favoritos.filter { it.id != lugarId }
+            val favoritosActualizados = usuario.favoritos.filter { it.id != lugar.id }
             val usuarioActualizado = usuario.copy(favoritos = favoritosActualizados)
             _usuarioActual.value = usuarioActualizado
             
-            // Actualizar también en la lista de usuarios
+            // actualizar lista de usuarios
             _usuario.value = _usuario.value.map { 
                 if (it.id == usuario.id) usuarioActualizado else it 
             }
+            
+            // quitar de favoritos
+            val favoritosActuales = _favoritosGuardados.value.toMutableSet()
+            favoritosActuales.remove(lugar.id)
+            _favoritosGuardados.value = favoritosActuales
         }
     }
 
@@ -92,10 +110,31 @@ class UsuarioViewModel : ViewModel() {
             )
             _usuarioActual.value = usuarioActualizado
             
-            // Actualizar también en la lista de usuarios
+            // actualizar lista de usuarios
             _usuario.value = _usuario.value.map { 
                 if (it.id == usuario.id) usuarioActualizado else it 
             }
         }
+    }
+    
+    // likes
+    fun darLike(lugarId: String) {
+        val likesActuales = _likesDados.value.toMutableSet()
+        likesActuales.add(lugarId)
+        _likesDados.value = likesActuales
+    }
+    
+    fun quitarLike(lugarId: String) {
+        val likesActuales = _likesDados.value.toMutableSet()
+        likesActuales.remove(lugarId)
+        _likesDados.value = likesActuales
+    }
+    
+    fun yaDioLike(lugarId: String): Boolean {
+        return _likesDados.value.contains(lugarId)
+    }
+    
+    fun estaGuardado(lugarId: String): Boolean {
+        return _favoritosGuardados.value.contains(lugarId)
     }
 }

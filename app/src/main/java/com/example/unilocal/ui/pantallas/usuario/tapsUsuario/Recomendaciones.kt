@@ -40,7 +40,7 @@ fun Recomendaciones(
 ) {
     val lugares by lugaresViewModel.lugares.collectAsState()
     
-    // Filtrar solo lugares autorizados
+    // solo lugares autorizados
     val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }
 
     LazyColumn(

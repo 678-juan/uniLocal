@@ -7,7 +7,7 @@ data class Solicitud(
     val lugarId: String,
     val lugarNombre: String,
     val moderadorId: String,
-    val accion: EstadoLugar, // AUTORIZADO o RECHAZADO
+    val accion: EstadoLugar, // autorizado o rechazado
     val motivo: String,
     val fechaIso: String
 )

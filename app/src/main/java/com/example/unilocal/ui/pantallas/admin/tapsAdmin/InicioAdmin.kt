@@ -4,35 +4,45 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.viewModel.LugaresViewModel
-import com.example.unilocal.viewModel.ModeracionViewModel
+import com.example.unilocal.viewModel.ModeradorViewModel
 import com.example.unilocal.model.entidad.EstadoLugar
-import com.example.unilocal.R
+import com.example.unilocal.ui.componentes.FichaLugarAdmin
+
+
+import androidx.compose.ui.draw.clip
+
 import androidx.compose.ui.platform.LocalContext
+
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.unilocal.R
+
 
 @Composable
 fun InicioAdmin(
     moderadorId: String,
     lugaresViewModel: LugaresViewModel = viewModel(),
-    moderacionViewModel: ModeracionViewModel = viewModel()
+    moderadorViewModel: ModeradorViewModel = viewModel()
 ) {
     val lugares = lugaresViewModel.lugares.collectAsState().value
     val pendientes = lugares.filter { it.estado == EstadoLugar.PENDIENTE }
-    val autorizadosPorMi = moderacionViewModel.misAutorizados.collectAsState().value
+    val autorizadosPorMi = moderadorViewModel.misAutorizados.collectAsState().value
 
     Column(
         modifier = Modifier
@@ -40,7 +50,7 @@ fun InicioAdmin(
             .padding(16.dp)
             .background(Color(0xFFF5F5F5))
     ) {
-        // Perfil moderador + métricas
+        // perfil moderador
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -64,7 +74,7 @@ fun InicioAdmin(
                     Text(text = "Panel de moderación", style = MaterialTheme.typography.titleMedium)
                     Text(text = "ID: $moderadorId", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
-                // KPIs rápidos
+                // métricas
                 AssistChip(onClick = {}, label = { Text("Pendientes ${pendientes.size}") })
             }
         }
@@ -88,10 +98,10 @@ fun InicioAdmin(
                     modifier = Modifier.padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Imagen pequeña del lugar
+                    // imagen pequeña del lugar
                     if (lugar.imagenUri != "default_image") {
                         if (lugar.imagenUri.startsWith("content://") || lugar.imagenUri.startsWith("file://")) {
-                            // Es una URI de imagen seleccionada
+                            // uri de imagen seleccionada
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
                                     .data(lugar.imagenUri)
@@ -104,7 +114,7 @@ fun InicioAdmin(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            // Es un recurso drawable
+                            // recurso drawable
                             Image(
                                 painter = painterResource(id = when (lugar.imagenUri) {
                                     "restaurante_mex" -> R.drawable.restaurante_mex
@@ -125,7 +135,7 @@ fun InicioAdmin(
                         Spacer(Modifier.width(12.dp))
                     }
                     
-                    // Información del lugar
+                    // información del lugar
                     Column(Modifier.weight(1f)) {
                         Text(
                             text = lugar.nombre,
@@ -148,7 +158,7 @@ fun InicioAdmin(
                         )
                     }
                     
-                    // Botones de acción compactos
+                    // botones de acción compactos
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -156,7 +166,7 @@ fun InicioAdmin(
                         Button(
                             onClick = {
                                 lugaresViewModel.actualizarEstado(lugar.id, EstadoLugar.AUTORIZADO)
-                                moderacionViewModel.registrarDecision(lugar, moderadorId, EstadoLugar.AUTORIZADO)
+                                moderadorViewModel.registrarDecision(lugar, moderadorId, EstadoLugar.AUTORIZADO)
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                             modifier = Modifier.size(width = 80.dp, height = 32.dp),
@@ -168,7 +178,7 @@ fun InicioAdmin(
                         OutlinedButton(
                             onClick = {
                                 lugaresViewModel.actualizarEstado(lugar.id, EstadoLugar.RECHAZADO)
-                                moderacionViewModel.registrarDecision(lugar, moderadorId, EstadoLugar.RECHAZADO)
+                                moderadorViewModel.registrarDecision(lugar, moderadorId, EstadoLugar.RECHAZADO)
                             },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFD32F2F)),
                             modifier = Modifier.size(width = 80.dp, height = 32.dp),
@@ -182,18 +192,79 @@ fun InicioAdmin(
         }
 
         Spacer(Modifier.height(16.dp))
-        Text(text = "Autorizados por mí", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(8.dp))
-
-        if (autorizadosPorMi.isEmpty()) {
-            Text("Aún no has autorizado lugares")
-        } else {
-            autorizadosPorMi.forEach { lugar ->
-                ListItem(
-                    headlineContent = { Text(lugar.nombre) },
-                    supportingContent = { Text(lugar.categoria) }
-                )
-                Divider()
+        
+        // sección de lugares autorizados
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, Color.Black, androidx.compose.foundation.shape.RoundedCornerShape(12.dp)),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Lugares Autorizados", 
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    AssistChip(
+                        onClick = {},
+                        label = { 
+                            Text(
+                                "${autorizadosPorMi.size} lugares",
+                                fontSize = 12.sp
+                            ) 
+                        }
+                    )
+                }
+                
+                Spacer(Modifier.height(12.dp))
+                
+                if (autorizadosPorMi.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Aún no has autorizado lugares",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                    }
+                } else {
+                    // primeros 3 lugares
+                    autorizadosPorMi.take(3).forEach { lugar ->
+                        FichaLugarAdmin(
+                            lugar = lugar,
+                            estado = "Autorizado",
+                            onClick = { /* navegar a detalles si es necesario */ }
+                        )
+                    }
+                    
+                    // ver más
+                    if (autorizadosPorMi.size > 3) {
+                        Text(
+                            text = "... y ${autorizadosPorMi.size - 3} lugares más",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
             }
         }
     }

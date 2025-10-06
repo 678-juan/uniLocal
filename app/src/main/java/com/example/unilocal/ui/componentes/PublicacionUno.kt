@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
@@ -89,13 +91,18 @@ fun PublicacionUno(
     onClick: () -> Unit,
     usuarioViewModel: UsuarioViewModel? = null
 ) {
-    // like state
-    var yaDioLike by remember { mutableStateOf(false) }
-    var likes by remember { mutableStateOf(lugar.likes.toInt()) }
-    
     // buscar quien creo el lugar
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
     val creador = viewModel.buscarId(lugar.creadorId)
+    
+    // like state persistente
+    val yaDioLike by viewModel.likesDados.collectAsState()
+    val dioLike = yaDioLike.contains(lugar.id)
+    var likes by remember { mutableStateOf(lugar.likes.toInt()) }
+    
+    // bookmark state persistente
+    val favoritosGuardados by viewModel.favoritosGuardados.collectAsState()
+    var estaGuardado = favoritosGuardados.contains(lugar.id)
     
     // avatares disponibles
     val avatares = listOf(
@@ -167,18 +174,24 @@ fun PublicacionUno(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                val corazonIcon = if (yaDioLike) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
+                val corazonIcon = if (dioLike) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
 
                 Icon(
                     imageVector = corazonIcon,
                     contentDescription = "Like",
-                    tint = if (yaDioLike) Color.Red else Color.Gray,
+                    tint = if (dioLike) Color.Red else Color.Gray,
                     modifier = Modifier
                         .size(30.dp)
-                        .clickable(enabled = !yaDioLike) {
-                            likes += 1
-                            yaDioLike = true
-
+                        .clickable {
+                            if (dioLike) {
+                                // Quitar like
+                                viewModel.quitarLike(lugar.id)
+                                likes = maxOf(0, likes - 1)
+                            } else {
+                                // Dar like
+                                viewModel.darLike(lugar.id)
+                                likes += 1
+                            }
                         }
                         .padding(4.dp)
                 )
@@ -197,6 +210,30 @@ fun PublicacionUno(
                     text = "💬 ${lugar.comentarios.size}", // no hay iconos de comentarios
                     modifier = Modifier
                         .clickable { /* abrir comentarios */ }
+                        .padding(4.dp)
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // icono de guardar (bookmark)
+                val bookmarkIcon = if (estaGuardado) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder
+                
+                Icon(
+                    imageVector = bookmarkIcon,
+                    contentDescription = "Guardar en favoritos",
+                    tint = if (estaGuardado) Color(0xFF2196F3) else Color.Gray,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable {
+                            estaGuardado = !estaGuardado
+                            if (estaGuardado) {
+                                // Agregar a favoritos
+                                viewModel.agregarFavorito(lugar)
+                            } else {
+                                // Quitar de favoritos
+                                viewModel.quitarFavorito(lugar)
+                            }
+                        }
                         .padding(4.dp)
                 )
 

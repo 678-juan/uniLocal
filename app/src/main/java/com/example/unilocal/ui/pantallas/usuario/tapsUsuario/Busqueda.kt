@@ -25,7 +25,7 @@ fun Busqueda(
     val lugaresViewModel: LugaresViewModel = viewModel()
     val lugares by lugaresViewModel.lugares.collectAsState()
     
-    // Filtrar lugares por categoría basado en el texto de búsqueda
+    // filtrar lugares
     val lugaresFiltrados = remember(textoBusqueda, lugares) {
         val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }
         
