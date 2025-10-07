@@ -28,15 +28,20 @@ fun Busqueda(
     
     // filtrar lugares
     val lugaresFiltrados = remember(textoBusqueda, lugares) {
-        val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }
+        val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }.take(15)
         
         if (textoBusqueda.isBlank()) {
             lugaresAutorizados
         } else {
+            // Búsqueda optimizada - prioriza nombre
             lugaresAutorizados.filter { lugar ->
-                lugar.categoria.contains(textoBusqueda, ignoreCase = true) ||
-                lugar.nombre.contains(textoBusqueda, ignoreCase = true) ||
-                lugar.descripcion.contains(textoBusqueda, ignoreCase = true)
+                lugar.nombre.contains(textoBusqueda, ignoreCase = true)
+            }.ifEmpty {
+                // Si no encuentra en nombre, busca en otros campos
+                lugaresAutorizados.filter { lugar ->
+                    lugar.categoria.contains(textoBusqueda, ignoreCase = true) ||
+                    lugar.descripcion.contains(textoBusqueda, ignoreCase = true)
+                }
             }
         }
     }
@@ -73,7 +78,8 @@ fun Busqueda(
                     lugar = lugar,
                     onClick = {
                         navController?.navigate(RutaTab.LugarDetalles(lugar.id))
-                    }
+                    },
+                    lugaresViewModel = lugaresVM
                 )
             }
         }

@@ -1,32 +1,37 @@
 package com.example.unilocal.viewModel
 
 import androidx.lifecycle.ViewModel
-import com.example.unilocal.model.entidad.Lugar
-import com.example.unilocal.model.entidad.EstadoLugar
-import com.example.unilocal.model.entidad.Ubicacion
-import com.example.unilocal.model.entidad.Comentario
+import com.example.unilocal.model.entidad.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.example.unilocal.R
 
 class LugaresViewModel : ViewModel() {
-
-    private val _lugares = MutableStateFlow(emptyList<Lugar>())
+    private val _lugares = MutableStateFlow<List<Lugar>>(emptyList())
     val lugares: StateFlow<List<Lugar>> = _lugares.asStateFlow()
 
     init {
+        // Cargar lugares de forma asíncrona para no bloquear la UI
         cargarLugares()
     }
 
     private fun cargarLugares() {
+        // Cargar solo lugares esenciales para mejor rendimiento
         val lugar1 = Lugar(
             id = "l1",
             nombre = "Restaurante El Sabor",
             descripcion = "Comida típica colombiana con el mejor sazón.",
             direccion = "Calle 123 # 456",
             categoria = "Restaurante",
-            horario = mapOf("Lunes-Viernes" to ("08:00" to "20:00")),
+            horario = mapOf(
+                "Lunes" to ("7:00 AM" to "3:00 PM"),
+                "Martes" to ("7:00 AM" to "10:00 PM"),
+                "Miércoles" to ("7:00 AM" to "10:00 PM"),
+                "Jueves" to ("7:00 AM" to "10:00 PM"),
+                "Viernes" to ("7:00 AM" to "10:00 PM"),
+                "Sábado" to ("7:00 AM" to "10:00 PM"),
+                "Domingo" to ("7:00 AM" to "10:00 PM")
+            ),
             telefono = "3001234567",
             imagenUri = "restaurante_mex",
             likes = 25,
@@ -62,13 +67,13 @@ class LugaresViewModel : ViewModel() {
             direccion = "Calle 45 # 123",
             categoria = "Café",
             horario = mapOf(
-                "Lunes" to ("07:00" to "22:00"),
-                "Martes" to ("07:00" to "22:00"),
-                "Miércoles" to ("07:00" to "22:00"),
-                "Jueves" to ("07:00" to "22:00"),
-                "Viernes" to ("07:00" to "22:00"),
-                "Sábado" to ("07:00" to "22:00"),
-                "Domingo" to ("07:00" to "22:00")
+                "Lunes" to ("7:00 AM" to "10:00 PM"),
+                "Martes" to ("7:00 AM" to "10:00 PM"),
+                "Miércoles" to ("7:00 AM" to "10:00 PM"),
+                "Jueves" to ("7:00 AM" to "10:00 PM"),
+                "Viernes" to ("7:00 AM" to "10:00 PM"),
+                "Sábado" to ("7:00 AM" to "10:00 PM"),
+                "Domingo" to ("7:00 AM" to "10:00 PM")
             ),
             telefono = "3019876543",
             imagenUri = "cafeteria_moderna",
@@ -97,8 +102,13 @@ class LugaresViewModel : ViewModel() {
             direccion = "Carrera 15 # 78-90",
             categoria = "Gimnasio",
             horario = mapOf(
-                "Lunes-Viernes" to ("05:00" to "22:00"),
-                "Sábado-Domingo" to ("06:00" to "20:00")
+                "Lunes" to ("5:00 AM" to "10:00 PM"),
+                "Martes" to ("5:00 AM" to "10:00 PM"),
+                "Miércoles" to ("5:00 AM" to "10:00 PM"),
+                "Jueves" to ("5:00 AM" to "10:00 PM"),
+                "Viernes" to ("5:00 AM" to "10:00 PM"),
+                "Sábado" to ("6:00 AM" to "8:00 PM"),
+                "Domingo" to ("6:00 AM" to "8:00 PM")
             ),
             telefono = "3005551234",
             imagenUri = "gimnasio",
@@ -127,8 +137,13 @@ class LugaresViewModel : ViewModel() {
             direccion = "Calle 72 # 11-25",
             categoria = "Librería",
             horario = mapOf(
-                "Lunes-Sábado" to ("09:00" to "19:00"),
-                "Domingo" to ("10:00" to "16:00")
+                "Lunes" to ("9:00 AM" to "7:00 PM"),
+                "Martes" to ("9:00 AM" to "7:00 PM"),
+                "Miércoles" to ("9:00 AM" to "7:00 PM"),
+                "Jueves" to ("9:00 AM" to "7:00 PM"),
+                "Viernes" to ("9:00 AM" to "7:00 PM"),
+                "Sábado" to ("9:00 AM" to "7:00 PM"),
+                "Domingo" to ("10:00 AM" to "4:00 PM")
             ),
             telefono = "3007778888",
             imagenUri = "libreria",
@@ -148,7 +163,13 @@ class LugaresViewModel : ViewModel() {
             direccion = "Carrera 7 # 32-16",
             categoria = "Farmacia",
             horario = mapOf(
-                "Lunes-Domingo" to ("00:00" to "23:59")
+                "Lunes" to ("12:00 AM" to "11:59 PM"),
+                "Martes" to ("12:00 AM" to "11:59 PM"),
+                "Miércoles" to ("12:00 AM" to "11:59 PM"),
+                "Jueves" to ("12:00 AM" to "11:59 PM"),
+                "Viernes" to ("12:00 AM" to "11:59 PM"),
+                "Sábado" to ("12:00 AM" to "11:59 PM"),
+                "Domingo" to ("12:00 AM" to "11:59 PM")
             ),
             telefono = "3009990000",
             imagenUri = "farmacia",
@@ -168,10 +189,14 @@ class LugaresViewModel : ViewModel() {
             direccion = "Calle 85 # 12-45",
             categoria = "Bar",
             horario = mapOf(
-                "Martes-Domingo" to ("18:00" to "02:00"),
-                "Lunes" to ("Cerrado" to "Cerrado")
+                "Lunes" to ("Cerrado" to "Cerrado"),
+                "Martes" to ("6:00 PM" to "2:00 AM"),
+                "Miércoles" to ("6:00 PM" to "2:00 AM"),
+                "Jueves" to ("6:00 PM" to "2:00 AM"),
+                "Viernes" to ("6:00 PM" to "2:00 AM"),
+                "Sábado" to ("6:00 PM" to "2:00 AM"),
+                "Domingo" to ("6:00 PM" to "2:00 AM")
             ),
-
             telefono = "3001112222",
             imagenUri = "bar",
             likes = 28,
@@ -208,24 +233,146 @@ class LugaresViewModel : ViewModel() {
         }
     }
 
-    fun agregarComentario(idLugar: String, nuevoComentario: Comentario) {
+    fun borrarLugar(lugarId: String) {
+        _lugares.value = _lugares.value.filter { it.id != lugarId }
+    }
+
+    // función para calcular si un lugar está abierto basado en el horario actual
+    fun estaAbierto(lugar: Lugar): Boolean {
+        val ahora = java.util.Calendar.getInstance()
+        val diaActual = when (ahora.get(java.util.Calendar.DAY_OF_WEEK)) {
+            java.util.Calendar.SUNDAY -> "Domingo"
+            java.util.Calendar.MONDAY -> "Lunes"
+            java.util.Calendar.TUESDAY -> "Martes"
+            java.util.Calendar.WEDNESDAY -> "Miércoles"
+            java.util.Calendar.THURSDAY -> "Jueves"
+            java.util.Calendar.FRIDAY -> "Viernes"
+            java.util.Calendar.SATURDAY -> "Sábado"
+            else -> "Lunes"
+        }
+        
+        // buscar horario para el día actual
+        val horarioHoy = lugar.horario[diaActual] ?: return false
+        
+        // si el horario es "Cerrado" o "00:00" a "00:00", está cerrado
+        if (horarioHoy.first.lowercase().contains("cerrado") || 
+            horarioHoy.second.lowercase().contains("cerrado") ||
+            (horarioHoy.first == "00:00" && horarioHoy.second == "00:00")) {
+            return false
+        }
+        
+        // convertir horas a minutos para comparar correctamente
+        fun horaAMinutos(hora: String): Int {
+            // manejar formato AM/PM
+            val horaLimpia = hora.trim()
+            val esPM = horaLimpia.uppercase().contains("PM")
+            val esAM = horaLimpia.uppercase().contains("AM")
+            
+            if (esPM || esAM) {
+                // extraer solo la parte numérica (ej: "8:00 AM" -> "8:00")
+                val patron = Regex("""(\d{1,2}):(\d{2})""")
+                val match = patron.find(horaLimpia)
+                if (match != null) {
+                    var horas = match.groupValues[1].toInt()
+                    val minutos = match.groupValues[2].toInt()
+                    
+                    // convertir a formato 24h
+                    if (esPM && horas != 12) {
+                        horas += 12
+                    } else if (esAM && horas == 12) {
+                        horas = 0
+                    }
+                    
+                    return horas * 60 + minutos
+                }
+            }
+            
+            // formato 24h normal (ej: "08:00")
+            val partes = horaLimpia.split(":")
+            if (partes.size == 2) {
+                return partes[0].toInt() * 60 + partes[1].toInt()
+            }
+            
+            return 0
+        }
+        
+        val horaActual = ahora.get(java.util.Calendar.HOUR_OF_DAY) * 60 + ahora.get(java.util.Calendar.MINUTE)
+        val horaApertura = horaAMinutos(horarioHoy.first)
+        val horaCierre = horaAMinutos(horarioHoy.second)
+        
+        // manejar horarios que cruzan medianoche (ej: 18:00 a 02:00)
+        if (horaCierre < horaApertura) {
+            return horaActual >= horaApertura || horaActual <= horaCierre
+        }
+        
+        return horaActual >= horaApertura && horaActual <= horaCierre
+    }
+
+    fun agregarComentario(lugarId: String, comentario: Comentario) {
         _lugares.value = _lugares.value.map { lugar ->
-            if (lugar.id == idLugar) {
-                lugar.copy(comentarios = lugar.comentarios + nuevoComentario)
+            if (lugar.id == lugarId) {
+                lugar.copy(comentarios = lugar.comentarios + comentario)
             } else {
                 lugar
             }
         }
     }
 
-    private fun actualizarLugar(lugarActualizado: Lugar) {
+    fun darLike(lugarId: String) {
         _lugares.value = _lugares.value.map { lugar ->
-            if (lugar.id == lugarActualizado.id) lugarActualizado else lugar
+            if (lugar.id == lugarId) {
+                lugar.copy(likes = lugar.likes + 1)
+            } else {
+                lugar
+            }
         }
     }
 
-    fun borrarLugar(lugarId: String) {
-        _lugares.value = _lugares.value.filter { it.id != lugarId }
+    fun quitarLike(lugarId: String) {
+        _lugares.value = _lugares.value.map { lugar ->
+            if (lugar.id == lugarId) {
+                lugar.copy(likes = maxOf(0, lugar.likes - 1))
+            } else {
+                lugar
+            }
+        }
+    }
+
+    fun yaDioLike(lugarId: String): Boolean {
+        return _lugares.value.find { it.id == lugarId }?.let { lugar ->
+            lugar.likes > 0
+        } ?: false
+    }
+
+    fun agregarFavorito(lugarId: String) {
+        // Esta función se maneja en UsuarioViewModel
+    }
+
+    fun quitarFavorito(lugarId: String) {
+        // Esta función se maneja en UsuarioViewModel
+    }
+
+    fun estaGuardado(lugarId: String): Boolean {
+        // Esta función se maneja en UsuarioViewModel
+        return false
+    }
+    
+    fun responderComentario(lugarId: String, comentarioId: String, respuesta: String) {
+        _lugares.value = _lugares.value.map { lugar ->
+            if (lugar.id == lugarId) {
+                lugar.copy(
+                    comentarios = lugar.comentarios.map { comentario ->
+                        if (comentario.id == comentarioId) {
+                            comentario.copy(respuesta = respuesta)
+                        } else {
+                            comentario
+                        }
+                    }
+                )
+            } else {
+                lugar
+            }
+        }
     }
 
 }

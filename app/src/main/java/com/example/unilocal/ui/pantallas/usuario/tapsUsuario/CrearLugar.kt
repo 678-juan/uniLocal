@@ -57,6 +57,9 @@ fun CrearLugar(
     var descripcion by remember { mutableStateOf("") }
     var horario by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
+    
+    // Estados estables para evitar recomposición
+    val esFormularioValido = nombre.isNotBlank() && descripcion.isNotBlank()
     var direccion by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf("") }
     var imagenSeleccionada by remember { mutableStateOf<android.net.Uri?>(null) }

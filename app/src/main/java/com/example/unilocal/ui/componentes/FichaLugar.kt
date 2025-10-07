@@ -8,7 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -23,14 +26,22 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.unilocal.R
+import com.example.unilocal.viewModel.LugaresViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
 fun FichaLugar(
     lugar: Lugar,
     onClick: () -> Unit,
+    lugaresViewModel: LugaresViewModel? = null,
     modifier: Modifier = Modifier
 ) {
+    val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
+    
+    // Memoizar cálculos costosos
+    val estaAbierto = remember(lugar.id) { lugaresVM.estaAbierto(lugar) }
+    
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -71,6 +82,30 @@ fun FichaLugar(
                     modifier = Modifier.fillMaxSize()
                 )
             }
+            // Estado abierto/cerrado en la esquina superior derecha
+            AssistChip(
+                onClick = { 
+                    // Prueba temporal
+                    println("=== PRUEBA ESTADO ===")
+                    println("Lugar: ${lugar.nombre}")
+                    println("¿Abierto? $estaAbierto")
+                },
+                label = { 
+                    Text(
+                        text = if (estaAbierto) "Abierto" else "Cerrado",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp),
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = if (estaAbierto) Color(0xFF4CAF50) else Color(0xFFD32F2F)
+                )
+            )
+            
             Text(
                 text = lugar.nombre,
                 modifier = Modifier

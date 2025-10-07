@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
@@ -26,6 +27,7 @@ import com.example.unilocal.R
 import com.example.unilocal.ui.configuracion.RutasPantallas
 import com.example.unilocal.ui.componentes.FichaLugar
 import com.example.unilocal.ui.componentes.FichaLugarPerfil
+import com.example.unilocal.ui.componentes.ComentarioCard
 import com.example.unilocal.viewModel.UsuarioViewModel
 import com.example.unilocal.viewModel.LugaresViewModel
 
@@ -42,6 +44,11 @@ fun Perfil(
     val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
     val usuarioActual by viewModel.usuarioActual.collectAsState()
     val lugares by lugaresVM.lugares.collectAsState()
+    
+    var lugarSeleccionado by remember { mutableStateOf<com.example.unilocal.model.entidad.Lugar?>(null) }
+    var mostrarComentarios by remember { mutableStateOf(false) }
+    var comentarioSeleccionado by remember { mutableStateOf<com.example.unilocal.model.entidad.Comentario?>(null) }
+    var textoRespuesta by remember { mutableStateOf("") }
 
     // avatares disponibles
     val avatares = listOf(
@@ -169,7 +176,11 @@ fun Perfil(
                     FichaLugarPerfil(
                         lugar = lugar,
                         onClick = { navegarALugar(lugar.id) },
-                        onBorrar = { lugaresVM.borrarLugar(lugar.id) }
+                        onBorrar = { lugaresVM.borrarLugar(lugar.id) },
+                        onVerComentarios = {
+                            lugarSeleccionado = lugar
+                            mostrarComentarios = true
+                        }
                     )
                 }
             }
@@ -211,5 +222,111 @@ fun Perfil(
                 modifier = Modifier.padding(16.dp)
             )
         }
+    }
+    
+    // Modal para comentarios con respuesta
+    if (mostrarComentarios && lugarSeleccionado != null) {
+        AlertDialog(
+            onDismissRequest = { 
+                mostrarComentarios = false
+                lugarSeleccionado = null
+                comentarioSeleccionado = null
+                textoRespuesta = ""
+            },
+            containerColor = Color.White,
+            text = {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        val lugar = lugarSeleccionado
+                        if (lugar != null) {
+                            if (lugar.comentarios.isEmpty()) {
+                                Text(
+                                    text = "No hay comentarios aún",
+                                    color = Color.Black,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            } else {
+                                LazyColumn(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.height(300.dp)
+                                ) {
+                                items(lugar.comentarios) { comentario ->
+                                    val esSeleccionado = comentarioSeleccionado?.id == comentario.id
+                                    ComentarioCard(
+                                        comentario = comentario,
+                                        usuarioViewModel = viewModel,
+                                        lugar = lugar,
+                                        esSeleccionado = esSeleccionado,
+                                        onClick = {
+                                            comentarioSeleccionado = comentario
+                                            textoRespuesta = comentario.respuesta ?: ""
+                                        }
+                                    )
+                                }
+                                }
+                            }
+                            
+                            // Campo para responder
+                            if (comentarioSeleccionado != null) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                OutlinedTextField(
+                                    value = textoRespuesta,
+                                    onValueChange = { textoRespuesta = it },
+                                    label = { Text("Tu respuesta...") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    maxLines = 3
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = "Error: Lugar no encontrado",
+                                color = Color.Black
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Row {
+                    if (comentarioSeleccionado != null) {
+                        Button(
+                            onClick = {
+                                if (textoRespuesta.isNotBlank()) {
+                                    lugaresVM.responderComentario(
+                                        lugarSeleccionado!!.id,
+                                        comentarioSeleccionado!!.id,
+                                        textoRespuesta
+                                    )
+                                    comentarioSeleccionado = null
+                                    textoRespuesta = ""
+                                }
+                            },
+                            enabled = textoRespuesta.isNotBlank()
+                        ) {
+                            Text("Responder")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Button(
+                        onClick = { 
+                            mostrarComentarios = false
+                            lugarSeleccionado = null
+                            comentarioSeleccionado = null
+                            textoRespuesta = ""
+                        }
+                    ) {
+                        Text("Cerrar")
+                    }
+                }
+            }
+        )
     }
 }

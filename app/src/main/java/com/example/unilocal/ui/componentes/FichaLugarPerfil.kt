@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,7 +29,8 @@ import com.example.unilocal.model.entidad.Lugar
 fun FichaLugarPerfil(
     lugar: Lugar,
     onClick: () -> Unit,
-    onBorrar: () -> Unit
+    onBorrar: () -> Unit,
+    onVerComentarios: () -> Unit = {}
 ) {
     var mostrarDialogo by remember { mutableStateOf(false) }
     
@@ -112,15 +114,29 @@ fun FichaLugarPerfil(
                 )
             }
             
-            // botón de borrar
-            IconButton(
-                onClick = { mostrarDialogo = true }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Borrar lugar",
-                    tint = Color.Red
-                )
+            // botones de acción
+            Row {
+                // botón de comentarios
+                IconButton(
+                    onClick = onVerComentarios
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Comment,
+                        contentDescription = "Ver comentarios",
+                        tint = Color(0xFF2196F3)
+                    )
+                }
+                
+                // botón de borrar
+                IconButton(
+                    onClick = { mostrarDialogo = true }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Borrar lugar",
+                        tint = Color.Red
+                    )
+                }
             }
         }
     }

@@ -26,8 +26,8 @@ fun Inicio(
     val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
     val lugares by lugaresVM.lugares.collectAsState()
     
-    // solo lugares autorizados
-    val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }
+    // solo lugares autorizados - limitar a 10 para mejor rendimiento
+    val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }.take(10)
     
     LazyColumn(
         modifier = Modifier

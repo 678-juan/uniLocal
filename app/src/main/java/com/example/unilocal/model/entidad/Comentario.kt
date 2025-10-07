@@ -8,5 +8,6 @@ data class Comentario(
     val lugarId: String,
     val texto: String,
     val estrellas: Int,
-    val fecha: Long = System.currentTimeMillis()
+    val fecha: Long = System.currentTimeMillis(),
+    val respuesta: String? = null
 )
