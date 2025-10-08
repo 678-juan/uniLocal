@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.sp
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.R
 import com.example.unilocal.model.entidad.Usuario
@@ -171,24 +173,33 @@ fun PantallaRegisto(
                             .background(androidx.compose.ui.graphics.Color.White)
                     )
 
-                    ExposedDropdownMenu(
-                        expanded = sexoExpandido,
-                        onDismissRequest = { sexoExpandido = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Masculino") },
-                            onClick = {
-                                sexo = "Masculino"
-                                sexoExpandido = false
+                    if (sexoExpandido) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(androidx.compose.ui.graphics.Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                            colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.White)
+                        ) {
+                            Column {
+                                DropdownMenuItem(
+                                    text = { Text("Masculino") },
+                                    onClick = {
+                                        sexo = "Masculino"
+                                        sexoExpandido = false
+                                    },
+                                    modifier = Modifier.background(androidx.compose.ui.graphics.Color.White)
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Femenino") },
+                                    onClick = {
+                                        sexo = "Femenino"
+                                        sexoExpandido = false
+                                    },
+                                    modifier = Modifier.background(androidx.compose.ui.graphics.Color.White)
+                                )
                             }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Femenino") },
-                            onClick = {
-                                sexo = "Femenino"
-                                sexoExpandido = false
-                            }
-                        )
+                        }
                     }
                 }
             }
