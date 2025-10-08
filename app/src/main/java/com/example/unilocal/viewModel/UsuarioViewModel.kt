@@ -13,7 +13,11 @@ class UsuarioViewModel : ViewModel() {
     private val _usuarioActual = MutableStateFlow<Usuario?>(null)
     val usuarioActual: StateFlow<Usuario?> = _usuarioActual.asStateFlow()
     
-    // likes
+    // likes por usuario - Map<usuarioId, Set<lugarId>>
+    private val _likesPorUsuario = MutableStateFlow(mapOf<String, Set<String>>())
+    val likesPorUsuario: StateFlow<Map<String, Set<String>>> = _likesPorUsuario.asStateFlow()
+    
+    // likes del usuario actual - se actualiza dinámicamente
     private val _likesDados = MutableStateFlow(setOf<String>())
     val likesDados: StateFlow<Set<String>> = _likesDados.asStateFlow()
     
@@ -51,12 +55,20 @@ class UsuarioViewModel : ViewModel() {
         val usuarioEncontrado = _usuario.value.find { it.email == email && it.clave == password }
         if (usuarioEncontrado != null) {
             _usuarioActual.value = usuarioEncontrado
+            // Cargar likes del usuario actual
+            cargarLikesUsuario(usuarioEncontrado.id)
         }
         return usuarioEncontrado
     }
     
     fun cerrarSesion() {
         _usuarioActual.value = null
+        _likesDados.value = emptySet()
+    }
+    
+    private fun cargarLikesUsuario(usuarioId: String) {
+        val likesDelUsuario = _likesPorUsuario.value[usuarioId] ?: emptySet()
+        _likesDados.value = likesDelUsuario
     }
 
     fun agregarFavorito(lugar: com.example.unilocal.model.entidad.Lugar) {
@@ -119,15 +131,33 @@ class UsuarioViewModel : ViewModel() {
     
     // likes
     fun darLike(lugarId: String) {
-        val likesActuales = _likesDados.value.toMutableSet()
-        likesActuales.add(lugarId)
-        _likesDados.value = likesActuales
+        val usuario = _usuarioActual.value
+        if (usuario != null) {
+            // Actualizar likes del usuario actual
+            val likesActuales = _likesDados.value.toMutableSet()
+            likesActuales.add(lugarId)
+            _likesDados.value = likesActuales
+            
+            // Actualizar likes por usuario
+            val likesPorUsuarioActual = _likesPorUsuario.value.toMutableMap()
+            likesPorUsuarioActual[usuario.id] = likesActuales
+            _likesPorUsuario.value = likesPorUsuarioActual
+        }
     }
     
     fun quitarLike(lugarId: String) {
-        val likesActuales = _likesDados.value.toMutableSet()
-        likesActuales.remove(lugarId)
-        _likesDados.value = likesActuales
+        val usuario = _usuarioActual.value
+        if (usuario != null) {
+            // Actualizar likes del usuario actual
+            val likesActuales = _likesDados.value.toMutableSet()
+            likesActuales.remove(lugarId)
+            _likesDados.value = likesActuales
+            
+            // Actualizar likes por usuario
+            val likesPorUsuarioActual = _likesPorUsuario.value.toMutableMap()
+            likesPorUsuarioActual[usuario.id] = likesActuales
+            _likesPorUsuario.value = likesPorUsuarioActual
+        }
     }
     
     fun yaDioLike(lugarId: String): Boolean {

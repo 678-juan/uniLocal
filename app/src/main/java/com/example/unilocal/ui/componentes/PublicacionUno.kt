@@ -33,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.R
 import com.example.unilocal.model.entidad.Lugar
 import com.example.unilocal.viewModel.UsuarioViewModel
+import com.example.unilocal.viewModel.LugaresViewModel
 import kotlin.math.roundToInt
 
 // Función para calcular el promedio de estrellas
@@ -89,7 +90,8 @@ fun MostrarEstrellas(
 fun PublicacionUno(
     lugar: Lugar,
     onClick: () -> Unit,
-    usuarioViewModel: UsuarioViewModel? = null
+    usuarioViewModel: UsuarioViewModel? = null,
+    lugaresViewModel: LugaresViewModel? = null
 ) {
     // buscar quien creo el lugar
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
@@ -98,7 +100,8 @@ fun PublicacionUno(
     // like state persistente
     val yaDioLike by viewModel.likesDados.collectAsState()
     val dioLike = yaDioLike.contains(lugar.id)
-    var likes by remember { mutableStateOf(lugar.likes.toInt()) }
+    // Usar el estado del lugar directamente para mantener consistencia
+    val likes = lugar.likes
     
     // bookmark state persistente
     val favoritosGuardados by viewModel.favoritosGuardados.collectAsState()
@@ -185,12 +188,10 @@ fun PublicacionUno(
                         .clickable {
                             if (dioLike) {
                                 // Quitar like
-                                viewModel.quitarLike(lugar.id)
-                                likes = maxOf(0, likes - 1)
+                                lugaresViewModel?.quitarLike(lugar.id)
                             } else {
                                 // Dar like
-                                viewModel.darLike(lugar.id)
-                                likes += 1
+                                lugaresViewModel?.darLike(lugar.id)
                             }
                         }
                         .padding(4.dp)

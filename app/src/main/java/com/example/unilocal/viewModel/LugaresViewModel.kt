@@ -9,6 +9,13 @@ import kotlinx.coroutines.flow.asStateFlow
 class LugaresViewModel : ViewModel() {
     private val _lugares = MutableStateFlow<List<Lugar>>(emptyList())
     val lugares: StateFlow<List<Lugar>> = _lugares.asStateFlow()
+    
+    // Referencia al UsuarioViewModel para sincronizar likes
+    private var usuarioViewModel: UsuarioViewModel? = null
+    
+    fun setUsuarioViewModel(usuarioViewModel: UsuarioViewModel) {
+        this.usuarioViewModel = usuarioViewModel
+    }
 
     init {
         // Cargar lugares de forma asíncrona para no bloquear la UI
@@ -319,6 +326,7 @@ class LugaresViewModel : ViewModel() {
     }
 
     fun darLike(lugarId: String) {
+        // Solo actualizar el contador de likes en el lugar
         _lugares.value = _lugares.value.map { lugar ->
             if (lugar.id == lugarId) {
                 lugar.copy(likes = lugar.likes + 1)
@@ -326,9 +334,13 @@ class LugaresViewModel : ViewModel() {
                 lugar
             }
         }
+        
+        // Delegar la gestión de likes del usuario al UsuarioViewModel
+        usuarioViewModel?.darLike(lugarId)
     }
 
     fun quitarLike(lugarId: String) {
+        // Solo actualizar el contador de likes en el lugar
         _lugares.value = _lugares.value.map { lugar ->
             if (lugar.id == lugarId) {
                 lugar.copy(likes = maxOf(0, lugar.likes - 1))
@@ -336,12 +348,14 @@ class LugaresViewModel : ViewModel() {
                 lugar
             }
         }
+        
+        // Delegar la gestión de likes del usuario al UsuarioViewModel
+        usuarioViewModel?.quitarLike(lugarId)
     }
 
     fun yaDioLike(lugarId: String): Boolean {
-        return _lugares.value.find { it.id == lugarId }?.let { lugar ->
-            lugar.likes > 0
-        } ?: false
+        // Delegar la verificación al UsuarioViewModel
+        return usuarioViewModel?.yaDioLike(lugarId) ?: false
     }
 
     fun agregarFavorito(lugarId: String) {

@@ -59,7 +59,8 @@ fun Inicio(
                     onClick = { 
                         navegarALugar(lugar.id) 
                     },
-                    usuarioViewModel = usuarioViewModel
+                    usuarioViewModel = usuarioViewModel,
+                    lugaresViewModel = lugaresVM
                 )
             }
         }

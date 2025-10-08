@@ -81,7 +81,8 @@ fun Recomendaciones(
                 PublicacionUno(
                     lugar = lugar,
                     onClick = { navegarALugar(lugar.id) },
-                    usuarioViewModel = usuarioViewModel
+                    usuarioViewModel = usuarioViewModel,
+                    lugaresViewModel = lugaresViewModel
                 )
             }
         }

@@ -19,6 +19,9 @@ fun Navegacion() {
     val usuarioViewModel: UsuarioViewModel = viewModel()
     val lugaresViewModel: LugaresViewModel = viewModel()
     val moderadorViewModel: ModeradorViewModel = viewModel()
+    
+    // Conectar LugaresViewModel con UsuarioViewModel para sincronizar likes
+    lugaresViewModel.setUsuarioViewModel(usuarioViewModel)
 
     NavHost(
         navController = navController,

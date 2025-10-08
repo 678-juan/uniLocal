@@ -90,7 +90,8 @@ fun LugarDetalles(
                 PublicacionUno(
                     lugar = lugarActual,
                     onClick = { },
-                    usuarioViewModel = usuarioViewModel
+                    usuarioViewModel = usuarioViewModel,
+                    lugaresViewModel = lugarViewModel
                 )
             }
 
