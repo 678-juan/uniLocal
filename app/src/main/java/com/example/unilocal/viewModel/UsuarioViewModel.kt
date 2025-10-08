@@ -2,6 +2,8 @@ package com.example.unilocal.viewModel
 
 import androidx.lifecycle.ViewModel
 import com.example.unilocal.model.entidad.Usuario
+import com.example.unilocal.model.entidad.Notificacion
+import com.example.unilocal.model.entidad.TipoNotificacion
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +26,14 @@ class UsuarioViewModel : ViewModel() {
     // favoritos
     private val _favoritosGuardados = MutableStateFlow(setOf<String>())
     val favoritosGuardados: StateFlow<Set<String>> = _favoritosGuardados.asStateFlow()
+    
+    // notificaciones por usuario - Map<usuarioId, List<Notificacion>>
+    private val _notificacionesPorUsuario = MutableStateFlow(mapOf<String, List<Notificacion>>())
+    val notificacionesPorUsuario: StateFlow<Map<String, List<Notificacion>>> = _notificacionesPorUsuario.asStateFlow()
+    
+    // notificaciones del usuario actual
+    private val _notificacionesUsuario = MutableStateFlow(emptyList<Notificacion>())
+    val notificacionesUsuario: StateFlow<List<Notificacion>> = _notificacionesUsuario.asStateFlow()
 
     init {
         cargarUsuarios()
@@ -57,6 +67,8 @@ class UsuarioViewModel : ViewModel() {
             _usuarioActual.value = usuarioEncontrado
             // Cargar likes del usuario actual
             cargarLikesUsuario(usuarioEncontrado.id)
+            // Cargar notificaciones del usuario actual
+            cargarNotificacionesUsuario(usuarioEncontrado.id)
         }
         return usuarioEncontrado
     }
@@ -64,11 +76,17 @@ class UsuarioViewModel : ViewModel() {
     fun cerrarSesion() {
         _usuarioActual.value = null
         _likesDados.value = emptySet()
+        _notificacionesUsuario.value = emptyList()
     }
     
     private fun cargarLikesUsuario(usuarioId: String) {
         val likesDelUsuario = _likesPorUsuario.value[usuarioId] ?: emptySet()
         _likesDados.value = likesDelUsuario
+    }
+    
+    private fun cargarNotificacionesUsuario(usuarioId: String) {
+        val notificacionesDelUsuario = _notificacionesPorUsuario.value[usuarioId] ?: emptyList()
+        _notificacionesUsuario.value = notificacionesDelUsuario
     }
 
     fun agregarFavorito(lugar: com.example.unilocal.model.entidad.Lugar) {
@@ -166,5 +184,47 @@ class UsuarioViewModel : ViewModel() {
     
     fun estaGuardado(lugarId: String): Boolean {
         return _favoritosGuardados.value.contains(lugarId)
+    }
+    
+    // Funciones para manejar notificaciones
+    fun crearNotificacion(usuarioId: String, titulo: String, mensaje: String, tipo: TipoNotificacion, lugarId: String? = null) {
+        val notificacion = Notificacion(
+            id = "notif_${System.currentTimeMillis()}",
+            usuarioId = usuarioId,
+            titulo = titulo,
+            mensaje = mensaje,
+            tipo = tipo,
+            lugarId = lugarId
+        )
+        
+        val notificacionesActuales = _notificacionesPorUsuario.value.toMutableMap()
+        val notificacionesDelUsuario = (notificacionesActuales[usuarioId] ?: emptyList()).toMutableList()
+        notificacionesDelUsuario.add(0, notificacion) // Agregar al inicio
+        notificacionesActuales[usuarioId] = notificacionesDelUsuario
+        _notificacionesPorUsuario.value = notificacionesActuales
+        
+        // Si es el usuario actual, actualizar también su lista
+        if (_usuarioActual.value?.id == usuarioId) {
+            _notificacionesUsuario.value = notificacionesDelUsuario
+        }
+    }
+    
+    fun marcarNotificacionComoLeida(notificacionId: String) {
+        val usuario = _usuarioActual.value
+        if (usuario != null) {
+            val notificacionesActuales = _notificacionesPorUsuario.value.toMutableMap()
+            val notificacionesDelUsuario = (notificacionesActuales[usuario.id] ?: emptyList()).toMutableList()
+            val notificacionIndex = notificacionesDelUsuario.indexOfFirst { it.id == notificacionId }
+            if (notificacionIndex != -1) {
+                notificacionesDelUsuario[notificacionIndex] = notificacionesDelUsuario[notificacionIndex].copy(leida = true)
+                notificacionesActuales[usuario.id] = notificacionesDelUsuario
+                _notificacionesPorUsuario.value = notificacionesActuales
+                _notificacionesUsuario.value = notificacionesDelUsuario
+            }
+        }
+    }
+    
+    fun obtenerNotificacionesNoLeidas(): Int {
+        return _notificacionesUsuario.value.count { !it.leida }
     }
 }

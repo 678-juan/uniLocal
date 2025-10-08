@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +29,7 @@ import com.example.unilocal.ui.configuracion.RutasPantallas
 import com.example.unilocal.ui.componentes.FichaLugar
 import com.example.unilocal.ui.componentes.FichaLugarPerfil
 import com.example.unilocal.ui.componentes.ComentarioCard
+import com.example.unilocal.ui.componentes.NotificacionCard
 import com.example.unilocal.viewModel.UsuarioViewModel
 import com.example.unilocal.viewModel.LugaresViewModel
 
@@ -48,6 +50,11 @@ fun Perfil(
     var lugarSeleccionado by remember { mutableStateOf<com.example.unilocal.model.entidad.Lugar?>(null) }
     var mostrarComentarios by remember { mutableStateOf(false) }
     var comentarioSeleccionado by remember { mutableStateOf<com.example.unilocal.model.entidad.Comentario?>(null) }
+    var mostrarNotificaciones by remember { mutableStateOf(false) }
+    
+    // Obtener notificaciones del usuario
+    val notificaciones by viewModel.notificacionesUsuario.collectAsState()
+    val notificacionesNoLeidas = viewModel.obtenerNotificacionesNoLeidas()
     var textoRespuesta by remember { mutableStateOf("") }
 
     // avatares disponibles
@@ -133,11 +140,36 @@ fun Perfil(
                 )
             }
 
-            IconButton(
-                onClick = { navegarAConfiguracion() },
-                modifier = Modifier.align(Alignment.CenterVertically)
+            Row(
+                modifier = Modifier.align(Alignment.CenterVertically),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(Icons.Default.Settings, contentDescription = "Configuración")
+                // Botón de notificaciones
+                Box {
+                    IconButton(
+                        onClick = { mostrarNotificaciones = !mostrarNotificaciones }
+                    ) {
+                        Icon(Icons.Default.Notifications, contentDescription = "Notificaciones")
+                    }
+                    // Badge para notificaciones no leídas
+                    if (notificacionesNoLeidas > 0) {
+                        Badge(
+                            modifier = Modifier.align(Alignment.TopEnd)
+                        ) {
+                            Text(
+                                text = notificacionesNoLeidas.toString(),
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+                }
+                
+                // Botón de configuración
+                IconButton(
+                    onClick = { navegarAConfiguracion() }
+                ) {
+                    Icon(Icons.Default.Settings, contentDescription = "Configuración")
+                }
             }
         }
 
@@ -145,6 +177,72 @@ fun Perfil(
             modifier = Modifier.padding(vertical = 16.dp),
             color = Color.LightGray
         )
+
+        // Sección de notificaciones
+        if (mostrarNotificaciones) {
+            Text(
+                text = "Notificaciones",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            if (notificaciones.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Sin notificaciones",
+                        modifier = Modifier.size(48.dp),
+                        tint = Color.Gray.copy(alpha = 0.5f)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "No tienes notificaciones",
+                        color = Color.Gray,
+                        fontSize = 16.sp,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    Text(
+                        text = "Te notificaremos cuando tengas novedades",
+                        color = Color.Gray.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.height(300.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(notificaciones) { notificacion ->
+                        NotificacionCard(
+                            notificacion = notificacion,
+                            usuarioViewModel = viewModel,
+                            onNotificacionClick = { notif ->
+                                // Aquí puedes agregar lógica adicional cuando se hace click
+                                // Por ejemplo, navegar al lugar si tiene lugarId
+                            }
+                        )
+                    }
+                }
+            }
+            
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 16.dp),
+                color = Color.LightGray
+            )
+        }
 
         // Sección de publicaciones
         Text(
@@ -328,5 +426,19 @@ fun Perfil(
                 }
             }
         )
+    }
+}
+
+// Función para formatear el tiempo transcurrido
+private fun formatearTiempo(timestamp: Long): String {
+    val ahora = System.currentTimeMillis()
+    val diferencia = ahora - timestamp
+    
+    return when {
+        diferencia < 60000 -> "unos segundos"
+        diferencia < 3600000 -> "${diferencia / 60000} minutos"
+        diferencia < 86400000 -> "${diferencia / 3600000} horas"
+        diferencia < 604800000 -> "${diferencia / 86400000} días"
+        else -> "${diferencia / 604800000} semanas"
     }
 }

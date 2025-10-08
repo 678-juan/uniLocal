@@ -52,7 +52,7 @@ class LugaresViewModel : ViewModel() {
                     id = "c1",
                     usuarioId = "2",
                     lugarId = "l1",
-                    texto = "Excelente comida y muy buen servicio. La atención es muy amable y los precios son justos.",
+                    texto = "¡Increíble! Fui con mi familia el sábado pasado y quedamos encantados. El sancocho de gallina está para chuparse los dedos 😋. El mesero Carlos nos atendió súper bien y nos explicó cada plato. Definitivamente volveremos!",
                     estrellas = 5,
                     fecha = System.currentTimeMillis() - 86400000
                 ),
@@ -60,7 +60,7 @@ class LugaresViewModel : ViewModel() {
                     id = "c2",
                     usuarioId = "3",
                     lugarId = "l1",
-                    texto = "Muy buena experiencia, la comida está deliciosa. Recomiendo el plato especial.",
+                    texto = "La verdad es que esperaba más por las reseñas, pero no me decepcionó. El arroz con pollo estaba bueno, aunque un poco salado para mi gusto. El ambiente es agradable y los precios están bien. Le doy 4 estrellas porque el servicio fue un poco lento.",
                     estrellas = 4,
                     fecha = System.currentTimeMillis() - 172800000
                 )
@@ -95,7 +95,7 @@ class LugaresViewModel : ViewModel() {
                     id = "c3",
                     usuarioId = "1",
                     lugarId = "l2",
-                    texto = "El mejor café de la ciudad. Ambiente muy acogedor y el personal es muy amable.",
+                    texto = "¡WOW! Este café es mi lugar favorito para trabajar. El cappuccino con leche de almendras es espectacular ☕. La barista María siempre me saluda con una sonrisa y me conoce mi pedido de memoria. El wifi es súper rápido y el ambiente es perfecto para concentrarse. 100% recomendado!",
                     estrellas = 5,
                     fecha = System.currentTimeMillis() - 259200000
                 )
@@ -130,7 +130,7 @@ class LugaresViewModel : ViewModel() {
                     id = "c4",
                     usuarioId = "4",
                     lugarId = "l3",
-                    texto = "Excelente gimnasio con equipos modernos. Los entrenadores son muy profesionales.",
+                    texto = "Llevo 3 meses entrenando aquí y he visto resultados increíbles! 💪 El entrenador Diego me ayudó a crear una rutina personalizada y siempre está pendiente de mi técnica. Los equipos están súper limpios y el ambiente es muy motivador. La única queja es que a veces está muy lleno en las tardes, pero vale la pena!",
                     estrellas = 5,
                     fecha = System.currentTimeMillis() - 432000000 // Hace 5 días
                 )
@@ -160,7 +160,24 @@ class LugaresViewModel : ViewModel() {
             creadorId = "3",
             calificacionPromedio = 4.6,
             ubicacion = Ubicacion(4.60971, -74.08175),
-            comentarios = emptyList()
+            comentarios = listOf(
+                Comentario(
+                    id = "c5",
+                    usuarioId = "2",
+                    lugarId = "l4",
+                    texto = "¡Un paraíso para los amantes de los libros! 📚 Encontré una edición rara de 'Cien años de soledad' que llevaba años buscando. El dueño, don Roberto, es súper conocedor y me recomendó varios títulos que no conocía. El ambiente es muy tranquilo, perfecto para leer. Los precios son justos y tienen descuentos para estudiantes.",
+                    estrellas = 5,
+                    fecha = System.currentTimeMillis() - 604800000 // Hace 1 semana
+                ),
+                Comentario(
+                    id = "c6",
+                    usuarioId = "5",
+                    lugarId = "l4",
+                    texto = "Me encanta venir aquí a estudiar. Tienen una sección de libros académicos muy completa y el personal siempre está dispuesto a ayudar. La única cosa es que el aire acondicionado a veces está muy fuerte, pero por lo demás es perfecto. Recomendado para estudiantes universitarios!",
+                    estrellas = 4,
+                    fecha = System.currentTimeMillis() - 1209600000 // Hace 2 semanas
+                )
+            )
         )
 
         val lugar5 = Lugar(
@@ -186,7 +203,24 @@ class LugaresViewModel : ViewModel() {
             creadorId = "2",
             calificacionPromedio = 4.4,
             ubicacion = Ubicacion(4.60971, -74.08175),
-            comentarios = emptyList()
+            comentarios = listOf(
+                Comentario(
+                    id = "c7",
+                    usuarioId = "1",
+                    lugarId = "l5",
+                    texto = "¡Salvadores! 🏥 Tuve una emergencia a las 2 AM y necesitaba medicamentos para mi abuela. Llegué aquí y me atendieron súper rápido. La farmacéutica Laura fue muy amable y me explicó todo sobre los medicamentos. El servicio de entrega a domicilio también es excelente, llegan en menos de 30 minutos.",
+                    estrellas = 5,
+                    fecha = System.currentTimeMillis() - 259200000 // Hace 3 días
+                ),
+                Comentario(
+                    id = "c8",
+                    usuarioId = "4",
+                    lugarId = "l5",
+                    texto = "Buen servicio 24 horas, pero los precios son un poco altos comparado con otras farmacias. El personal es amable y tienen buena variedad de medicamentos. La entrega a domicilio funciona bien, aunque a veces se demoran más de lo prometido.",
+                    estrellas = 3,
+                    fecha = System.currentTimeMillis() - 518400000 // Hace 6 días
+                )
+            )
         )
 
         val lugar6 = Lugar(
@@ -212,7 +246,24 @@ class LugaresViewModel : ViewModel() {
             creadorId = "1",
             calificacionPromedio = 4.2,
             ubicacion = Ubicacion(4.60971, -74.08175),
-            comentarios = emptyList()
+            comentarios = listOf(
+                Comentario(
+                    id = "c9",
+                    usuarioId = "3",
+                    lugarId = "l6",
+                    texto = "¡Qué ambiente tan genial! 🍺 Fui con mis amigos el viernes pasado y la pasamos increíble. La banda que tocaba era buenísima, tocaron vallenato y salsa. Los mojitos están deliciosos y el bartender Juan es un crack mezclando. El único detalle es que está un poco caro, pero vale la pena por la experiencia.",
+                    estrellas = 4,
+                    fecha = System.currentTimeMillis() - 345600000 // Hace 4 días
+                ),
+                Comentario(
+                    id = "c10",
+                    usuarioId = "5",
+                    lugarId = "l6",
+                    texto = "Me encanta este lugar para relajarme después del trabajo. El ambiente es muy acogedor y la música no está tan fuerte como en otros bares. La cerveza está fría y los snacks están buenos. El personal es súper amable, especialmente la mesera Ana que siempre me recuerda mi pedido favorito.",
+                    estrellas = 5,
+                    fecha = System.currentTimeMillis() - 691200000 // Hace 8 días
+                )
+            )
         )
 
         _lugares.value = listOf(lugar1, lugar2, lugar3, lugar4, lugar5, lugar6)
@@ -235,8 +286,31 @@ class LugaresViewModel : ViewModel() {
     }
 
     fun actualizarEstado(id: String, nuevoEstado: EstadoLugar) {
+        val lugar = _lugares.value.find { it.id == id }
         _lugares.value = _lugares.value.map {
             if (it.id == id) it.copy(estado = nuevoEstado) else it
+        }
+        
+        // Enviar notificación cuando se autoriza un lugar
+        if (nuevoEstado == EstadoLugar.AUTORIZADO && lugar != null) {
+            usuarioViewModel?.crearNotificacion(
+                usuarioId = lugar.creadorId,
+                titulo = "¡Lugar Autorizado!",
+                mensaje = "Tu lugar '${lugar.nombre}' ha sido autorizado y ya está disponible para todos los usuarios.",
+                tipo = TipoNotificacion.LUGAR_AUTORIZADO,
+                lugarId = lugar.id
+            )
+        }
+        
+        // Enviar notificación cuando se rechaza un lugar
+        if (nuevoEstado == EstadoLugar.RECHAZADO && lugar != null) {
+            usuarioViewModel?.crearNotificacion(
+                usuarioId = lugar.creadorId,
+                titulo = "Lugar Rechazado",
+                mensaje = "Tu lugar '${lugar.nombre}' ha sido rechazado. Puedes revisar los criterios y crear uno nuevo.",
+                tipo = TipoNotificacion.LUGAR_RECHAZADO,
+                lugarId = lugar.id
+            )
         }
     }
 
