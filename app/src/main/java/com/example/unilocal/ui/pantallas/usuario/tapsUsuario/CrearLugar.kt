@@ -55,7 +55,6 @@ fun CrearLugar(
 ) {
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
-    var horario by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
     
     // Estados estables para evitar recomposición
@@ -399,11 +398,6 @@ fun CrearLugar(
                     
                     Spacer(modifier = Modifier.height(12.dp))
                     
-                    CampoTexto(
-                        valor = horario,
-                        cuandoCambia = { horario = it },
-                        etiqueta = stringResource(R.string.horario_atencion)
-                    )
                     
                     Spacer(modifier = Modifier.height(12.dp))
                     
