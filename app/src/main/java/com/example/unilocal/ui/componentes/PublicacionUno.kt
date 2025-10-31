@@ -95,7 +95,18 @@ fun PublicacionUno(
 ) {
     // buscar quien creo el lugar
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
-    val creador = viewModel.buscarId(lugar.creadorId)
+    val creador = viewModel.obtenerUsuarioPorId(lugar.creadorId)
+    
+    // Cargar creador desde Firebase si no está en local
+    LaunchedEffect(lugar.creadorId) {
+        if (creador == null) {
+            viewModel.buscarId(lugar.creadorId)
+        }
+    }
+    
+    // Usar usuario actualizado después de la búsqueda
+    val usuarioActualizado by viewModel.usuarioActual.collectAsState()
+    val creadorFinal = creador ?: (if (usuarioActualizado?.id == lugar.creadorId) usuarioActualizado else null)
     
     // like state persistente
     val yaDioLike by viewModel.likesDados.collectAsState()
@@ -133,7 +144,7 @@ fun PublicacionUno(
             ) {
                 // avatar del creador
                 Image(
-                    painter = painterResource(id = avatares[creador?.avatar ?: 0]),
+                    painter = painterResource(id = avatares[(creadorFinal?.avatar ?: 0).coerceIn(0, avatares.size - 1)]),
                     contentDescription = "Avatar del Creador",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -144,7 +155,7 @@ fun PublicacionUno(
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = creador?.nombre ?: "Usuario desconocido",
+                        text = creadorFinal?.nombre ?: "Usuario desconocido",
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )
@@ -187,10 +198,10 @@ fun PublicacionUno(
                         .size(30.dp)
                         .clickable {
                             if (dioLike) {
-                                // Quitar like
+
                                 lugaresViewModel?.quitarLike(lugar.id)
                             } else {
-                                // Dar like
+
                                 lugaresViewModel?.darLike(lugar.id)
                             }
                         }
@@ -216,7 +227,7 @@ fun PublicacionUno(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // icono de guardar (bookmark)
+                // icono de guardar
                 val bookmarkIcon = if (estaGuardado) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder
                 
                 Icon(

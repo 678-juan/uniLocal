@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -28,6 +29,8 @@ import coil.request.ImageRequest
 import com.example.unilocal.R
 import com.example.unilocal.viewModel.LugaresViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import android.graphics.BitmapFactory
+import android.util.Base64
 
 
 @Composable
@@ -54,8 +57,39 @@ fun FichaLugar(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box {
-            if (lugar.imagenUri.startsWith("content://") || lugar.imagenUri.startsWith("file://")) {
-                // uri de imagen seleccionada
+            if (lugar.imagenUri.startsWith("data:image")) {
+                // Base64 - decodificar y mostrar
+                val base64String = lugar.imagenUri.substringAfter(",")
+                val bitmap = remember(base64String) {
+                    try {
+                        val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+                        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = lugar.nombre,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = lugar.nombre,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            } else if (
+                lugar.imagenUri.startsWith("content://") ||
+                lugar.imagenUri.startsWith("file://") ||
+                lugar.imagenUri.startsWith("http://") ||
+                lugar.imagenUri.startsWith("https://")
+            ) {
+                // URI o URL - usar Coil
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(lugar.imagenUri)

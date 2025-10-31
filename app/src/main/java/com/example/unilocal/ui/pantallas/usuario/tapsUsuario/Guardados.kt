@@ -29,6 +29,10 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.unilocal.ui.theme.AzulEnlaces
+import androidx.compose.ui.graphics.asImageBitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.compose.runtime.remember
 import com.example.unilocal.viewModel.UsuarioViewModel
 import com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab
 
@@ -203,8 +207,45 @@ fun LugarGuardadoItem(
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column {
-            if (lugar.imagenUri.startsWith("content://") || lugar.imagenUri.startsWith("file://")) {
-                // uri de imagen seleccionada
+            if (lugar.imagenUri.startsWith("data:image")) {
+                // Base64 - decodificar y mostrar
+                val base64String = lugar.imagenUri.substringAfter(",")
+                val bitmap = remember(base64String) {
+                    try {
+                        val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+                        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = lugar.nombre,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = lugar.nombre,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    )
+                }
+            } else if (
+                lugar.imagenUri.startsWith("content://") ||
+                lugar.imagenUri.startsWith("file://") ||
+                lugar.imagenUri.startsWith("http://") ||
+                lugar.imagenUri.startsWith("https://")
+            ) {
+                // URI o URL - usar Coil
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(lugar.imagenUri)

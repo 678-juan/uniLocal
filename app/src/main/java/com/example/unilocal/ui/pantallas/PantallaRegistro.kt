@@ -27,8 +27,10 @@ import com.example.unilocal.model.entidad.Usuario
 import com.example.unilocal.ui.componentes.BotonPrincipal
 import com.example.unilocal.ui.componentes.CampoTexto
 import com.example.unilocal.ui.componentes.LineaDecorativa
+import com.example.unilocal.ui.componentes.Resultadooperacion
 import com.example.unilocal.ui.componentes.SelectorAvatar
 import com.example.unilocal.viewModel.UsuarioViewModel
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +52,10 @@ fun PantallaRegisto(
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
     val scrollState = rememberLazyListState()
     var sexoExpandido by remember { mutableStateOf(false) }
+
+    val usuarioResult by viewModel.usuarioResult.collectAsState()
+    val scope = rememberCoroutineScope()
+
 
     // Debug: mostrar usuarios después del registro
     LaunchedEffect(Unit) {
@@ -252,43 +258,53 @@ fun PantallaRegisto(
 
                     cargando = true
 
-                    // Verificar si el email ya existe
-                    val usuarioExistente = viewModel.buscarEmail(email.trim())
-                    if (usuarioExistente != null) {
+                    scope.launch {
+                        // Verificar si el email ya existe (asíncrono)
+                        val existe = viewModel.existeEmail(email.trim())
+                        if (existe) {
+                            Toast.makeText(
+                                contexto,
+                                "Este email ya está registrado",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            cargando = false
+                            return@launch
+                        }
+
+                        // Crear nuevo usuario
+                        val nuevoUsuario = Usuario(
+                            nombre = nombre.trim(),
+                            username = username.trim(),
+                            clave = password,
+                            email = email.trim(),
+                            ciudad = ciudad.trim(),
+                            sexo = sexo.trim(),
+                            avatar = avatarSeleccionado
+                        )
+
+                        viewModel.crearUsuario(nuevoUsuario)
+
                         Toast.makeText(
                             contexto,
-                            "Este email ya está registrado",
+                            "¡Usuario registrado exitosamente!",
                             Toast.LENGTH_SHORT
                         ).show()
+
                         cargando = false
-                        return@BotonPrincipal
                     }
-
-                    // Crear nuevo usuario
-                    val nuevoUsuario = Usuario(
-                        id = (viewModel.usuario.value.size + 1).toString(),
-                        nombre = nombre.trim(),
-                        username = username.trim(),
-                        clave = password,
-                        email = email.trim(),
-                        ciudad = ciudad.trim(),
-                        sexo = sexo.trim(),
-                        avatar = avatarSeleccionado
-                    )
-
-                    viewModel.crearUsuario(nuevoUsuario)
-
-                    Toast.makeText(
-                        contexto,
-                        "¡Usuario registrado exitosamente!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    navegarALogin()
-
-                    cargando = false
                 }
             )
         }
 
     }
+    Resultadooperacion(
+        result = usuarioResult,
+        onSucess = {
+            navegarALogin()
+            usuarioViewModel?.resetear()
+        },
+        onFailure = {
+            usuarioViewModel?.resetear()
+        }
+    )
 }

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +47,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.unilocal.ui.componentes.Resultadooperacion
+import com.example.unilocal.utils.RequestResult
+import kotlinx.coroutines.delay
+import android.widget.Toast
 
 @Composable
 fun CrearLugar(
@@ -78,6 +83,7 @@ fun CrearLugar(
         )
     }
     val usuarioActual = usuarioViewModel.usuarioActual.collectAsState().value
+    val lugarResult by lugaresViewModel.lugarResult.collectAsState()
     val context = LocalContext.current
 
     val categorias = listOf(
@@ -621,13 +627,8 @@ fun CrearLugar(
                         comentarios = emptyList()
                     )
 
-                    lugaresViewModel.crearLugar(nuevoLugar)
-                    android.widget.Toast.makeText(
-                        context,
-                        "Lugar enviado para moderación",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                    navController?.popBackStack()
+                    lugaresViewModel.crearLugar(nuevoLugar, context)
+                    // No navegar ni mostrar toast aquí, esperar al resultado
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -651,10 +652,29 @@ fun CrearLugar(
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
+
                 }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
+
+            // Mostrar resultado de la operación
+            Resultadooperacion(
+                result = lugarResult,
+                onSucess = {
+                    lugaresViewModel.resetear()
+                    navController?.popBackStack()
+                },
+                onFailure = {
+                    lugaresViewModel.resetear()
+                }
+            )
+
+
+
         }
     }
+    
+
+
 }

@@ -25,8 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.R
 import com.example.unilocal.viewModel.UsuarioViewModel
 import com.example.unilocal.viewModel.ModeradorViewModel
-import com.example.unilocal.model.entidad.Usuario
-import com.example.unilocal.model.entidad.Moderador
+import com.example.unilocal.ui.componentes.Resultadooperacion
 
 @Composable
 fun PantallaLogin(
@@ -39,13 +38,16 @@ fun PantallaLogin(
     var correo by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
     var cargando by remember { mutableStateOf(false) }
+    var intentandoLoginModerador by remember { mutableStateOf(false) }
     val contexto = LocalContext.current
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
+    val moderadorVM: ModeradorViewModel = moderadorViewModel ?: viewModel()
+
+    val usuarioResult by viewModel.usuarioResult.collectAsState()
+    val usuarioActual by viewModel.usuarioActual.collectAsState()
+    val moderadorActual by moderadorVM.moderadorActual.collectAsState()
     
-    // Debug: mostrar usuarios disponibles
-    LaunchedEffect(Unit) {
-        println("Usuarios disponibles para login: ${viewModel.usuario.value.map { it.email }}")
-    }
+
 
     Box(
         modifier = Modifier
@@ -127,28 +129,94 @@ fun PantallaLogin(
                         Toast.makeText(contexto, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
                         return@BotonPrincipal
                     }
-                    
+
                     cargando = true
-                    
-                    // Intentar login como moderador primero
-                    val moderador = moderadorViewModel?.login(correo.trim(), clave)
+                    intentandoLoginModerador = true
+
+                    // Intentar login como moderador primero (puede retornar null si busca en Firebase)
+                    val moderador = moderadorVM.login(correo.trim(), clave)
                     if (moderador != null) {
+                        // Moderador encontrado en local, navegar inmediatamente
                         Toast.makeText(contexto, "¡Bienvenido ${moderador.nombre} (moderador)!", Toast.LENGTH_SHORT).show()
+                        cargando = false
+                        intentandoLoginModerador = false
                         navegarAPrincipalAdmin(moderador.id)
-                    } else {
-                        // Si no es moderador, intentar como usuario
-                        val usuarioEncontrado = viewModel.login(correo.trim(), clave)
-                        if (usuarioEncontrado != null) {
-                            Toast.makeText(contexto, "¡Bienvenido ${usuarioEncontrado.nombre}!", Toast.LENGTH_SHORT).show()
-                            navegarAPrincipalUsuario()
-                        } else {
-                            Toast.makeText(contexto, "Credenciales incorrectas. Verifica tu email y contraseña.", Toast.LENGTH_LONG).show()
-                        }
+                        // Limpiar campos
+                        correo = ""
+                        clave = ""
+                        return@BotonPrincipal
                     }
-                    
-                    cargando = false
+
+                    // Si retornó null, está buscando en Firebase (asíncrono)
+                    // El LaunchedEffect se encargará de esperar y luego intentar como usuario si no hay resultado
                 }
             )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Manejar resultado del login
+            Resultadooperacion(
+                result = usuarioResult,
+                onSucess = {
+                    // El login fue exitoso, usuarioActual ya está actualizado
+                    viewModel.resetear()
+                },
+                onFailure = {
+                    cargando = false
+                    viewModel.resetear()
+                }
+            )
+            
+            // Observar cuando el moderador se loguea exitosamente (después de buscar en Firebase)
+            LaunchedEffect(moderadorActual) {
+                if (moderadorActual != null && intentandoLoginModerador && correo.isNotBlank()) {
+                    // Verificar que el email coincide (para evitar navegación incorrecta)
+                    if (moderadorActual?.email == correo.trim()) {
+                        cargando = false
+                        intentandoLoginModerador = false
+                        Toast.makeText(
+                            contexto,
+                            "¡Bienvenido ${moderadorActual?.nombre} (moderador)!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        navegarAPrincipalAdmin(moderadorActual?.id ?: "")
+                        // Limpiar campos
+                        correo = ""
+                        clave = ""
+                    }
+                }
+            }
+            
+            // Observar cuando el usuario se loguea exitosamente
+            LaunchedEffect(usuarioActual, usuarioResult) {
+                if (usuarioActual != null && 
+                    usuarioResult is com.example.unilocal.utils.RequestResult.Sucess &&
+                    !intentandoLoginModerador) {
+                    cargando = false
+                    intentandoLoginModerador = false
+                    Toast.makeText(
+                        contexto,
+                        "¡Bienvenido ${usuarioActual?.nombre}!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    navegarAPrincipalUsuario()
+                    viewModel.resetear()
+                    // Limpiar campos
+                    correo = ""
+                    clave = ""
+                }
+            }
+            
+            // Timeout: si después de intentar login de moderador no hay resultado, intentar como usuario
+            LaunchedEffect(intentandoLoginModerador, moderadorActual) {
+                if (intentandoLoginModerador && correo.isNotBlank() && clave.isNotBlank()) {
+                    kotlinx.coroutines.delay(1500) // Esperar 1.5 segundos
+                    // Si después de esperar no hay moderador, intentar como usuario
+                    if (moderadorActual == null || moderadorActual?.email != correo.trim()) {
+                        intentandoLoginModerador = false
+                        viewModel.login(correo.trim(), clave)
+                    }
+                }
+            }
 
 
             Spacer(modifier = Modifier.height(24.dp))

@@ -32,6 +32,10 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.unilocal.R
+import androidx.compose.ui.graphics.asImageBitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.compose.runtime.remember
 
 
 @Composable
@@ -100,8 +104,43 @@ fun InicioAdmin(
                 ) {
                     // imagen pequeña del lugar
                     if (lugar.imagenUri != "default_image") {
-                        if (lugar.imagenUri.startsWith("content://") || lugar.imagenUri.startsWith("file://")) {
-                            // uri de imagen seleccionada
+                        if (lugar.imagenUri.startsWith("data:image")) {
+                            // Base64 - decodificar y mostrar
+                            val base64String = lugar.imagenUri.substringAfter(",")
+                            val bitmap = remember(base64String) {
+                                try {
+                                    val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+                                    BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                                } catch (e: Exception) {
+                                    null
+                                }
+                            }
+                            if (bitmap != null) {
+                                Image(
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = lugar.nombre,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(60.dp)
+                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = R.drawable.logo),
+                                    contentDescription = lugar.nombre,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(60.dp)
+                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                )
+                            }
+                        } else if (
+                            lugar.imagenUri.startsWith("content://") ||
+                            lugar.imagenUri.startsWith("file://") ||
+                            lugar.imagenUri.startsWith("http://") ||
+                            lugar.imagenUri.startsWith("https://")
+                        ) {
+                            // URI o URL - usar Coil
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
                                     .data(lugar.imagenUri)

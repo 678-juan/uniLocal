@@ -1,280 +1,400 @@
 package com.example.unilocal.viewModel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.unilocal.model.entidad.*
+import com.example.unilocal.utils.RequestResult
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import android.net.Uri
+import java.util.UUID
+import java.io.ByteArrayOutputStream
+import android.graphics.BitmapFactory
+import android.graphics.Bitmap
 
 class LugaresViewModel : ViewModel() {
     private val _lugares = MutableStateFlow<List<Lugar>>(emptyList())
     val lugares: StateFlow<List<Lugar>> = _lugares.asStateFlow()
     
+    // Estado del resultado de operaciones
+    private val _lugarResult = MutableStateFlow<RequestResult?>(null)
+    val lugarResult: StateFlow<RequestResult?> = _lugarResult.asStateFlow()
+    
     // Referencia al UsuarioViewModel para sincronizar likes
     private var usuarioViewModel: UsuarioViewModel? = null
+    
+    val db = Firebase.firestore
+    
+    fun resetear() {
+        _lugarResult.value = null
+    }
     
     fun setUsuarioViewModel(usuarioViewModel: UsuarioViewModel) {
         this.usuarioViewModel = usuarioViewModel
     }
 
     init {
-        // Cargar lugares de forma asíncrona para no bloquear la UI
+        // Cargar lugares desde Firebase
         cargarLugares()
     }
 
     private fun cargarLugares() {
-        // Cargar solo lugares esenciales para mejor rendimiento
-        val lugar1 = Lugar(
-            id = "l1",
-            nombre = "Restaurante El Sabor",
-            descripcion = "Comida típica colombiana con el mejor sazón.",
-            direccion = "Calle 123 # 456",
-            categoria = "Restaurante",
-            horario = mapOf(
-                "Lunes" to ("7:00 AM" to "3:00 PM"),
-                "Martes" to ("7:00 AM" to "10:00 PM"),
-                "Miércoles" to ("7:00 AM" to "10:00 PM"),
-                "Jueves" to ("7:00 AM" to "10:00 PM"),
-                "Viernes" to ("7:00 AM" to "10:00 PM"),
-                "Sábado" to ("7:00 AM" to "10:00 PM"),
-                "Domingo" to ("7:00 AM" to "10:00 PM")
-            ),
-            telefono = "3001234567",
-            imagenUri = "restaurante_mex",
-            likes = 25,
-            longitud = -74.08175,
-            estado = EstadoLugar.AUTORIZADO,
-            creadorId = "1",
-            calificacionPromedio = 4.5,
-            ubicacion = Ubicacion(4.60971, -74.08175),
-            comentarios = listOf(
+        viewModelScope.launch {
+            try {
+                val snapshot = db.collection("Lugares").get().await()
+                val lugaresList = snapshot.documents.mapNotNull { doc ->
+                    try {
+                        // Leer datos directamente del documento para manejar tipos complejos
+                        val data = doc.data ?: emptyMap<String, Any>()
+                        val horarioFirebase = data["horario"] as? Map<String, Any>
+                        val horario = horarioDesdeFirebase(horarioFirebase)
+                        
+                        // Obtener estado como String y convertirlo a enum
+                        val estadoStr = data["estado"] as? String ?: "PENDIENTE"
+                        val estado = try {
+                            EstadoLugar.valueOf(estadoStr)
+                        } catch (e: Exception) {
+                            EstadoLugar.PENDIENTE
+                        }
+                        
+                        // Obtener ubicación
+                        val ubicacionData = data["ubicacion"] as? Map<String, Any>?
+                        val ubicacion = ubicacionData?.let {
+                            Ubicacion(
+                                latitud = (it["latitud"] as? Number)?.toDouble() ?: 0.0,
+                                longitud = (it["longitud"] as? Number)?.toDouble() ?: 0.0
+                            )
+                        } ?: Ubicacion(0.0, 0.0)
+                        
+                        // Crear objeto Lugar manualmente
+                        val lugar = Lugar(
+                            id = doc.id,
+                            nombre = data["nombre"] as? String ?: "",
+                            descripcion = data["descripcion"] as? String ?: "",
+                            direccion = data["direccion"] as? String ?: "",
+                            categoria = data["categoria"] as? String ?: "",
+                            horario = horario,
+                            telefono = data["telefono"] as? String ?: "",
+                            imagenUri = data["imagenUri"] as? String ?: "",
+                            likes = (data["likes"] as? Number)?.toInt() ?: 0,
+                            longitud = (data["longitud"] as? Number)?.toDouble() ?: 0.0,
+                            estado = estado,
+                            creadorId = data["creadorId"] as? String ?: "",
+                            calificacionPromedio = (data["calificacionPromedio"] as? Number)?.toDouble() ?: 0.0,
+                            ubicacion = ubicacion,
+                            comentarios = emptyList() // Se carga desde subcolección
+                        )
+                        
+                        // Cargar comentarios desde subcolección
+                        val comentarios = cargarComentariosLugar(doc.id)
+                        lugar.copy(comentarios = comentarios)
+                    } catch (e: Exception) {
+                        // Si falla la lectura manual, intentar con toObject como fallback
+                        val lugar = doc.toObject(Lugar::class.java)
+                        lugar?.let {
+                            val comentarios = cargarComentariosLugar(doc.id)
+                            it.copy(id = doc.id, comentarios = comentarios)
+                        }
+                    }
+                }
+                _lugares.value = lugaresList
+            } catch (e: Exception) {
+                // Error al cargar lugares
+                _lugares.value = emptyList()
+            }
+        }
+    }
+    
+    private suspend fun cargarComentariosLugar(lugarId: String): List<Comentario> {
+        return try {
+            val snapshot = db.collection("Lugares")
+                .document(lugarId)
+                .collection("comentarios")
+                .orderBy("fecha", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            snapshot.documents.mapNotNull { doc ->
+                if (doc.exists()) {
+                    val data = doc.data ?: emptyMap<String, Any>()
                 Comentario(
-                    id = "c1",
-                    usuarioId = "2",
-                    lugarId = "l1",
-                    texto = "¡Increíble! Fui con mi familia el sábado pasado y quedamos encantados. El sancocho de gallina está para chuparse los dedos 😋. El mesero Carlos nos atendió súper bien y nos explicó cada plato. Definitivamente volveremos!",
-                    estrellas = 5,
-                    fecha = System.currentTimeMillis() - 86400000
-                ),
-                Comentario(
-                    id = "c2",
-                    usuarioId = "3",
-                    lugarId = "l1",
-                    texto = "La verdad es que esperaba más por las reseñas, pero no me decepcionó. El arroz con pollo estaba bueno, aunque un poco salado para mi gusto. El ambiente es agradable y los precios están bien. Le doy 4 estrellas porque el servicio fue un poco lento.",
-                    estrellas = 4,
-                    fecha = System.currentTimeMillis() - 172800000
-                )
+                        id = doc.id,
+                        usuarioId = data["usuarioId"] as? String ?: "",
+                        lugarId = data["lugarId"] as? String ?: "",
+                        texto = data["texto"] as? String ?: "",
+                        estrellas = (data["estrellas"] as? Number)?.toInt() ?: 0,
+                        fecha = (data["fecha"] as? Number)?.toLong() ?: System.currentTimeMillis(),
+                        respuesta = data["respuesta"] as? String
+                    )
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            println("DEBUG: Error al cargar comentarios: ${e.message}")
+            emptyList()
+        }
+    }
+    
+    // Convertir horario de Map<String, Pair<String, String>> a formato compatible con Firestore
+    private fun horarioParaFirebase(horario: Map<String, Pair<String, String>>): Map<String, Map<String, String>> {
+        return horario.mapValues { (_, pair) ->
+            mapOf(
+                "apertura" to pair.first,
+                "cierre" to pair.second
             )
-        )
-
-        val lugar2 = Lugar(
-            id = "l2",
-            nombre = "Café La Taza",
-            descripcion = "Un lugar acogedor para disfrutar del mejor café.",
-            direccion = "Calle 45 # 123",
-            categoria = "Café",
-            horario = mapOf(
-                "Lunes" to ("7:00 AM" to "10:00 PM"),
-                "Martes" to ("7:00 AM" to "10:00 PM"),
-                "Miércoles" to ("7:00 AM" to "10:00 PM"),
-                "Jueves" to ("7:00 AM" to "10:00 PM"),
-                "Viernes" to ("7:00 AM" to "10:00 PM"),
-                "Sábado" to ("7:00 AM" to "10:00 PM"),
-                "Domingo" to ("7:00 AM" to "10:00 PM")
-            ),
-            telefono = "3019876543",
-            imagenUri = "cafeteria_moderna",
-            likes = 15,
-            longitud = -75.56359,
-            estado = EstadoLugar.AUTORIZADO,
-            creadorId = "2",
-            calificacionPromedio = 4.7,
-            ubicacion = Ubicacion(6.25184, -75.56359),
-            comentarios = listOf(
-                Comentario(
-                    id = "c3",
-                    usuarioId = "1",
-                    lugarId = "l2",
-                    texto = "¡WOW! Este café es mi lugar favorito para trabajar. El cappuccino con leche de almendras es espectacular ☕. La barista María siempre me saluda con una sonrisa y me conoce mi pedido de memoria. El wifi es súper rápido y el ambiente es perfecto para concentrarse. 100% recomendado!",
-                    estrellas = 5,
-                    fecha = System.currentTimeMillis() - 259200000
-                )
-            )
-        )
-
-        val lugar3 = Lugar(
-            id = "l3",
-            nombre = "Gimnasio PowerFit",
-            descripcion = "Centro de fitness con equipos modernos y entrenadores certificados.",
-            direccion = "Carrera 15 # 78-90",
-            categoria = "Gimnasio",
-            horario = mapOf(
-                "Lunes" to ("5:00 AM" to "10:00 PM"),
-                "Martes" to ("5:00 AM" to "10:00 PM"),
-                "Miércoles" to ("5:00 AM" to "10:00 PM"),
-                "Jueves" to ("5:00 AM" to "10:00 PM"),
-                "Viernes" to ("5:00 AM" to "10:00 PM"),
-                "Sábado" to ("6:00 AM" to "8:00 PM"),
-                "Domingo" to ("6:00 AM" to "8:00 PM")
-            ),
-            telefono = "3005551234",
-            imagenUri = "gimnasio",
-            likes = 42,
-            longitud = -74.08175,
-            estado = EstadoLugar.AUTORIZADO,
-            creadorId = "1",
-            calificacionPromedio = 4.3,
-            ubicacion = Ubicacion(4.60971, -74.08175),
-            comentarios = listOf(
-                Comentario(
-                    id = "c4",
-                    usuarioId = "4",
-                    lugarId = "l3",
-                    texto = "Llevo 3 meses entrenando aquí y he visto resultados increíbles! 💪 El entrenador Diego me ayudó a crear una rutina personalizada y siempre está pendiente de mi técnica. Los equipos están súper limpios y el ambiente es muy motivador. La única queja es que a veces está muy lleno en las tardes, pero vale la pena!",
-                    estrellas = 5,
-                    fecha = System.currentTimeMillis() - 432000000 // Hace 5 días
-                )
-            )
-        )
-
-        val lugar4 = Lugar(
-            id = "l4",
-            nombre = "Librería El Saber",
-            descripcion = "Librería especializada en literatura y libros académicos.",
-            direccion = "Calle 72 # 11-25",
-            categoria = "Librería",
-            horario = mapOf(
-                "Lunes" to ("9:00 AM" to "7:00 PM"),
-                "Martes" to ("9:00 AM" to "7:00 PM"),
-                "Miércoles" to ("9:00 AM" to "7:00 PM"),
-                "Jueves" to ("9:00 AM" to "7:00 PM"),
-                "Viernes" to ("9:00 AM" to "7:00 PM"),
-                "Sábado" to ("9:00 AM" to "7:00 PM"),
-                "Domingo" to ("10:00 AM" to "4:00 PM")
-            ),
-            telefono = "3007778888",
-            imagenUri = "libreria",
-            likes = 18,
-            longitud = -74.08175,
-            estado = EstadoLugar.PENDIENTE,
-            creadorId = "3",
-            calificacionPromedio = 4.6,
-            ubicacion = Ubicacion(4.60971, -74.08175),
-            comentarios = listOf(
-                Comentario(
-                    id = "c5",
-                    usuarioId = "2",
-                    lugarId = "l4",
-                    texto = "¡Un paraíso para los amantes de los libros! 📚 Encontré una edición rara de 'Cien años de soledad' que llevaba años buscando. El dueño, don Roberto, es súper conocedor y me recomendó varios títulos que no conocía. El ambiente es muy tranquilo, perfecto para leer. Los precios son justos y tienen descuentos para estudiantes.",
-                    estrellas = 5,
-                    fecha = System.currentTimeMillis() - 604800000 // Hace 1 semana
-                ),
-                Comentario(
-                    id = "c6",
-                    usuarioId = "5",
-                    lugarId = "l4",
-                    texto = "Me encanta venir aquí a estudiar. Tienen una sección de libros académicos muy completa y el personal siempre está dispuesto a ayudar. La única cosa es que el aire acondicionado a veces está muy fuerte, pero por lo demás es perfecto. Recomendado para estudiantes universitarios!",
-                    estrellas = 4,
-                    fecha = System.currentTimeMillis() - 1209600000 // Hace 2 semanas
-                )
-            )
-        )
-
-        val lugar5 = Lugar(
-            id = "l5",
-            nombre = "Farmacia Salud Total",
-            descripcion = "Farmacia 24 horas con servicio de entrega a domicilio.",
-            direccion = "Carrera 7 # 32-16",
-            categoria = "Farmacia",
-            horario = mapOf(
-                "Lunes" to ("12:00 AM" to "11:59 PM"),
-                "Martes" to ("12:00 AM" to "11:59 PM"),
-                "Miércoles" to ("12:00 AM" to "11:59 PM"),
-                "Jueves" to ("12:00 AM" to "11:59 PM"),
-                "Viernes" to ("12:00 AM" to "11:59 PM"),
-                "Sábado" to ("12:00 AM" to "11:59 PM"),
-                "Domingo" to ("12:00 AM" to "11:59 PM")
-            ),
-            telefono = "3009990000",
-            imagenUri = "farmacia",
-            likes = 35,
-            longitud = -74.08175,
-            estado = EstadoLugar.PENDIENTE,
-            creadorId = "2",
-            calificacionPromedio = 4.4,
-            ubicacion = Ubicacion(4.60971, -74.08175),
-            comentarios = listOf(
-                Comentario(
-                    id = "c7",
-                    usuarioId = "1",
-                    lugarId = "l5",
-                    texto = "¡Salvadores! 🏥 Tuve una emergencia a las 2 AM y necesitaba medicamentos para mi abuela. Llegué aquí y me atendieron súper rápido. La farmacéutica Laura fue muy amable y me explicó todo sobre los medicamentos. El servicio de entrega a domicilio también es excelente, llegan en menos de 30 minutos.",
-                    estrellas = 5,
-                    fecha = System.currentTimeMillis() - 259200000 // Hace 3 días
-                ),
-                Comentario(
-                    id = "c8",
-                    usuarioId = "4",
-                    lugarId = "l5",
-                    texto = "Buen servicio 24 horas, pero los precios son un poco altos comparado con otras farmacias. El personal es amable y tienen buena variedad de medicamentos. La entrega a domicilio funciona bien, aunque a veces se demoran más de lo prometido.",
-                    estrellas = 3,
-                    fecha = System.currentTimeMillis() - 518400000 // Hace 6 días
-                )
-            )
-        )
-
-        val lugar6 = Lugar(
-            id = "l6",
-            nombre = "Bar El Rincón",
-            descripcion = "Bar tradicional con música en vivo y ambiente relajado.",
-            direccion = "Calle 85 # 12-45",
-            categoria = "Bar",
-            horario = mapOf(
-                "Lunes" to ("Cerrado" to "Cerrado"),
-                "Martes" to ("6:00 PM" to "2:00 AM"),
-                "Miércoles" to ("6:00 PM" to "2:00 AM"),
-                "Jueves" to ("6:00 PM" to "2:00 AM"),
-                "Viernes" to ("6:00 PM" to "2:00 AM"),
-                "Sábado" to ("6:00 PM" to "2:00 AM"),
-                "Domingo" to ("6:00 PM" to "2:00 AM")
-            ),
-            telefono = "3001112222",
-            imagenUri = "bar",
-            likes = 28,
-            longitud = -74.08175,
-            estado = EstadoLugar.AUTORIZADO,
-            creadorId = "1",
-            calificacionPromedio = 4.2,
-            ubicacion = Ubicacion(4.60971, -74.08175),
-            comentarios = listOf(
-                Comentario(
-                    id = "c9",
-                    usuarioId = "3",
-                    lugarId = "l6",
-                    texto = "¡Qué ambiente tan genial! 🍺 Fui con mis amigos el viernes pasado y la pasamos increíble. La banda que tocaba era buenísima, tocaron vallenato y salsa. Los mojitos están deliciosos y el bartender Juan es un crack mezclando. El único detalle es que está un poco caro, pero vale la pena por la experiencia.",
-                    estrellas = 4,
-                    fecha = System.currentTimeMillis() - 345600000 // Hace 4 días
-                ),
-                Comentario(
-                    id = "c10",
-                    usuarioId = "5",
-                    lugarId = "l6",
-                    texto = "Me encanta este lugar para relajarme después del trabajo. El ambiente es muy acogedor y la música no está tan fuerte como en otros bares. La cerveza está fría y los snacks están buenos. El personal es súper amable, especialmente la mesera Ana que siempre me recuerda mi pedido favorito.",
-                    estrellas = 5,
-                    fecha = System.currentTimeMillis() - 691200000 // Hace 8 días
-                )
-            )
-        )
-
-        _lugares.value = listOf(lugar1, lugar2, lugar3, lugar4, lugar5, lugar6)
+        }
+    }
+    
+    // Convertir horario de Firestore a Map<String, Pair<String, String>>
+    private fun horarioDesdeFirebase(horarioFirebase: Map<String, Any>?): Map<String, Pair<String, String>> {
+        if (horarioFirebase == null) return emptyMap()
+        
+        return horarioFirebase.mapNotNull { (dia, valor) ->
+            if (valor is Map<*, *>) {
+                val apertura = valor["apertura"] as? String ?: ""
+                val cierre = valor["cierre"] as? String ?: ""
+                dia to Pair(apertura, cierre)
+            } else {
+                null
+            }
+        }.toMap()
     }
 
-    fun crearLugar(lugar: Lugar) {
-        _lugares.value += lugar
+    fun crearLugar(lugar: Lugar, context: android.content.Context? = null) {
+        viewModelScope.launch {
+            _lugarResult.value = RequestResult.Cargar
+            try {
+                // Subir imagen si es un URI local y obtener URL pública
+                val imagenUrlFinal = try {
+                    obtenerImagenUrlFinal(lugar.imagenUri, context)
+                } catch (e: Exception) {
+                    // Log del error para debugging
+                    println("Error al subir imagen: ${e.message}")
+                    e.printStackTrace()
+                    // Si falla la subida, usar default_image
+                    "default_image"
+                }
+
+                // Preparar datos para Firebase con conversiones necesarias
+                println("DEBUG: Preparando datos para guardar lugar: ${lugar.nombre}")
+                val lugarData = hashMapOf<String, Any>(
+                    "nombre" to lugar.nombre,
+                    "descripcion" to lugar.descripcion,
+                    "direccion" to lugar.direccion,
+                    "categoria" to lugar.categoria,
+                    "horario" to horarioParaFirebase(lugar.horario),
+                    "telefono" to lugar.telefono,
+                    "imagenUri" to imagenUrlFinal,
+                    "likes" to lugar.likes,
+                    "longitud" to lugar.longitud,
+                    "estado" to lugar.estado.name, // Guardar enum como String
+                    "creadorId" to lugar.creadorId,
+                    "calificacionPromedio" to lugar.calificacionPromedio,
+                    "ubicacion" to hashMapOf(
+                        "latitud" to lugar.ubicacion.latitud,
+                        "longitud" to lugar.ubicacion.longitud
+                    )
+                )
+                
+                println("DEBUG: Intentando guardar en Firestore...")
+                val docRef = db.collection("Lugares")
+                    .add(lugarData)
+                    .await()
+                println("DEBUG: Documento guardado en Firestore con ID: ${docRef.id}")
+                
+                // Actualizar con el ID de Firestore
+                val lugarConId = lugar.copy(id = docRef.id, imagenUri = imagenUrlFinal)
+                
+                // Guardar comentarios en subcolección si existen
+                if (lugar.comentarios.isNotEmpty()) {
+                    lugar.comentarios.forEach { comentario ->
+                        val comentarioData = hashMapOf<String, Any>(
+                            "usuarioId" to comentario.usuarioId,
+                            "lugarId" to comentario.lugarId,
+                            "texto" to comentario.texto,
+                            "estrellas" to comentario.estrellas,
+                            "fecha" to comentario.fecha,
+                            "respuesta" to (comentario.respuesta ?: "")
+                        )
+                        db.collection("Lugares")
+                            .document(docRef.id)
+                            .collection("comentarios")
+                            .add(comentarioData)
+                            .await()
+                    }
+                }
+                
+                // Actualizar lista local
+                _lugares.value = _lugares.value + lugarConId
+                println("DEBUG: Lugar creado exitosamente con ID: ${docRef.id}")
+                println("DEBUG: Datos guardados: nombre=${lugar.nombre}, categoria=${lugar.categoria}")
+                
+                // Marcar como éxito
+                _lugarResult.value = RequestResult.Sucess("Lugar creado exitosamente")
+            } catch (e: Exception) {
+                // Error al crear lugar
+                println("DEBUG: ❌ ERROR al crear lugar: ${e.message}")
+                println("DEBUG: ❌ Tipo de error: ${e.javaClass.simpleName}")
+                e.printStackTrace()
+                println("DEBUG: ❌ Stack trace completo del error")
+                
+                // Marcar como error
+                _lugarResult.value = RequestResult.Error("Error al crear el lugar: ${e.message ?: "Error desconocido"}")
+            }
+        }
+    }
+
+    // Opción 1: Subir a Firebase Storage (recomendado para imágenes grandes)
+    private suspend fun obtenerImagenUrlFinal(imagenUri: String, context: android.content.Context? = null): String {
+        if (imagenUri.isBlank() || imagenUri == "default_image") {
+            println("DEBUG: imagenUri vacío o default_image")
+            return "default_image"
+        }
+        
+        // Si ya es URL, usarla tal cual
+        val lower = imagenUri.lowercase()
+        if (lower.startsWith("http://") || lower.startsWith("https://")) {
+            println("DEBUG: imagenUri ya es URL: $imagenUri")
+            return imagenUri
+        }
+
+        // Si es un URI local (content:// o file://), subir a Storage
+        try {
+            println("DEBUG: Intentando subir imagen a Storage: $imagenUri")
+            val uri = Uri.parse(imagenUri)
+            
+            val fileName = "lugares/${UUID.randomUUID()}.jpg"
+            val storageRef = FirebaseStorage.getInstance().reference.child(fileName)
+            
+            println("DEBUG: Subiendo a Storage: $fileName")
+            val uploadTask = storageRef.putFile(uri)
+            uploadTask.await()
+            
+            println("DEBUG: Imagen subida, obteniendo URL de descarga...")
+            val downloadUrl = storageRef.downloadUrl.await()
+            val urlString = downloadUrl.toString()
+            println("DEBUG: URL obtenida de Storage: $urlString")
+            
+            return urlString
+        } catch (e: Exception) {
+            println("DEBUG: Error al subir a Storage: ${e.message}")
+            e.printStackTrace()
+            // Si falla Storage, intentar Base64 como alternativa (solo si hay contexto)
+            if (context != null) {
+                println("DEBUG: Intentando guardar como Base64...")
+                return try {
+                    obtenerImagenUrlFinalBase64(imagenUri, context)
+                } catch (e2: Exception) {
+                    println("DEBUG: Error también con Base64: ${e2.message}")
+                    "default_image"
+                }
+            } else {
+                println("DEBUG: No hay contexto disponible para Base64, usando default_image")
+                return "default_image"
+            }
+        }
+    }
+    
+    // Opción 2: Guardar como Base64 directamente en Firestore (alternativa)
+    // Útil para imágenes pequeñas o cuando Storage falla
+    // Nota: Esta función requiere que se pase el contexto desde la UI
+    private suspend fun obtenerImagenUrlFinalBase64(imagenUri: String, context: android.content.Context): String {
+        try {
+            println("DEBUG: Convirtiendo imagen a Base64: $imagenUri")
+            val uri = Uri.parse(imagenUri)
+            
+            // Leer la imagen desde el URI
+            val inputStream = context.contentResolver.openInputStream(uri)
+                ?: throw Exception("No se pudo abrir el input stream")
+            
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream.close()
+            
+            if (bitmap == null) {
+                throw Exception("No se pudo decodificar la imagen")
+            }
+            
+            // Comprimir y convertir a Base64
+            val outputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream) // 80% calidad
+            val byteArray = outputStream.toByteArray()
+            val base64 = android.util.Base64.encodeToString(byteArray, android.util.Base64.DEFAULT)
+            
+            // Prefijo especial para identificar que es Base64
+            val base64Url = "data:image/jpeg;base64,$base64"
+            println("DEBUG: Imagen convertida a Base64 (tamaño: ${byteArray.size} bytes)")
+            
+            return base64Url
+        } catch (e: Exception) {
+            println("DEBUG: Error al convertir a Base64: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 
     fun buscarPorId(id: String): Lugar? {
-        return _lugares.value.find { it.id == id }
+        // Primero buscar en la lista local
+        val lugarLocal = _lugares.value.find { it.id == id }
+        if (lugarLocal != null) return lugarLocal
+        
+        // Si no está en local, cargar desde Firebase
+        viewModelScope.launch {
+            try {
+                val doc = db.collection("Lugares").document(id).get().await()
+                if (doc.exists()) {
+                    val data = doc.data!!
+                    val horarioFirebase = data["horario"] as? Map<String, Any>?
+                    val horario = horarioDesdeFirebase(horarioFirebase)
+                    
+                    val estadoStr = data["estado"] as? String ?: "PENDIENTE"
+                    val estado = try {
+                        EstadoLugar.valueOf(estadoStr)
+                    } catch (e: Exception) {
+                        EstadoLugar.PENDIENTE
+                    }
+                    
+                    val ubicacionData = data["ubicacion"] as? Map<String, Any>?
+                    val ubicacion = ubicacionData?.let {
+                        Ubicacion(
+                            latitud = (it["latitud"] as? Number)?.toDouble() ?: 0.0,
+                            longitud = (it["longitud"] as? Number)?.toDouble() ?: 0.0
+                        )
+                    } ?: Ubicacion(0.0, 0.0)
+                    
+                    val lugar = Lugar(
+                        id = doc.id,
+                        nombre = data["nombre"] as? String ?: "",
+                        descripcion = data["descripcion"] as? String ?: "",
+                        direccion = data["direccion"] as? String ?: "",
+                        categoria = data["categoria"] as? String ?: "",
+                        horario = horario,
+                        telefono = data["telefono"] as? String ?: "",
+                        imagenUri = data["imagenUri"] as? String ?: "",
+                        likes = (data["likes"] as? Number)?.toInt() ?: 0,
+                        longitud = (data["longitud"] as? Number)?.toDouble() ?: 0.0,
+                        estado = estado,
+                        creadorId = data["creadorId"] as? String ?: "",
+                        calificacionPromedio = (data["calificacionPromedio"] as? Number)?.toDouble() ?: 0.0,
+                        ubicacion = ubicacion,
+                        comentarios = emptyList()
+                    )
+                    
+                    val comentarios = cargarComentariosLugar(id)
+                    val lugarCompleto = lugar.copy(comentarios = comentarios)
+                    _lugares.value = _lugares.value + lugarCompleto
+                }
+            } catch (e: Exception) {
+                // Error al buscar lugar
+            }
+        }
+        return null
     }
 
     fun buscarPorCategoria(categoria: String): List<Lugar> {
@@ -286,7 +406,17 @@ class LugaresViewModel : ViewModel() {
     }
 
     fun actualizarEstado(id: String, nuevoEstado: EstadoLugar) {
+        viewModelScope.launch {
+            try {
         val lugar = _lugares.value.find { it.id == id }
+                
+                // Actualizar en Firebase
+                db.collection("Lugares")
+                    .document(id)
+                    .update("estado", nuevoEstado.name)
+                    .await()
+                
+                // Actualizar estado local
         _lugares.value = _lugares.value.map {
             if (it.id == id) it.copy(estado = nuevoEstado) else it
         }
@@ -311,11 +441,39 @@ class LugaresViewModel : ViewModel() {
                 tipo = TipoNotificacion.LUGAR_RECHAZADO,
                 lugarId = lugar.id
             )
+                }
+            } catch (e: Exception) {
+                // Error al actualizar estado
+            }
         }
     }
 
     fun borrarLugar(lugarId: String) {
+        viewModelScope.launch {
+            try {
+                // Eliminar comentarios primero (subcolección)
+                val comentariosSnapshot = db.collection("Lugares")
+                    .document(lugarId)
+                    .collection("comentarios")
+                    .get()
+                    .await()
+                
+                comentariosSnapshot.documents.forEach { doc ->
+                    doc.reference.delete().await()
+                }
+                
+                // Eliminar lugar
+                db.collection("Lugares")
+                    .document(lugarId)
+                    .delete()
+                    .await()
+                
+                // Actualizar lista local
         _lugares.value = _lugares.value.filter { it.id != lugarId }
+            } catch (e: Exception) {
+                // Error al borrar lugar
+            }
+        }
     }
 
     // función para calcular si un lugar está abierto basado en el horario actual
@@ -390,41 +548,109 @@ class LugaresViewModel : ViewModel() {
     }
 
     fun agregarComentario(lugarId: String, comentario: Comentario) {
+        viewModelScope.launch {
+            try {
+                // Guardar comentario en Firebase (subcolección) - guardar manualmente
+                val comentarioData = hashMapOf<String, Any>(
+                    "usuarioId" to comentario.usuarioId,
+                    "lugarId" to comentario.lugarId,
+                    "texto" to comentario.texto,
+                    "estrellas" to comentario.estrellas,
+                    "fecha" to comentario.fecha,
+                    "respuesta" to (comentario.respuesta ?: "")
+                )
+                
+                val docRef = db.collection("Lugares")
+                    .document(lugarId)
+                    .collection("comentarios")
+                    .add(comentarioData)
+                    .await()
+                
+                val comentarioConId = comentario.copy(id = docRef.id)
+                
+                // Actualizar estado local
         _lugares.value = _lugares.value.map { lugar ->
             if (lugar.id == lugarId) {
-                lugar.copy(comentarios = lugar.comentarios + comentario)
+                        lugar.copy(comentarios = lugar.comentarios + comentarioConId)
             } else {
                 lugar
+                    }
+                }
+                
+                // Enviar notificación al creador del lugar
+                val lugar = _lugares.value.find { it.id == lugarId }
+                if (lugar != null && lugar.creadorId != comentario.usuarioId) {
+                    usuarioViewModel?.crearNotificacion(
+                        usuarioId = lugar.creadorId,
+                        titulo = "Nuevo comentario",
+                        mensaje = "Tienes un nuevo comentario en tu lugar '${lugar.nombre}'",
+                        tipo = TipoNotificacion.COMENTARIO_NUEVO,
+                        lugarId = lugarId
+                    )
+                }
+            } catch (e: Exception) {
+                // Error al agregar comentario
             }
         }
     }
 
     fun darLike(lugarId: String) {
-        // Solo actualizar el contador de likes en el lugar
-        _lugares.value = _lugares.value.map { lugar ->
-            if (lugar.id == lugarId) {
-                lugar.copy(likes = lugar.likes + 1)
+        viewModelScope.launch {
+            try {
+                val lugar = _lugares.value.find { it.id == lugarId }
+                if (lugar != null) {
+                    // Actualizar contador en Firebase
+                    db.collection("Lugares")
+                        .document(lugarId)
+                        .update("likes", lugar.likes + 1)
+                        .await()
+                    
+                    // Actualizar estado local
+                    _lugares.value = _lugares.value.map { l ->
+                        if (l.id == lugarId) {
+                            l.copy(likes = l.likes + 1)
             } else {
-                lugar
+                            l
+                        }
             }
         }
         
         // Delegar la gestión de likes del usuario al UsuarioViewModel
         usuarioViewModel?.darLike(lugarId)
+            } catch (e: Exception) {
+                // Error al dar like
+            }
+        }
     }
 
     fun quitarLike(lugarId: String) {
-        // Solo actualizar el contador de likes en el lugar
-        _lugares.value = _lugares.value.map { lugar ->
-            if (lugar.id == lugarId) {
-                lugar.copy(likes = maxOf(0, lugar.likes - 1))
+        viewModelScope.launch {
+            try {
+                val lugar = _lugares.value.find { it.id == lugarId }
+                if (lugar != null) {
+                    // Actualizar contador en Firebase
+                    val nuevosLikes = maxOf(0, lugar.likes - 1)
+                    db.collection("Lugares")
+                        .document(lugarId)
+                        .update("likes", nuevosLikes)
+                        .await()
+                    
+                    // Actualizar estado local
+                    _lugares.value = _lugares.value.map { l ->
+                        if (l.id == lugarId) {
+                            l.copy(likes = nuevosLikes)
             } else {
-                lugar
+                            l
+                        }
             }
         }
         
         // Delegar la gestión de likes del usuario al UsuarioViewModel
         usuarioViewModel?.quitarLike(lugarId)
+            } catch (e: Exception) {
+                // Error al quitar like
+            }
+        }
     }
 
     fun yaDioLike(lugarId: String): Boolean {
@@ -446,6 +672,17 @@ class LugaresViewModel : ViewModel() {
     }
     
     fun responderComentario(lugarId: String, comentarioId: String, respuesta: String) {
+        viewModelScope.launch {
+            try {
+                // Actualizar respuesta en Firebase
+                db.collection("Lugares")
+                    .document(lugarId)
+                    .collection("comentarios")
+                    .document(comentarioId)
+                    .update("respuesta", respuesta)
+                    .await()
+                
+                // Actualizar estado local
         _lugares.value = _lugares.value.map { lugar ->
             if (lugar.id == lugarId) {
                 lugar.copy(
@@ -459,6 +696,10 @@ class LugaresViewModel : ViewModel() {
                 )
             } else {
                 lugar
+                    }
+                }
+            } catch (e: Exception) {
+                // Error al responder comentario
             }
         }
     }

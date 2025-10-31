@@ -31,10 +31,29 @@ fun ComentarioCard(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val usuario = usuarioViewModel.buscarId(comentario.usuarioId)
-    val dueñoLugar = lugar?.let { usuarioViewModel.buscarId(it.creadorId) }
+    val usuario = usuarioViewModel.obtenerUsuarioPorId(comentario.usuarioId)
+    val dueñoLugar = lugar?.let { usuarioViewModel.obtenerUsuarioPorId(it.creadorId) }
+    
+    // Cargar usuario desde Firebase si no está en local
+    LaunchedEffect(comentario.usuarioId) {
+        if (usuario == null) {
+            usuarioViewModel.buscarId(comentario.usuarioId)
+        }
+    }
+    
+    // Cargar dueño del lugar desde Firebase si no está en local
+    LaunchedEffect(lugar?.creadorId) {
+        if (dueñoLugar == null && lugar != null) {
+            usuarioViewModel.buscarId(lugar.creadorId)
+        }
+    }
+    
+    // Usar usuario actualizado después de la búsqueda
+    val usuarioActualizado by usuarioViewModel.usuarioActual.collectAsState()
+    val usuarioFinal = usuario ?: (if (usuarioActualizado?.id == comentario.usuarioId) usuarioActualizado else null)
+    val dueñoLugarFinal = dueñoLugar ?: (if (usuarioActualizado?.id == lugar?.creadorId) usuarioActualizado else null)
 
-    if (usuario != null) {
+    if (usuarioFinal != null) {
         Row(
             modifier = modifier
                 .fillMaxWidth()
@@ -49,8 +68,8 @@ fun ComentarioCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 🧍 Avatar del usuario - memoizado
-            val avatarRes = remember(usuario.avatar) {
-                when (usuario.avatar) {
+            val avatarRes = remember(usuarioFinal.avatar) {
+                when (usuarioFinal.avatar) {
                     0 -> R.drawable.hombre
                     1 -> R.drawable.mujer
                     2 -> R.drawable.hombre1
@@ -63,7 +82,7 @@ fun ComentarioCard(
 
             Image(
                 painter = painterResource(id = avatarRes),
-                contentDescription = "Avatar de ${usuario.nombre}",
+                contentDescription = "Avatar de ${usuarioFinal.nombre}",
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
@@ -75,7 +94,7 @@ fun ComentarioCard(
             // 💬 Contenido del comentario
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = usuario.nombre,
+                    text = usuarioFinal.nombre,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
@@ -106,7 +125,7 @@ fun ComentarioCard(
         }
         
         // Mostrar respuesta si existe
-        if (comentario.respuesta != null && dueñoLugar != null) {
+        if (comentario.respuesta != null && dueñoLugarFinal != null) {
             Spacer(modifier = Modifier.height(12.dp))
             Card(
                 modifier = Modifier
@@ -122,7 +141,7 @@ fun ComentarioCard(
                     verticalAlignment = Alignment.Top
                 ) {
                     // Avatar del dueño del lugar
-                    val avatarRes = when (dueñoLugar.avatar) {
+                    val avatarRes = when (dueñoLugarFinal.avatar) {
                         0 -> R.drawable.hombre
                         1 -> R.drawable.mujer
                         2 -> R.drawable.hombre1
@@ -148,7 +167,7 @@ fun ComentarioCard(
                     ) {
                         // Nombre del dueño
                         Text(
-                            text = "Dueño del lugar • ${dueñoLugar.nombre}",
+                            text = "Dueño del lugar • ${dueñoLugarFinal.nombre}",
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF4CAF50)
