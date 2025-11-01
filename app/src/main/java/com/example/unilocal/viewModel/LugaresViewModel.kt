@@ -215,14 +215,26 @@ class LugaresViewModel : ViewModel() {
                 // Guardar comentarios en subcolección si existen
                 if (lugar.comentarios.isNotEmpty()) {
                     lugar.comentarios.forEach { comentario ->
+                        // Evitar guardar comentarios con texto vacío
+                        if (comentario.texto.isBlank()) {
+                            println("DEBUG: Se omitió guardar un comentario vacío al crear lugar")
+                            return@forEach
+                        }
+
+                        // Construir el mapa de datos y solo incluir 'respuesta' si no está vacía
                         val comentarioData = hashMapOf<String, Any>(
                             "usuarioId" to comentario.usuarioId,
                             "lugarId" to comentario.lugarId,
                             "texto" to comentario.texto,
                             "estrellas" to comentario.estrellas,
-                            "fecha" to comentario.fecha,
-                            "respuesta" to (comentario.respuesta ?: "")
+                            "fecha" to comentario.fecha
                         )
+
+                        val respuestaVal = comentario.respuesta
+                        if (!respuestaVal.isNullOrBlank()) {
+                            comentarioData["respuesta"] = respuestaVal
+                        }
+
                         db.collection("Lugares")
                             .document(docRef.id)
                             .collection("comentarios")
@@ -550,16 +562,26 @@ class LugaresViewModel : ViewModel() {
     fun agregarComentario(lugarId: String, comentario: Comentario) {
         viewModelScope.launch {
             try {
+                // Evitar guardar comentarios con texto vacío
+                if (comentario.texto.isBlank()) {
+                    println("DEBUG: Se evitó guardar un comentario vacío para lugarId=$lugarId")
+                    return@launch
+                }
+
                 // Guardar comentario en Firebase (subcolección) - guardar manualmente
                 val comentarioData = hashMapOf<String, Any>(
                     "usuarioId" to comentario.usuarioId,
                     "lugarId" to comentario.lugarId,
                     "texto" to comentario.texto,
                     "estrellas" to comentario.estrellas,
-                    "fecha" to comentario.fecha,
-                    "respuesta" to (comentario.respuesta ?: "")
+                    "fecha" to comentario.fecha
                 )
-                
+
+                val respuestaVal = comentario.respuesta
+                if (!respuestaVal.isNullOrBlank()) {
+                    comentarioData["respuesta"] = respuestaVal
+                }
+
                 val docRef = db.collection("Lugares")
                     .document(lugarId)
                     .collection("comentarios")
@@ -674,6 +696,12 @@ class LugaresViewModel : ViewModel() {
     fun responderComentario(lugarId: String, comentarioId: String, respuesta: String) {
         viewModelScope.launch {
             try {
+                // Evitar guardar respuestas vacías
+                if (respuesta.isBlank()) {
+                    println("DEBUG: Se evitó guardar una respuesta vacía para comentarioId=$comentarioId")
+                    return@launch
+                }
+
                 // Actualizar respuesta en Firebase
                 db.collection("Lugares")
                     .document(lugarId)
