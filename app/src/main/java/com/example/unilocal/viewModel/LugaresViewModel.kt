@@ -332,7 +332,8 @@ class LugaresViewModel : ViewModel() {
             if (bitmap == null) {
                 throw Exception("No se pudo decodificar la imagen")
             }
-            
+
+
             // Comprimir y convertir a Base64
             val outputStream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream) // 80% calidad
