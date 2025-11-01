@@ -233,8 +233,8 @@ class LugaresViewModel : ViewModel() {
                 
                 // Actualizar lista local
                 _lugares.value = _lugares.value + lugarConId
-                println("DEBUG: Lugar creado exitosamente con ID: ${docRef.id}")
-                println("DEBUG: Datos guardados: nombre=${lugar.nombre}, categoria=${lugar.categoria}")
+                println("DEBUG: ✅ Lugar creado exitosamente con ID: ${docRef.id}")
+                println("DEBUG: ✅ Datos guardados: nombre=${lugar.nombre}, categoria=${lugar.categoria}")
                 
                 // Marcar como éxito
                 _lugarResult.value = RequestResult.Sucess("Lugar creado exitosamente")

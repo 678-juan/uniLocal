@@ -180,8 +180,11 @@ fun FichaLugarPerfil(
     if (mostrarDialogo) {
         AlertDialog(
             onDismissRequest = { mostrarDialogo = false },
+            // Fondo del diálogo en blanco y sin tonal elevation para evitar tintes
+            containerColor = Color.White,
+            tonalElevation = 0.dp,
             title = { Text("Borrar lugar") },
-            text = { Text("¿Estás seguro de que quieres borrar este lugar? Esta acción no se puede deshacer.") },
+            text = { Text("¿Estás seguro de que quieres borrar este lugar? Esta acción no se puede deshacer.", color = Color.Black) },
             confirmButton = {
                 TextButton(
                     onClick = {

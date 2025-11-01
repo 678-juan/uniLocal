@@ -652,7 +652,6 @@ fun CrearLugar(
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
-
                 }
             }
 
@@ -669,12 +668,9 @@ fun CrearLugar(
                     lugaresViewModel.resetear()
                 }
             )
-
-
-
         }
     }
     
-
+    // Manejar navegación cuando se crea exitosamente
 
 }

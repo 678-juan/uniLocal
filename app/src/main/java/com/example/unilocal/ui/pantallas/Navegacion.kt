@@ -1,6 +1,7 @@
 package com.example.unilocal.ui.pantallas
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -64,8 +65,10 @@ fun Navegacion() {
         }
 
         composable<RutasPantallas.PrincipalAdministrador> {
+            // Obtener el moderador actual desde el ViewModel para pasar su ID a PrincipalAdmin
+            val moderadorId = moderadorViewModel.moderadorActual.collectAsState().value?.id ?: ""
             PrincipalAdmin(
-                moderadorId = "mod1", 
+                moderadorId = moderadorId,
                 lugaresViewModel = lugaresViewModel,
                 moderadorViewModel = moderadorViewModel,
                 navegarALogin = {

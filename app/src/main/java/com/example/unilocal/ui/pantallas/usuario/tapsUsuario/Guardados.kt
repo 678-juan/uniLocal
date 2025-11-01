@@ -39,10 +39,14 @@ import com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab
 @Composable
 fun Guardados(
     navController: NavController,
-    usuarioViewModel: UsuarioViewModel? = null
+    usuarioViewModel: UsuarioViewModel? = null,
+    lugaresViewModel: com.example.unilocal.viewModel.LugaresViewModel? = null
 ) {
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
+    val lugaresVM: com.example.unilocal.viewModel.LugaresViewModel = lugaresViewModel ?: viewModel()
     val usuarioActual by viewModel.usuarioActual.collectAsState()
+    val lugares by lugaresVM.lugares.collectAsState()
+    val favoritosIds by viewModel.favoritosGuardados.collectAsState()
 
     // avatares disponibles
     val avatares = listOf(
@@ -54,8 +58,19 @@ fun Guardados(
     val usuarioUsername = usuarioActual?.username ?: "@vawlte"
     val avatarId = (usuarioActual?.avatar ?: 0).coerceIn(0, avatares.size - 1)
 
-    // obtener lugares guardados del usuario actual
-    val lugaresGuardados = usuarioActual?.favoritos ?: emptyList()
+    // obtener lugares guardados: mapear los IDs de favoritos a objetos Lugar
+    // Si faltan lugares cargados localmente, pedirlos al ViewModel de lugares
+    LaunchedEffect(favoritosIds) {
+        // buscar en Firebase cualquier lugar que no esté en la lista local
+        favoritosIds.forEach { id ->
+            val existe = lugares.any { it.id == id }
+            if (!existe) {
+                lugaresVM.buscarPorId(id)
+            }
+        }
+    }
+
+    val lugaresGuardados = lugares.filter { favoritosIds.contains(it.id) }
 
     Column(
         modifier = Modifier
@@ -156,7 +171,7 @@ fun Guardados(
                     items(lugaresGuardados) { lugar ->
                         LugarGuardadoItem(
                             lugar = lugar,
-                            onClick = { 
+                            onClick = {
                                 // navegar a detalles del lugar
                                 navController.navigate(RutaTab.LugarDetalles(lugar.id))
                             }

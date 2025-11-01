@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import com.example.unilocal.utils.RequestResult
 
 class ModeradorViewModel : ViewModel(){
 
@@ -53,63 +54,10 @@ class ModeradorViewModel : ViewModel(){
     init{
         cargarModeradores()
     }
-    
-    // quemo moderadores aun nos e si meterlos a frebase
-    private fun obtenerModeradoresQuemados(): List<Moderador> {
-        return listOf(
-            Moderador(
-                id = "mod1",
-                nombre = "Juan",
-                username = "juan123",
-                email = "juan-moderador@gmail.com",
-                clave = "clave123",
-                historial = emptyList(),
-                lugares = emptyList()
-            ),
-            Moderador(
-                id = "mod2",
-                nombre = "María",
-                username = "maria456",
-                email = "maria-moderador@gmail.com",
-                clave = "clave456",
-                historial = emptyList(),
-                lugares = emptyList()
-            ),
-            Moderador(
-                id = "mod3",
-                nombre = "Pedro",
-                username = "pedro789",
-                email = "pedro-moderador@gmail.com",
-                clave = "clave789",
-                historial = emptyList(),
-                lugares = emptyList()
-            ),
-            // Moderador admin del README
-            Moderador(
-                id = "mod_admin",
-                nombre = "Admin",
-                username = "admin",
-                email = "admin@unilocal.com",
-                clave = "123",
-                historial = emptyList(),
-                lugares = emptyList()
-            )
-        )
-    }
-
-    // cargar moderadores (quemados + Firebase)
+    // cargar moderadores desde Firebase
     fun cargarModeradores(){
-        // Primero cargar moderadores quemados
-        val moderadoresQuemados = obtenerModeradoresQuemados()
-        _moderador.value = moderadoresQuemados
-        
-        // Luego cargar desde Firebase y combinar (evitando duplicados)
         viewModelScope.launch {
             try {
-                // Primero, asegurar que los moderadores quemados existan en Firebase
-                crearModeradoresQuemadosEnFirebase(moderadoresQuemados)
-                
-                // Cargar todos los moderadores desde Firebase
                 val snapshot = db.collection("Moderadores").get().await()
                 val moderadoresFirebase = snapshot.documents.mapNotNull { doc ->
                     if (doc.exists()) {
@@ -127,100 +75,17 @@ class ModeradorViewModel : ViewModel(){
                         null
                     }
                 }
-                
-                // Combinar: mantener quemados y agregar los de Firebase que no existan ya
-                val moderadoresCombinados = moderadoresQuemados.toMutableList()
-                moderadoresFirebase.forEach { moderadorFirebase ->
-                    // Solo agregar si no existe ya (por ID o email)
-                    if (!moderadoresCombinados.any { 
-                        it.id == moderadorFirebase.id || it.email == moderadorFirebase.email 
-                    }) {
-                        moderadoresCombinados.add(moderadorFirebase)
-                    }
-                }
-                
-                _moderador.value = moderadoresCombinados
+
+                _moderador.value = moderadoresFirebase
             } catch (e: Exception) {
-                // Si hay error con Firebase, mantener solo los quemados
-                // Ya están cargados arriba
+                // Error al cargar moderadores desde Firebase
+                _moderador.value = emptyList()
             }
         }
     }
     
     // Crear moderadores quemados en Firebase si no existen
-    private suspend fun crearModeradoresQuemadosEnFirebase(moderadoresQuemados: List<Moderador>) {
-        moderadoresQuemados.forEach { moderadorQuemado ->
-            try {
-                // Verificar si ya existe en Firebase por email
-                val querySnapshot = db.collection("Moderadores")
-                    .whereEqualTo("email", moderadorQuemado.email)
-                    .get()
-                    .await()
-                
-                if (querySnapshot.isEmpty) {
-                    // No existe, crearlo con el ID fijo (sin historial y lugares, se manejan en subcolecciones)
-                    val moderadorData = hashMapOf<String, Any>(
-                        "nombre" to moderadorQuemado.nombre,
-                        "username" to moderadorQuemado.username,
-                        "email" to moderadorQuemado.email,
-                        "clave" to moderadorQuemado.clave
-                        // historial y lugares NO se guardan aquí, se manejan en subcolecciones
-                    )
-                    db.collection("Moderadores")
-                        .document(moderadorQuemado.id)
-                        .set(moderadorData)
-                        .await()
-                } else {
-                    // Ya existe, verificar si tiene el mismo ID
-                    val existente = querySnapshot.documents.firstOrNull()
-                    if (existente != null && existente.id != moderadorQuemado.id) {
-                        // Existe pero con otro ID, actualizar el documento con el ID correcto
-                        val moderadorData = hashMapOf<String, Any>(
-                            "nombre" to moderadorQuemado.nombre,
-                            "username" to moderadorQuemado.username,
-                            "email" to moderadorQuemado.email,
-                            "clave" to moderadorQuemado.clave
-                        )
-                        // Crear con el ID correcto
-                        db.collection("Moderadores")
-                            .document(moderadorQuemado.id)
-                            .set(moderadorData)
-                            .await()
-                        // Eliminar el duplicado si es diferente
-                        if (existente.id != moderadorQuemado.id) {
-                            existente.reference.delete().await()
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                // Error al crear/verificar moderador quemado, continuar con el siguiente
-            }
-        }
-    }
-    
-    fun crearModerador(moderador: Moderador){
-        viewModelScope.launch {
-            try {
-                // Guardar moderador sin historial y lugares (se manejan en subcolecciones)
-                val moderadorData = hashMapOf<String, Any>(
-                    "nombre" to moderador.nombre,
-                    "username" to moderador.username,
-                    "email" to moderador.email,
-                    "clave" to moderador.clave
-                    // historial y lugares NO se guardan aquí, se manejan en subcolecciones
-                )
-                
-                val docRef = db.collection("Moderadores")
-                    .add(moderadorData)
-                    .await()
-                
-                val moderadorConId = moderador.copy(id = docRef.id, historial = emptyList(), lugares = emptyList())
-                _moderador.value = _moderador.value + moderadorConId
-            } catch (e: Exception) {
-                // Error al crear moderador
-            }
-        }
-    }
+
     
     fun buscarId(id: String): Moderador? {
         return _moderador.value.find { it.id == id }
@@ -230,64 +95,51 @@ class ModeradorViewModel : ViewModel(){
         return _moderador.value.find { it.email == email }
     }
 
-    fun login(email: String, password: String): Moderador? {
-        // Primero buscar en moderadores quemados (tienen prioridad)
-        val moderadoresQuemados = obtenerModeradoresQuemados()
-        val encontradoQuemado = moderadoresQuemados.find { 
-            it.email == email && it.clave == password 
-        }
-        if (encontradoQuemado != null) {
-            _moderadorActual.value = encontradoQuemado
-            // Para moderadores quemados, intentar cargar datos de Firebase si existen
-            cargarDatosModerador(encontradoQuemado.id)
-            return encontradoQuemado
-        }
-        
-        // Luego buscar en la lista local (que incluye quemados + Firebase)
-        val encontrado = _moderador.value.find { 
-            it.email == email && it.clave == password && it.id != encontradoQuemado?.id
-        }
-        if (encontrado != null) {
-            _moderadorActual.value = encontrado
-            cargarDatosModerador(encontrado.id)
-            return encontrado
-        }
-        
-        // Si no está en local, buscar en Firebase
+    // Resultado del login de moderador (similar a UsuarioViewModel)
+    private val _moderadorResult = MutableStateFlow<RequestResult?>(null)
+    val moderadorResult: StateFlow<RequestResult?> = _moderadorResult.asStateFlow()
+
+    fun login(email: String, password: String) {
         viewModelScope.launch {
-            try {
-                val snapshot = db.collection("Moderadores")
-                    .whereEqualTo("email", email)
-                    .whereEqualTo("clave", password)
-                    .get()
-                    .await()
-                
-                val doc = snapshot.documents.firstOrNull()
-                if (doc != null && doc.exists()) {
-                    val data = doc.data!!
-                    val moderador = Moderador(
-                        id = doc.id,
-                        nombre = data["nombre"] as? String ?: "",
-                        username = data["username"] as? String ?: "",
-                        email = data["email"] as? String ?: "",
-                        clave = data["clave"] as? String ?: "",
-                        historial = emptyList(), // Se carga desde subcolección
-                        lugares = emptyList() // Se carga desde subcolección
-                    )
-                    
-                    _moderadorActual.value = moderador
-                    // Actualizar lista local (evitando duplicados)
-                    if (!_moderador.value.any { it.id == moderador.id || it.email == moderador.email }) {
-                        _moderador.value = _moderador.value + moderador
-                    }
-                    cargarDatosModerador(moderador.id)
-                }
-            } catch (e: Exception) {
-                // Error al hacer login
-            }
+            _moderadorResult.value = RequestResult.Cargar
+            _moderadorResult.value = runCatching { loginFireBase(email, password) }.fold(
+                onSuccess = { RequestResult.Sucess("Moderador autenticado") },
+                onFailure = { RequestResult.Error(it.message ?: "Error iniciando sesión moderador") }
+            )
         }
-        
-        return null // Retornará null mientras se busca en Firebase
+    }
+
+    private suspend fun loginFireBase(email: String, password: String) {
+        val snapshot = db.collection("Moderadores")
+            .whereEqualTo("email", email)
+            .whereEqualTo("clave", password)
+            .get()
+            .await()
+
+        val doc = snapshot.documents.firstOrNull()
+        if (doc != null && doc.exists()) {
+            val data = doc.data!!
+            val moderador = Moderador(
+                id = doc.id,
+                nombre = data["nombre"] as? String ?: "",
+                username = data["username"] as? String ?: "",
+                email = data["email"] as? String ?: "",
+                clave = data["clave"] as? String ?: "",
+                historial = emptyList(),
+                lugares = emptyList()
+            )
+
+            _moderadorActual.value = moderador
+
+            // Actualizar lista local (evitando duplicados)
+            if (!_moderador.value.any { it.id == moderador.id || it.email == moderador.email }) {
+                _moderador.value = _moderador.value + moderador
+            }
+
+            cargarDatosModerador(moderador.id)
+        } else {
+            throw Exception("Moderador no encontrado")
+        }
     }
     
     private fun cargarDatosModerador(moderadorId: String) {
@@ -366,39 +218,41 @@ class ModeradorViewModel : ViewModel(){
         motivo: String = "",
         lugaresViewModel: LugaresViewModel? = null
     ) {
-        val moderador = _moderadorActual.value
-        if (moderador != null) {
-            viewModelScope.launch {
-                try {
-                    val solicitud = Solicitud(
-                        lugarId = lugar.id,
-                        lugarNombre = lugar.nombre,
-                        moderadorId = moderadorId,
-                        accion = nuevaDecision,
-                        motivo = motivo,
-                        fechaIso = System.currentTimeMillis().toString()
-                    )
-                    
-                    // Guardar solicitud en Firebase (subcolección, convertir enum a String)
-                    val solicitudData = hashMapOf<String, Any>(
-                        "lugarId" to solicitud.lugarId,
-                        "lugarNombre" to solicitud.lugarNombre,
-                        "moderadorId" to solicitud.moderadorId,
-                        "accion" to solicitud.accion.name, // Guardar enum como String
-                        "motivo" to solicitud.motivo,
-                        "fechaIso" to solicitud.fechaIso
-                    )
-                    
-                    db.collection("Moderadores")
-                        .document(moderadorId)
-                        .collection("historial")
-                        .add(solicitudData)
-                        .await()
-                    
+        // Siempre intentar registrar la decisión en Firebase con el moderadorId proporcionado.
+        viewModelScope.launch {
+            try {
+                val solicitud = Solicitud(
+                    lugarId = lugar.id,
+                    lugarNombre = lugar.nombre,
+                    moderadorId = moderadorId,
+                    accion = nuevaDecision,
+                    motivo = motivo,
+                    fechaIso = System.currentTimeMillis().toString()
+                )
+
+                // Guardar solicitud en Firebase (subcolección, convertir enum a String)
+                val solicitudData = hashMapOf<String, Any>(
+                    "lugarId" to solicitud.lugarId,
+                    "lugarNombre" to solicitud.lugarNombre,
+                    "moderadorId" to solicitud.moderadorId,
+                    "accion" to solicitud.accion.name, // Guardar enum como String
+                    "motivo" to solicitud.motivo,
+                    "fechaIso" to solicitud.fechaIso
+                )
+
+                db.collection("Moderadores")
+                    .document(moderadorId)
+                    .collection("historial")
+                    .add(solicitudData)
+                    .await()
+
+                // Si el moderador actual en memoria coincide con el moderadorId, actualizar el estado local
+                val moderadorActualEnMemoria = _moderadorActual.value
+                if (moderadorActualEnMemoria != null && moderadorActualEnMemoria.id == moderadorId) {
                     // Actualizar historial local
                     val nuevoHistorial = _historial.value + solicitud
                     _historial.value = nuevoHistorial
-                    
+
                     // Actualizar lugares autorizados
                     if (nuevaDecision == EstadoLugar.AUTORIZADO) {
                         if (!_lugaresAutorizados.value.contains(lugar.id)) {
@@ -409,7 +263,7 @@ class ModeradorViewModel : ViewModel(){
                                 .document(lugar.id)
                                 .set(mapOf("lugarId" to lugar.id, "fecha" to System.currentTimeMillis()))
                                 .await()
-                            
+
                             // Actualizar local
                             _lugaresAutorizados.value = _lugaresAutorizados.value + lugar.id
                         }
@@ -421,28 +275,28 @@ class ModeradorViewModel : ViewModel(){
                             .document(lugar.id)
                             .delete()
                             .await()
-                        
+
                         // Actualizar local
                         _lugaresAutorizados.value = _lugaresAutorizados.value.filter { it != lugar.id }
                     }
-                    
+
                     // actualizar moderador actual
-                    val moderadorActualizado = moderador.copy(
-                        historial = nuevoHistorial,
+                    val moderadorActualizado = moderadorActualEnMemoria.copy(
+                        historial = _historial.value,
                         lugares = _lugaresAutorizados.value
                     )
                     _moderadorActual.value = moderadorActualizado
-                    
+
                     // actualizar en la lista de moderadores
-                    _moderador.value = _moderador.value.map { 
-                        if (it.id == moderador.id) moderadorActualizado else it 
+                    _moderador.value = _moderador.value.map {
+                        if (it.id == moderadorActualEnMemoria.id) moderadorActualizado else it
                     }
-                    
-                    // actualizar estado del lugar en LugaresViewModel
-                    lugaresViewModel?.actualizarEstado(lugar.id, nuevaDecision)
-                } catch (e: Exception) {
-                    // Error al registrar decisión
                 }
+
+                // actualizar estado del lugar en LugaresViewModel (independiente de si el moderadorActual estaba en memoria)
+                lugaresViewModel?.actualizarEstado(lugar.id, nuevaDecision)
+            } catch (e: Exception) {
+                // Error al registrar decisión
             }
         }
     }

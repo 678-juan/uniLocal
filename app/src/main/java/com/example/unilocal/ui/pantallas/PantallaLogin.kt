@@ -133,22 +133,8 @@ fun PantallaLogin(
                     cargando = true
                     intentandoLoginModerador = true
 
-                    // Intentar login como moderador primero (puede retornar null si busca en Firebase)
-                    val moderador = moderadorVM.login(correo.trim(), clave)
-                    if (moderador != null) {
-                        // Moderador encontrado en local, navegar inmediatamente
-                        Toast.makeText(contexto, "¡Bienvenido ${moderador.nombre} (moderador)!", Toast.LENGTH_SHORT).show()
-                        cargando = false
-                        intentandoLoginModerador = false
-                        navegarAPrincipalAdmin(moderador.id)
-                        // Limpiar campos
-                        correo = ""
-                        clave = ""
-                        return@BotonPrincipal
-                    }
-
-                    // Si retornó null, está buscando en Firebase (asíncrono)
-                    // El LaunchedEffect se encargará de esperar y luego intentar como usuario si no hay resultado
+                    // Intentar login como moderador (asíncrono). La navegación se realiza en LaunchedEffect(moderadorActual).
+                    moderadorVM.login(correo.trim(), clave)
                 }
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -200,7 +186,6 @@ fun PantallaLogin(
                     ).show()
                     navegarAPrincipalUsuario()
                     viewModel.resetear()
-                    // Limpiar campos
                     correo = ""
                     clave = ""
                 }
