@@ -51,13 +51,51 @@ import com.example.unilocal.ui.componentes.Resultadooperacion
 import com.example.unilocal.utils.RequestResult
 import kotlinx.coroutines.delay
 import android.widget.Toast
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.MapEventsOverlay
+import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.views.overlay.Marker
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.FusedLocationProviderClient
+import android.location.LocationManager
+import android.location.Location
+import androidx.compose.ui.viewinterop.AndroidView
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Bitmap.Config
+import android.graphics.Color as AndroidColor
+import android.graphics.drawable.BitmapDrawable
+import android.content.Context
+import android.graphics.drawable.Drawable
+import com.example.unilocal.ui.map.createPlacePinDrawable
 
 @Composable
 fun CrearLugar(
     navController: NavController? = null,
     lugaresViewModel: LugaresViewModel = viewModel(),
-    usuarioViewModel: UsuarioViewModel = viewModel()
+    usuarioViewModel: UsuarioViewModel? = null
 ) {
+    // Asegura un UsuarioViewModel con alcance Activity si no se pasa uno
+    val usuarioVM: UsuarioViewModel = usuarioViewModel ?: viewModel(LocalContext.current as androidx.activity.ComponentActivity)
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
@@ -82,7 +120,7 @@ fun CrearLugar(
             )
         )
     }
-    val usuarioActual = usuarioViewModel.usuarioActual.collectAsState().value
+    val usuarioActual = usuarioVM.usuarioActual.collectAsState().value
     val lugarResult by lugaresViewModel.lugarResult.collectAsState()
     val context = LocalContext.current
 
@@ -121,6 +159,111 @@ fun CrearLugar(
     ) { uri: android.net.Uri? ->
         imagenSeleccionada = uri
     }
+
+    // Ubicación seleccionada en el mapa (lat, lng) como MutableState para MapDialog
+    // Se inicializa desde la ubicación del dispositivo si está disponible; si no, queda en 0.0
+    val latSeleccionadaState = remember { mutableStateOf(0.0) }
+    val lngSeleccionadaState = remember { mutableStateOf(0.0) }
+
+    
+    // Por defecto: Armenia, Colombia si no hay ubicación
+    val DEFAULT_LAT = 4.5338889
+    val DEFAULT_LNG = -75.6811111
+    // referencia al MapView nativo
+    val referenciaMapa = remember { mutableStateOf<MapView?>(null) }
+
+    // Cliente de ubicación (FusedLocationProvider)
+    val clienteUbicacion = remember {
+        try {
+            LocationServices.getFusedLocationProviderClient(context)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // permiso de ubicación
+    val contextoPermisos = LocalContext.current
+    var permisoUbicacionConcedido by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                contextoPermisos,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val lanzadorPermisoUbicacion = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { concedido: Boolean ->
+        permisoUbicacionConcedido = concedido
+        if (concedido) {
+                // si el mapa ya existe, intentar centrarlo
+            val mv = referenciaMapa.value
+            if (mv != null) {
+                if (clienteUbicacion != null) {
+                    clienteUbicacion.lastLocation.addOnSuccessListener { loc: Location? ->
+                        if (loc != null) {
+                            android.util.Log.d("CrearLugar", "fused lastLocation -> lat=${loc.latitude}, lng=${loc.longitude}, accuracy=${loc.accuracy}")
+                            android.os.Handler(contextoPermisos.mainLooper).post {
+                                mv.controller.setCenter(GeoPoint(loc.latitude, loc.longitude))
+                                mv.controller.setZoom(16.5)
+                            }
+                        } else {
+                            android.util.Log.d("CrearLugar", "fused lastLocation -> null")
+                        }
+                    }
+                } else {
+                    val lm = contextoPermisos.getSystemService(LocationManager::class.java)
+                    val loc: Location? = try {
+                        lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                            ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                    } catch (e: Exception) { null }
+                    if (loc != null) {
+                        android.os.Handler(contextoPermisos.mainLooper).post {
+                            mv.controller.setCenter(GeoPoint(loc.latitude, loc.longitude))
+                            mv.controller.setZoom(16.5)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // Si hay permiso, pedir a UsuarioViewModel que obtenga y persista una ubicación del dispositivo (una vez)
+    LaunchedEffect(permisoUbicacionConcedido) {
+        if (permisoUbicacionConcedido) {
+            try {
+                usuarioVM.obtenerYGuardarUbicacionDispositivoSiFalta()
+                } catch (e: Exception) {
+                    // ignorar
+                }
+        }
+    }
+    // Intentar obtener la ubicación del dispositivo al componer, si el permiso está concedido.
+    LaunchedEffect(permisoUbicacionConcedido, clienteUbicacion) {
+        if (permisoUbicacionConcedido) {
+            try {
+                clienteUbicacion?.lastLocation?.addOnSuccessListener { loc: Location? ->
+                    if (loc != null) {
+                        // solo setear si aún no hay una selección previa en memoria
+                        if (latSeleccionadaState.value == 0.0 && lngSeleccionadaState.value == 0.0) {
+                            latSeleccionadaState.value = loc.latitude
+                            lngSeleccionadaState.value = loc.longitude
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // ignorar
+            }
+        } else {
+            // pedir permiso para que el diálogo pueda mostrar la ubicación si el usuario lo permite
+            try {
+                lanzadorPermisoUbicacion.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            } catch (e: Exception) {
+                // ignore
+            }
+        }
+    }
+    var showMap by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -567,7 +710,13 @@ fun CrearLugar(
                                 2.dp,
                                 VerdePrincipal.copy(alpha = 0.3f),
                                 RoundedCornerShape(12.dp)
-                            ),
+                            )
+                            .clickable {
+                                showMap = true
+                                if (!permisoUbicacionConcedido) {
+                                    lanzadorPermisoUbicacion.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                                }
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
@@ -581,11 +730,15 @@ fun CrearLugar(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Mapa interactivo",
+                                text = "Mapa interactivo (toca para seleccionar)",
                                 fontSize = 14.sp,
                                 color = VerdePrincipal,
                                 fontWeight = FontWeight.Medium
                             )
+                            Spacer(modifier = Modifier.height(8.dp))
+                                if (latSeleccionadaState.value != 0.0 || lngSeleccionadaState.value != 0.0) {
+                                Text(text = "Lat: ${String.format("%.6f", latSeleccionadaState.value)}  Lng: ${String.format("%.6f", lngSeleccionadaState.value)}", fontSize = 12.sp, color = Color.DarkGray)
+                            }
                         }
                     }
                 }
@@ -622,7 +775,7 @@ fun CrearLugar(
                         estado = EstadoLugar.PENDIENTE,
                         creadorId = usuarioActual?.id ?: "anon",
                         calificacionPromedio = 0.0,
-                        ubicacion = Ubicacion(latitud = 0.0, longitud = 0.0),
+                        ubicacion = Ubicacion(latitud = latSeleccionadaState.value, longitud = lngSeleccionadaState.value),
                         comentarios = emptyList()
                     )
 
@@ -670,6 +823,210 @@ fun CrearLugar(
         }
     }
     
+    // Mostrar el dialog del mapa cuando showMap sea true
+    if (showMap) {
+        MapDialog(
+            showMap = showMap,
+            onDismiss = {
+                showMap = false
+                // publicar la ubicación seleccionada en UsuarioViewModel para que otras pantallas (Recomendaciones) la usen
+                val nueva = Ubicacion(latitud = latSeleccionadaState.value, longitud = lngSeleccionadaState.value)
+                usuarioVM.setUbicacionSeleccionada(nueva)
+                // persistir la selección para que otras pantallas o el próximo inicio puedan leerla
+                try {
+                    val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                    prefs.edit()
+                        .putString("ubicacion_lat", nueva.latitud.toString())
+                        .putString("ubicacion_lng", nueva.longitud.toString())
+                        .apply()
+                } catch (e: Exception) {
+                    // ignorar errores de persistencia
+                }
+            },
+            mapViewRef = referenciaMapa,
+            latSeleccionadaState = latSeleccionadaState,
+            lngSeleccionadaState = lngSeleccionadaState,
+            permisoUbicacion = permisoUbicacionConcedido,
+            clienteUbicacion = clienteUbicacion
+        )
+    }
+
     // Manejar navegación cuando se crea exitosamente
 
 }
+
+// Diálogo de mapa a pantalla completa: se muestra cuando showMap == true
+@Composable
+private fun MapDialog(
+    showMap: Boolean,
+    onDismiss: () -> Unit,
+    mapViewRef: MutableState<MapView?>,
+    latSeleccionadaState: MutableState<Double>,
+    lngSeleccionadaState: MutableState<Double>,
+    permisoUbicacion: Boolean,
+    clienteUbicacion: FusedLocationProviderClient?
+) {
+    if (!showMap) return
+    Dialog(onDismissRequest = onDismiss) {
+    // Propietario del ciclo de vida para el MapView
+        val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+
+    // Overlay de pantalla completa; centrar un contenedor para que el mapa no cubra toda la pantalla
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    // make the dialog wider (closer to screen edges)
+                    .fillMaxWidth(0.96f)
+                    // increase overall dialog height so the map can be taller than wide
+                    .height(760.dp)
+                    .padding(vertical = 12.dp)
+                    .background(Color.White, RoundedCornerShape(12.dp))
+                    .border(2.dp, Color.LightGray.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                    .padding(12.dp)
+            ) {
+                // Encerrar el MapView en una caja recortada para evitar que se desborde
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // hacer el mapa más alto (vertical) manteniéndolo contenido
+                        .height(680.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .border(2.dp, Color.LightGray.copy(alpha = 0.25f), RoundedCornerShape(10.dp))
+                ) {
+                    AndroidView(
+                        factory = { ctx ->
+                        val appCtx = ctx.applicationContext
+                        val prefs = appCtx.getSharedPreferences("osmdroid", android.content.Context.MODE_PRIVATE)
+                        Configuration.getInstance().load(appCtx, prefs)
+
+                        val map = MapView(ctx).apply {
+                            setTileSource(TileSourceFactory.MAPNIK)
+                            setMultiTouchControls(true)
+                            controller.setZoom(16.5)
+                        }
+
+                        mapViewRef.value = map
+
+                        val marker = Marker(map).apply {
+                            // pin azul para el usuario (mismo estilo que en Recomendaciones)
+                            icon = createPlacePinDrawable(ctx, AndroidColor.parseColor("#2196F3"), 44)
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        }
+                        map.overlays.add(marker)
+
+                        val receiver = object : MapEventsReceiver {
+                            override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
+                                android.os.Handler(ctx.mainLooper).post {
+                                    latSeleccionadaState.value = p.latitude
+                                    lngSeleccionadaState.value = p.longitude
+                                    marker.position = GeoPoint(p.latitude, p.longitude)
+                                    map.invalidate()
+                                }
+                                return true
+                            }
+
+                            override fun longPressHelper(p: GeoPoint): Boolean = false
+                        }
+                        map.overlays.add(MapEventsOverlay(receiver))
+
+                        // Lógica de centrado
+                        if (latSeleccionadaState.value != 0.0 || lngSeleccionadaState.value != 0.0) {
+                            val p = GeoPoint(latSeleccionadaState.value, lngSeleccionadaState.value)
+                            marker.position = p
+                            map.controller.setCenter(p)
+                        } else if (permisoUbicacion) {
+                            if (clienteUbicacion != null) {
+                                clienteUbicacion.lastLocation.addOnSuccessListener { loc: Location? ->
+                                    if (loc != null) {
+                                        android.os.Handler(ctx.mainLooper).post {
+                                            val p = GeoPoint(loc.latitude, loc.longitude)
+                                            latSeleccionadaState.value = loc.latitude
+                                            lngSeleccionadaState.value = loc.longitude
+                                            marker.position = p
+                                            map.controller.setCenter(p)
+                                            map.invalidate()
+                                        }
+                                    }
+                                }
+                            } else {
+                                val lm = ctx.getSystemService(LocationManager::class.java)
+                                val loc: Location? = try {
+                                    lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                                        ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                                } catch (e: Exception) { null }
+                                if (loc != null) {
+                                    android.os.Handler(ctx.mainLooper).post {
+                                        val p = GeoPoint(loc.latitude, loc.longitude)
+                                        latSeleccionadaState.value = loc.latitude
+                                        lngSeleccionadaState.value = loc.longitude
+                                        marker.position = p
+                                        map.controller.setCenter(p)
+                                        map.invalidate()
+                                    }
+                                }
+                            }
+                        } else {
+                            android.os.Handler(ctx.mainLooper).post {
+                                val p = GeoPoint(4.5338889, -75.6811111)
+                                latSeleccionadaState.value = p.latitude
+                                lngSeleccionadaState.value = p.longitude
+                                marker.position = p
+                                map.controller.setCenter(p)
+                                map.invalidate()
+                            }
+                        }
+
+                            map
+                            },
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    }
+
+                // buttons row inside the boxed container, aligned to bottom
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TextButton(onClick = onDismiss) { Text("Cancelar") }
+                        TextButton(onClick = onDismiss) { Text("Confirmar") }
+                    }
+                }
+            }
+
+            // Manejo del ciclo de vida del MapView dentro del diálogo
+            DisposableEffect(lifecycleOwner, mapViewRef.value) {
+                val map = mapViewRef.value
+                val observer = LifecycleEventObserver { _, event ->
+                    map?.let {
+                        when (event) {
+                            Lifecycle.Event.ON_START -> it.onResume()
+                            Lifecycle.Event.ON_STOP -> it.onPause()
+                            else -> {}
+                        }
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                    mapViewRef.value?.onPause()
+                    mapViewRef.value = null
+                }
+            }
+        }
+    }
+}
+

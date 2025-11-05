@@ -79,5 +79,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation("io.coil-kt:coil-compose:2.4.0")
+    // OsmDroid for native maps (open-source, available on Maven Central)
+    implementation("org.osmdroid:osmdroid-android:6.1.14")
+    // Fused Location Provider to get the user's last known location
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
 }

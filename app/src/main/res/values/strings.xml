@@ -1,4 +1,6 @@
 <resources>
+
+    <!-- Mapbox token removed; using MapLibre demo tiles instead -->
     <!-- Pantalla login -->
     <string name="app_name">uniLocal</string>
     <string name="login_title">Accede a tu cuenta</string>

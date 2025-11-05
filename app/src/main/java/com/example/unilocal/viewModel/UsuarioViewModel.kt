@@ -1,6 +1,8 @@
 package com.example.unilocal.viewModel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.Context
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.unilocal.model.entidad.Usuario
 import com.example.unilocal.model.entidad.Notificacion
@@ -8,18 +10,74 @@ import com.example.unilocal.model.entidad.TipoNotificacion
 import com.example.unilocal.utils.RequestResult
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class UsuarioViewModel : ViewModel() {
+class UsuarioViewModel(application: Application) : AndroidViewModel(application) {
     private val _usuario = MutableStateFlow(emptyList<Usuario>())
     val usuario: StateFlow<List<Usuario>> = _usuario.asStateFlow()
     
     private val _usuarioActual = MutableStateFlow<Usuario?>(null)
     val usuarioActual: StateFlow<Usuario?> = _usuarioActual.asStateFlow()
+    
+    // ubicación seleccionada por el usuario (p.ej. desde CrearLugar)
+    private val _ubicacionSeleccionada = MutableStateFlow<com.example.unilocal.model.entidad.Ubicacion?>(null)
+    val ubicacionSeleccionada: StateFlow<com.example.unilocal.model.entidad.Ubicacion?> = _ubicacionSeleccionada.asStateFlow()
+
+    fun setUbicacionSeleccionada(ubicacion: com.example.unilocal.model.entidad.Ubicacion?) {
+        _ubicacionSeleccionada.value = ubicacion
+    // persistir selección
+        try {
+            val prefs = getApplication<Application>().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            if (ubicacion != null) {
+                prefs.edit()
+                    .putString("ubicacion_lat", ubicacion.latitud.toString())
+                    .putString("ubicacion_lng", ubicacion.longitud.toString())
+                    .apply()
+            } else {
+                prefs.edit().remove("ubicacion_lat").remove("ubicacion_lng").apply()
+            }
+        } catch (e: Exception) {
+            // ignorar errores de persistencia
+        }
+    }
+
+    /**
+     * Intentar obtener una ubicación fresca del dispositivo (alta precisión) una vez y persistirla
+     * mediante setUbicacionSeleccionada. Este método es idempotente: si ya existe una ubicación
+     * seleccionada no la sobreescribe.
+     */
+    fun obtenerYGuardarUbicacionDispositivoSiFalta() {
+        // si ya tenemos una ubicación seleccionada, no sobreescribir
+        if (_ubicacionSeleccionada.value != null) return
+
+        try {
+            val client = LocationServices.getFusedLocationProviderClient(getApplication<Application>())
+            try {
+                client.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                    .addOnSuccessListener { loc: android.location.Location? ->
+                        if (loc != null) {
+                            val u = com.example.unilocal.model.entidad.Ubicacion(loc.latitude, loc.longitude)
+                            setUbicacionSeleccionada(u)
+                        }
+                    }
+            } catch (e: NoSuchMethodError) {
+                // Play Services más antiguo: fallback a lastLocation
+                client.lastLocation.addOnSuccessListener { loc: android.location.Location? ->
+                    if (loc != null) {
+                        val u = com.example.unilocal.model.entidad.Ubicacion(loc.latitude, loc.longitude)
+                        setUbicacionSeleccionada(u)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // ignore errors
+        }
+    }
     
     // likes por usuario - Map<usuarioId, Set<lugarId>>
     private val _likesPorUsuario = MutableStateFlow(mapOf<String, Set<String>>())
@@ -47,6 +105,18 @@ class UsuarioViewModel : ViewModel() {
     val db = Firebase.firestore
     
     init {
+        // load persisted selected location if any
+        try {
+            val prefs = getApplication<Application>().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            val lat = prefs.getString("ubicacion_lat", null)?.toDoubleOrNull()
+            val lng = prefs.getString("ubicacion_lng", null)?.toDoubleOrNull()
+            if (lat != null && lng != null) {
+                _ubicacionSeleccionada.value = com.example.unilocal.model.entidad.Ubicacion(lat, lng)
+            }
+        } catch (e: Exception) {
+            // ignore read errors
+        }
+
         cargarUsuarios()
     }
 
