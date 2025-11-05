@@ -619,7 +619,6 @@ fun CrearLugar(
                         telefono = telefono,
                         imagenUri = imagenSeleccionada?.toString() ?: "default_image",
                         likes = 0,
-                        longitud = 0.0,
                         estado = EstadoLugar.PENDIENTE,
                         creadorId = usuarioActual?.id ?: "anon",
                         calificacionPromedio = 0.0,

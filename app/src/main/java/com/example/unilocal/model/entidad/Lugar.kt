@@ -12,13 +12,18 @@ data class Lugar(
     val telefono: String,
     val imagenUri: String,
     var likes: Int,
-    val longitud: Double,
+
     val estado: EstadoLugar = EstadoLugar.PENDIENTE,
     val creadorId: String,
     val calificacionPromedio: Double,
     val ubicacion: Ubicacion,
     val comentarios: List<Comentario> = emptyList()
 )
+
+
+
+
+
 
 
 
