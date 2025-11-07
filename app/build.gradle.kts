@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.kotlinx.serialization)
+    id("io.gitlab.arturbosch.detekt")
 
 }
 
@@ -84,4 +85,20 @@ dependencies {
     // Fused Location Provider to get the user's last known location
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
+    // Detekt formatting plugin used by detekt.yml
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
+
+}
+
+detekt {
+    toolVersion = "1.23.0"
+    config = files(rootProject.file("detekt.yml"))
+    buildUponDefaultConfig = true
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    jvmTarget = "11"
+    reports {
+        html.required.set(true)
+    }
 }

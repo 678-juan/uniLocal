@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.componentes
+﻿package com.example.unilocal.ui.componentes
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -37,7 +37,7 @@ fun FichaLugarPerfil(
     onVerComentarios: () -> Unit = {}
 ) {
     var mostrarDialogo by remember { mutableStateOf(false) }
-    
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -120,9 +120,9 @@ fun FichaLugarPerfil(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             // información del lugar
             Column(
                 modifier = Modifier.weight(1f)
@@ -133,13 +133,13 @@ fun FichaLugarPerfil(
                     fontSize = 16.sp,
                     color = Color.Black
                 )
-                
+
                 Text(
                     text = lugar.categoria,
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
-                
+
                 Text(
                     text = lugar.direccion,
                     fontSize = 12.sp,
@@ -148,7 +148,7 @@ fun FichaLugarPerfil(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            
+
             // botones de acción
             Row {
                 // botón de comentarios
@@ -161,7 +161,7 @@ fun FichaLugarPerfil(
                         tint = Color(0xFF2196F3)
                     )
                 }
-                
+
                 // botón de borrar
                 IconButton(
                     onClick = { mostrarDialogo = true }
@@ -175,7 +175,7 @@ fun FichaLugarPerfil(
             }
         }
     }
-    
+
     // diálogo de confirmación
     if (mostrarDialogo) {
         AlertDialog(
@@ -205,3 +205,4 @@ fun FichaLugarPerfil(
         )
     }
 }
+

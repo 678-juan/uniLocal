@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.theme
+﻿package com.example.unilocal.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
@@ -9,3 +9,4 @@ val Shapes = Shapes(
     medium = RoundedCornerShape(8.dp),
     large = RoundedCornerShape(12.dp)
 )
+

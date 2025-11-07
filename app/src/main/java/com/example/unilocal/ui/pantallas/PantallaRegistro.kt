@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas
+﻿package com.example.unilocal.ui.pantallas
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -308,3 +308,4 @@ fun PantallaRegisto(
         }
     )
 }
+

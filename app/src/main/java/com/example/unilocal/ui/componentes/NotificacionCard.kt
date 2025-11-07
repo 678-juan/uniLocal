@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.componentes
+﻿package com.example.unilocal.ui.componentes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,7 +30,7 @@ fun NotificacionCard(
     onNotificacionClick: (Notificacion) -> Unit = {}
 ) {
     val viewModel = usuarioViewModel ?: androidx.lifecycle.viewmodel.compose.viewModel<UsuarioViewModel>()
-    
+
     // Obtener icono según el tipo de notificación
     val icono = when (notificacion.tipo) {
         TipoNotificacion.LUGAR_AUTORIZADO -> Icons.Default.CheckCircle
@@ -39,7 +38,7 @@ fun NotificacionCard(
         TipoNotificacion.COMENTARIO_NUEVO -> Icons.Default.Notifications
         TipoNotificacion.LUGAR_FAVORITO -> Icons.Default.LocationOn
     }
-    
+
     // Obtener color según el tipo
     val colorIcono = when (notificacion.tipo) {
         TipoNotificacion.LUGAR_AUTORIZADO -> Color(0xFF4CAF50)
@@ -47,12 +46,12 @@ fun NotificacionCard(
         TipoNotificacion.COMENTARIO_NUEVO -> Color(0xFF2196F3)
         TipoNotificacion.LUGAR_FAVORITO -> Color(0xFFFF9800)
     }
-    
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .clickable { 
+            .clickable {
                 onNotificacionClick(notificacion)
                 if (!notificacion.leida) {
                     viewModel.marcarNotificacionComoLeida(notificacion.id)
@@ -60,9 +59,9 @@ fun NotificacionCard(
             },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (notificacion.leida) 
-                Color.White 
-            else 
+            containerColor = if (notificacion.leida)
+                Color.White
+            else
                 Color(0xFFE3F2FD).copy(alpha = 0.8f)
         ),
         elevation = CardDefaults.cardElevation(
@@ -90,9 +89,9 @@ fun NotificacionCard(
                     modifier = Modifier.size(20.dp)
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             // Contenido de la notificación
             Column(
                 modifier = Modifier.weight(1f)
@@ -109,7 +108,7 @@ fun NotificacionCard(
                         fontSize = 16.sp,
                         color = if (notificacion.leida) Color.Gray else Color.Black
                     )
-                    
+
                     // Indicador de no leída
                     if (!notificacion.leida) {
                         Box(
@@ -120,9 +119,9 @@ fun NotificacionCard(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(4.dp))
-                
+
                 // Mensaje
                 Text(
                     text = notificacion.mensaje,
@@ -130,9 +129,9 @@ fun NotificacionCard(
                     color = if (notificacion.leida) Color.Gray else Color.DarkGray,
                     lineHeight = 18.sp
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 // Fecha y hora
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -144,7 +143,7 @@ fun NotificacionCard(
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
-                    
+
                     // Tipo de notificación
                     Text(
                         text = obtenerTextoDelTipo(notificacion.tipo),
@@ -162,7 +161,7 @@ fun NotificacionCard(
 private fun formatearFechaCompleta(timestamp: Long): String {
     val ahora = System.currentTimeMillis()
     val diferencia = ahora - timestamp
-    
+
     return when {
         diferencia < 60000 -> "Hace un momento"
         diferencia < 3600000 -> "Hace ${diferencia / 60000} min"
@@ -184,3 +183,4 @@ private fun obtenerTextoDelTipo(tipo: TipoNotificacion): String {
         TipoNotificacion.LUGAR_FAVORITO -> "Favorito"
     }
 }
+

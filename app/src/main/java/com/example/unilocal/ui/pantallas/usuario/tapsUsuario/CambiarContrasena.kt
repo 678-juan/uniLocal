@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -44,7 +44,7 @@ fun CambiarPassword(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var verificationCode by remember { mutableStateOf("") }
-    
+
     // Estados para mostrar/ocultar contraseñas
     var showPassword by remember { mutableStateOf(false) }
     var showConfirmPassword by remember { mutableStateOf(false) }
@@ -115,7 +115,7 @@ fun CambiarPassword(
                     color = Color.Black,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-                
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -127,9 +127,9 @@ fun CambiarPassword(
                             .size(50.dp)
                             .clip(CircleShape)
                     )
-                    
+
                     Spacer(modifier = Modifier.width(12.dp))
-                    
+
                     Text(
                         text = usuarioUsername,
                         fontSize = 16.sp,
@@ -278,3 +278,4 @@ fun CambiarPassword(
         }
     }
 }
+

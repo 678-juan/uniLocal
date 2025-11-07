@@ -1,10 +1,9 @@
-package com.example.unilocal.ui.pantallas.admin.navegacionAdmin
+﻿package com.example.unilocal.ui.pantallas.admin.navegacionAdmin
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.automirrored.filled.List
+// duplicate import removed
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
@@ -65,18 +64,18 @@ fun ContentAdmin(
                     NavigationBarItem(
                         selected = selected,
                         onClick = { navController.navigate(tab.route) },
-                        icon = { 
+                        icon = {
                             Icon(
-                                tab.icon, 
+                                tab.icon,
                                 contentDescription = tab.label,
                                 tint = Color.Black
-                            ) 
+                            )
                         },
-                        label = { 
+                        label = {
                             Text(
                                 tab.label,
                                 color = Color.Black
-                            ) 
+                            )
                         }
                     )
                 }
@@ -112,3 +111,4 @@ fun ContentAdmin(
         }
     }
 }
+

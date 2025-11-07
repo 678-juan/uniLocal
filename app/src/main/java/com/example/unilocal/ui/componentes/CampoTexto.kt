@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.componentes
+﻿package com.example.unilocal.ui.componentes
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -11,9 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 
 
 
@@ -55,4 +52,5 @@ fun CampoTexto(
         )
     }
 }
+
 

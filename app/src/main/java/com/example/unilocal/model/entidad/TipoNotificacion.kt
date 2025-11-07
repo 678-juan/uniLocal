@@ -1,4 +1,4 @@
-package com.example.unilocal.model.entidad
+﻿package com.example.unilocal.model.entidad
 
 import kotlinx.serialization.Serializable
 
@@ -9,3 +9,4 @@ enum class TipoNotificacion {
     COMENTARIO_NUEVO,
     LUGAR_FAVORITO
 }
+

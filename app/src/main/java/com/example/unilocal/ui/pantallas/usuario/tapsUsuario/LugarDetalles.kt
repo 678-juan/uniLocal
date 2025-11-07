@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -213,3 +213,4 @@ fun LugarDetalles(
         }
     }
 }
+

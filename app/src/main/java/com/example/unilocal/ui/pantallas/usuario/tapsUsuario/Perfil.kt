@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -46,12 +46,12 @@ fun Perfil(
     val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
     val usuarioActual by viewModel.usuarioActual.collectAsState()
     val lugares by lugaresVM.lugares.collectAsState()
-    
+
     var lugarSeleccionado by remember { mutableStateOf<com.example.unilocal.model.entidad.Lugar?>(null) }
     var mostrarComentarios by remember { mutableStateOf(false) }
     var comentarioSeleccionado by remember { mutableStateOf<com.example.unilocal.model.entidad.Comentario?>(null) }
     var mostrarNotificaciones by remember { mutableStateOf(false) }
-    
+
     // Obtener notificaciones del usuario
     val notificaciones by viewModel.notificacionesUsuario.collectAsState()
     val notificacionesNoLeidas = viewModel.obtenerNotificacionesNoLeidas()
@@ -163,7 +163,7 @@ fun Perfil(
                         }
                     }
                 }
-                
+
                 // Botón de configuración
                 IconButton(
                     onClick = { navegarAConfiguracion() }
@@ -188,9 +188,9 @@ fun Perfil(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             if (notificaciones.isEmpty()) {
                 Column(
                     modifier = Modifier
@@ -237,7 +237,7 @@ fun Perfil(
                     }
                 }
             }
-            
+
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 16.dp),
                 color = Color.LightGray
@@ -321,11 +321,11 @@ fun Perfil(
             )
         }
     }
-    
+
     // Modal para comentarios con respuesta
     if (mostrarComentarios && lugarSeleccionado != null) {
         AlertDialog(
-            onDismissRequest = { 
+            onDismissRequest = {
                 mostrarComentarios = false
                 lugarSeleccionado = null
                 comentarioSeleccionado = null
@@ -371,7 +371,7 @@ fun Perfil(
                                 }
                                 }
                             }
-                            
+
                             // Campo para responder
                             if (comentarioSeleccionado != null) {
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -414,7 +414,7 @@ fun Perfil(
                         Spacer(modifier = Modifier.width(8.dp))
                     }
                     Button(
-                        onClick = { 
+                        onClick = {
                             mostrarComentarios = false
                             lugarSeleccionado = null
                             comentarioSeleccionado = null
@@ -429,16 +429,5 @@ fun Perfil(
     }
 }
 
-// Función para formatear el tiempo transcurrido
-private fun formatearTiempo(timestamp: Long): String {
-    val ahora = System.currentTimeMillis()
-    val diferencia = ahora - timestamp
-    
-    return when {
-        diferencia < 60000 -> "unos segundos"
-        diferencia < 3600000 -> "${diferencia / 60000} minutos"
-        diferencia < 86400000 -> "${diferencia / 3600000} horas"
-        diferencia < 604800000 -> "${diferencia / 86400000} días"
-        else -> "${diferencia / 604800000} semanas"
-    }
-}
+// (Eliminada) función privada formatearTiempo: no se usaba en este archivo.
+

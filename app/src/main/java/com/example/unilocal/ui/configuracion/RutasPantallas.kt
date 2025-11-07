@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.configuracion
+﻿package com.example.unilocal.ui.configuracion
 
 import kotlinx.serialization.Serializable
 
@@ -27,3 +27,4 @@ sealed class RutasPantallas {
 
 
 }
+

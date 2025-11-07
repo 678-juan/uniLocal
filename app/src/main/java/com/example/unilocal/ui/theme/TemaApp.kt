@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.theme
+﻿package com.example.unilocal.ui.theme
 
 
 import androidx.compose.material3.MaterialTheme
@@ -14,3 +14,4 @@ fun TemaApp(content: @Composable () -> Unit) {
         content = content
     )
 }
+

@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -128,7 +128,7 @@ fun Guardados(
                     color = Color.Black,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-                
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -140,9 +140,9 @@ fun Guardados(
                             .size(50.dp)
                             .clip(CircleShape)
                     )
-                    
+
                     Spacer(modifier = Modifier.width(12.dp))
-                    
+
                     Text(
                         text = usuarioUsername,
                         fontSize = 16.sp,
@@ -293,7 +293,7 @@ fun LugarGuardadoItem(
                         .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                 )
             }
-            
+
             Text(
                 text = lugar.nombre,
                 fontSize = 12.sp,
@@ -305,3 +305,4 @@ fun LugarGuardadoItem(
         }
     }
 }
+

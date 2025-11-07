@@ -1,4 +1,4 @@
-package com.example.unilocal.model.entidad
+﻿package com.example.unilocal.model.entidad
 
 import kotlinx.serialization.Serializable
 
@@ -13,5 +13,6 @@ data class Notificacion(
     val fecha: Long = System.currentTimeMillis(),
     val leida: Boolean = false
 )
+
 
 

@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.bottonBarUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.bottonBarUsuario
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.height
@@ -76,3 +76,4 @@ fun BottonBarUsuario(
 
 
 }
+

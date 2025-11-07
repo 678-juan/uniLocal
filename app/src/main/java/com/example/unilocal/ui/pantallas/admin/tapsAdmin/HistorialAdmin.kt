@@ -1,7 +1,6 @@
-package com.example.unilocal.ui.pantallas.admin.tapsAdmin
+﻿package com.example.unilocal.ui.pantallas.admin.tapsAdmin
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,7 +18,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unilocal.viewModel.ModeradorViewModel
 import com.example.unilocal.viewModel.LugaresViewModel
-import com.example.unilocal.model.entidad.Solicitud
 import com.example.unilocal.ui.componentes.FichaLugarAdmin
 
 @Composable
@@ -45,11 +43,11 @@ fun HistorialAdmin(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Historial", 
+                text = "Historial",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
-            
+
             // botón de cerrar sesión
             IconButton(
                 onClick = {
@@ -70,9 +68,9 @@ fun HistorialAdmin(
                 )
             }
         }
-        
+
         Spacer(Modifier.height(8.dp))
-        
+
         Column(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
@@ -92,7 +90,7 @@ fun HistorialAdmin(
                     )
                 }
             }
-            
+
             // ver más
             if (historial.size > 5) {
                 Text(
@@ -109,5 +107,6 @@ fun HistorialAdmin(
         }
     }
 }
+
 
 

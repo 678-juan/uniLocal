@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.navegacionUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.navegacionUsuario
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -129,3 +129,4 @@ fun ContentUsuario(
     }
 
 }
+

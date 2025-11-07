@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.componentes
+﻿package com.example.unilocal.ui.componentes
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -41,17 +40,17 @@ fun FichaLugar(
     modifier: Modifier = Modifier
 ) {
     val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
-    
+
     // Memoizar cálculos costosos
     val estaAbierto = remember(lugar.id) { lugaresVM.estaAbierto(lugar) }
-    
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(200.dp)
-            .clickable { 
+            .clickable {
                 println("DEBUG: Click en FichaLugar - ${lugar.nombre}")
-                onClick() 
+                onClick()
             },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -118,13 +117,13 @@ fun FichaLugar(
             }
             // Estado abierto/cerrado en la esquina superior derecha
             AssistChip(
-                onClick = { 
+                onClick = {
                     // Prueba temporal
                     println("=== PRUEBA ESTADO ===")
                     println("Lugar: ${lugar.nombre}")
                     println("¿Abierto? $estaAbierto")
                 },
-                label = { 
+                label = {
                     Text(
                         text = if (estaAbierto) "Abierto" else "Cerrado",
                         color = Color.White,
@@ -139,7 +138,7 @@ fun FichaLugar(
                     containerColor = if (estaAbierto) Color(0xFF4CAF50) else Color(0xFFD32F2F)
                 )
             )
-            
+
             Text(
                 text = lugar.nombre,
                 modifier = Modifier
@@ -152,3 +151,4 @@ fun FichaLugar(
         }
     }
 }
+

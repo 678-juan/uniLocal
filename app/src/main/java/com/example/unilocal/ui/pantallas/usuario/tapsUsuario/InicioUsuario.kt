@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,10 +25,10 @@ fun Inicio(
 ){
     val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
     val lugares by lugaresVM.lugares.collectAsState()
-    
+
     // solo lugares autorizados - limitar a 10 para mejor rendimiento
     val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }.take(10)
-    
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -42,7 +42,7 @@ fun Inicio(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
-        
+
         if (lugaresAutorizados.isEmpty()) {
             item {
                 Text(
@@ -56,8 +56,8 @@ fun Inicio(
             items(lugaresAutorizados) { lugar ->
                 PublicacionUno(
                     lugar = lugar,
-                    onClick = { 
-                        navegarALugar(lugar.id) 
+                    onClick = {
+                        navegarALugar(lugar.id)
                     },
                     usuarioViewModel = usuarioViewModel,
                     lugaresViewModel = lugaresVM
@@ -66,3 +66,4 @@ fun Inicio(
         }
     }
 }
+

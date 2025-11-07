@@ -1,7 +1,6 @@
-package com.example.unilocal.ui.componentes
+﻿package com.example.unilocal.ui.componentes
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -52,8 +51,7 @@ fun MostrarEstrellas(
     modifier: Modifier = Modifier
 ) {
     val promedioRedondeado = promedio.roundToInt()
-    val tieneDecimales = promedio % 1 != 0.0
-    
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -96,28 +94,28 @@ fun PublicacionUno(
     // buscar quien creo el lugar
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
     val creador = viewModel.obtenerUsuarioPorId(lugar.creadorId)
-    
+
     // Cargar creador desde Firebase si no está en local
     LaunchedEffect(lugar.creadorId) {
         if (creador == null) {
             viewModel.buscarId(lugar.creadorId)
         }
     }
-    
+
     // Usar usuario actualizado después de la búsqueda
     val usuarioActualizado by viewModel.usuarioActual.collectAsState()
     val creadorFinal = creador ?: (if (usuarioActualizado?.id == lugar.creadorId) usuarioActualizado else null)
-    
+
     // like state persistente
     val yaDioLike by viewModel.likesDados.collectAsState()
     val dioLike = yaDioLike.contains(lugar.id)
     // Usar el estado del lugar directamente para mantener consistencia
     val likes = lugar.likes
-    
+
     // bookmark state persistente
     val favoritosGuardados by viewModel.favoritosGuardados.collectAsState()
     var estaGuardado = favoritosGuardados.contains(lugar.id)
-    
+
     // avatares disponibles
     val avatares = listOf(
         R.drawable.hombre, R.drawable.mujer, R.drawable.hombre1,
@@ -229,7 +227,7 @@ fun PublicacionUno(
 
                 // icono de guardar
                 val bookmarkIcon = if (estaGuardado) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder
-                
+
                 Icon(
                     imageVector = bookmarkIcon,
                     contentDescription = "Guardar en favoritos",
@@ -254,3 +252,4 @@ fun PublicacionUno(
         }
     }
 }
+

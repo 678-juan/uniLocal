@@ -1,4 +1,4 @@
-package com.example.unilocal.viewModel
+﻿package com.example.unilocal.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,20 +21,20 @@ import android.graphics.Bitmap
 class LugaresViewModel : ViewModel() {
     private val _lugares = MutableStateFlow<List<Lugar>>(emptyList())
     val lugares: StateFlow<List<Lugar>> = _lugares.asStateFlow()
-    
+
     // Estado del resultado de operaciones
     private val _lugarResult = MutableStateFlow<RequestResult?>(null)
     val lugarResult: StateFlow<RequestResult?> = _lugarResult.asStateFlow()
-    
+
     // Referencia al UsuarioViewModel para sincronizar likes
     private var usuarioViewModel: UsuarioViewModel? = null
-    
+
     val db = Firebase.firestore
-    
+
     fun resetear() {
         _lugarResult.value = null
     }
-    
+
     fun setUsuarioViewModel(usuarioViewModel: UsuarioViewModel) {
         this.usuarioViewModel = usuarioViewModel
     }
@@ -54,7 +54,7 @@ class LugaresViewModel : ViewModel() {
                         val data = doc.data ?: emptyMap<String, Any>()
                         val horarioFirebase = data["horario"] as? Map<String, Any>
                         val horario = horarioDesdeFirebase(horarioFirebase)
-                        
+
                         // Obtener estado como String y convertirlo a enum
                         val estadoStr = data["estado"] as? String ?: "PENDIENTE"
                         val estado = try {
@@ -62,7 +62,7 @@ class LugaresViewModel : ViewModel() {
                         } catch (e: Exception) {
                             EstadoLugar.PENDIENTE
                         }
-                        
+
                         // Obtener ubicación
                         val ubicacionData = data["ubicacion"] as? Map<String, Any>?
                         val ubicacion = ubicacionData?.let {
@@ -71,7 +71,7 @@ class LugaresViewModel : ViewModel() {
                                 longitud = (it["longitud"] as? Number)?.toDouble() ?: 0.0
                             )
                         } ?: Ubicacion(0.0, 0.0)
-                        
+
                         // Crear objeto Lugar manualmente
                         val lugar = Lugar(
                             id = doc.id,
@@ -89,7 +89,7 @@ class LugaresViewModel : ViewModel() {
                             ubicacion = ubicacion,
                             comentarios = emptyList() // Se carga desde subcolección
                         )
-                        
+
                         // Cargar comentarios desde subcolección
                         val comentarios = cargarComentariosLugar(doc.id)
                         lugar.copy(comentarios = comentarios)
@@ -109,7 +109,7 @@ class LugaresViewModel : ViewModel() {
             }
         }
     }
-    
+
     private suspend fun cargarComentariosLugar(lugarId: String): List<Comentario> {
         return try {
             val snapshot = db.collection("Lugares")
@@ -118,7 +118,7 @@ class LugaresViewModel : ViewModel() {
                 .orderBy("fecha", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .get()
                 .await()
-            
+
             snapshot.documents.mapNotNull { doc ->
                 if (doc.exists()) {
                     val data = doc.data ?: emptyMap<String, Any>()
@@ -140,7 +140,7 @@ class LugaresViewModel : ViewModel() {
             emptyList()
         }
     }
-    
+
     // Convertir horario de Map<String, Pair<String, String>> a formato compatible con Firestore
     private fun horarioParaFirebase(horario: Map<String, Pair<String, String>>): Map<String, Map<String, String>> {
         return horario.mapValues { (_, pair) ->
@@ -150,11 +150,11 @@ class LugaresViewModel : ViewModel() {
             )
         }
     }
-    
+
     // Convertir horario de Firestore a Map<String, Pair<String, String>>
     private fun horarioDesdeFirebase(horarioFirebase: Map<String, Any>?): Map<String, Pair<String, String>> {
         if (horarioFirebase == null) return emptyMap()
-        
+
         return horarioFirebase.mapNotNull { (dia, valor) ->
             if (valor is Map<*, *>) {
                 val apertura = valor["apertura"] as? String ?: ""
@@ -201,16 +201,16 @@ class LugaresViewModel : ViewModel() {
                         "longitud" to lugar.ubicacion.longitud
                     )
                 )
-                
+
                 println("DEBUG: Intentando guardar en Firestore...")
                 val docRef = db.collection("Lugares")
                     .add(lugarData)
                     .await()
                 println("DEBUG: Documento guardado en Firestore con ID: ${docRef.id}")
-                
+
                 // Actualizar con el ID de Firestore
                 val lugarConId = lugar.copy(id = docRef.id, imagenUri = imagenUrlFinal)
-                
+
                 // Guardar comentarios en subcolección si existen
                 if (lugar.comentarios.isNotEmpty()) {
                     lugar.comentarios.forEach { comentario ->
@@ -241,12 +241,12 @@ class LugaresViewModel : ViewModel() {
                             .await()
                     }
                 }
-                
+
                 // Actualizar lista local
                 _lugares.value = _lugares.value + lugarConId
                 println("DEBUG: ✅ Lugar creado exitosamente con ID: ${docRef.id}")
                 println("DEBUG: ✅ Datos guardados: nombre=${lugar.nombre}, categoria=${lugar.categoria}")
-                
+
                 // Marcar como éxito
                 _lugarResult.value = RequestResult.Sucess("Lugar creado exitosamente")
             } catch (e: Exception) {
@@ -255,7 +255,7 @@ class LugaresViewModel : ViewModel() {
                 println("DEBUG: ❌ Tipo de error: ${e.javaClass.simpleName}")
                 e.printStackTrace()
                 println("DEBUG: ❌ Stack trace completo del error")
-                
+
                 // Marcar como error
                 _lugarResult.value = RequestResult.Error("Error al crear el lugar: ${e.message ?: "Error desconocido"}")
             }
@@ -268,7 +268,7 @@ class LugaresViewModel : ViewModel() {
             println("DEBUG: imagenUri vacío o default_image")
             return "default_image"
         }
-        
+
         // Si ya es URL, usarla tal cual
         val lower = imagenUri.lowercase()
         if (lower.startsWith("http://") || lower.startsWith("https://")) {
@@ -280,19 +280,19 @@ class LugaresViewModel : ViewModel() {
         try {
             println("DEBUG: Intentando subir imagen a Storage: $imagenUri")
             val uri = Uri.parse(imagenUri)
-            
+
             val fileName = "lugares/${UUID.randomUUID()}.jpg"
             val storageRef = FirebaseStorage.getInstance().reference.child(fileName)
-            
+
             println("DEBUG: Subiendo a Storage: $fileName")
             val uploadTask = storageRef.putFile(uri)
             uploadTask.await()
-            
+
             println("DEBUG: Imagen subida, obteniendo URL de descarga...")
             val downloadUrl = storageRef.downloadUrl.await()
             val urlString = downloadUrl.toString()
             println("DEBUG: URL obtenida de Storage: $urlString")
-            
+
             return urlString
         } catch (e: Exception) {
             println("DEBUG: Error al subir a Storage: ${e.message}")
@@ -312,7 +312,7 @@ class LugaresViewModel : ViewModel() {
             }
         }
     }
-    
+
     // Opción 2: Guardar como Base64 directamente en Firestore (alternativa)
     // Útil para imágenes pequeñas o cuando Storage falla
     // Nota: Esta función requiere que se pase el contexto desde la UI
@@ -320,14 +320,14 @@ class LugaresViewModel : ViewModel() {
         try {
             println("DEBUG: Convirtiendo imagen a Base64: $imagenUri")
             val uri = Uri.parse(imagenUri)
-            
+
             // Leer la imagen desde el URI
             val inputStream = context.contentResolver.openInputStream(uri)
                 ?: throw Exception("No se pudo abrir el input stream")
-            
+
             val bitmap = BitmapFactory.decodeStream(inputStream)
             inputStream.close()
-            
+
             if (bitmap == null) {
                 throw Exception("No se pudo decodificar la imagen")
             }
@@ -338,11 +338,11 @@ class LugaresViewModel : ViewModel() {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream) // 80% calidad
             val byteArray = outputStream.toByteArray()
             val base64 = android.util.Base64.encodeToString(byteArray, android.util.Base64.DEFAULT)
-            
+
             // Prefijo especial para identificar que es Base64
             val base64Url = "data:image/jpeg;base64,$base64"
             println("DEBUG: Imagen convertida a Base64 (tamaño: ${byteArray.size} bytes)")
-            
+
             return base64Url
         } catch (e: Exception) {
             println("DEBUG: Error al convertir a Base64: ${e.message}")
@@ -355,7 +355,7 @@ class LugaresViewModel : ViewModel() {
         // Primero buscar en la lista local
         val lugarLocal = _lugares.value.find { it.id == id }
         if (lugarLocal != null) return lugarLocal
-        
+
         // Si no está en local, cargar desde Firebase
         viewModelScope.launch {
             try {
@@ -364,14 +364,14 @@ class LugaresViewModel : ViewModel() {
                     val data = doc.data!!
                     val horarioFirebase = data["horario"] as? Map<String, Any>?
                     val horario = horarioDesdeFirebase(horarioFirebase)
-                    
+
                     val estadoStr = data["estado"] as? String ?: "PENDIENTE"
                     val estado = try {
                         EstadoLugar.valueOf(estadoStr)
                     } catch (e: Exception) {
                         EstadoLugar.PENDIENTE
                     }
-                    
+
                     val ubicacionData = data["ubicacion"] as? Map<String, Any>?
                     val ubicacion = ubicacionData?.let {
                         Ubicacion(
@@ -379,7 +379,7 @@ class LugaresViewModel : ViewModel() {
                             longitud = (it["longitud"] as? Number)?.toDouble() ?: 0.0
                         )
                     } ?: Ubicacion(0.0, 0.0)
-                    
+
                     val lugar = Lugar(
                         id = doc.id,
                         nombre = data["nombre"] as? String ?: "",
@@ -396,7 +396,7 @@ class LugaresViewModel : ViewModel() {
                         ubicacion = ubicacion,
                         comentarios = emptyList()
                     )
-                    
+
                     val comentarios = cargarComentariosLugar(id)
                     val lugarCompleto = lugar.copy(comentarios = comentarios)
                     _lugares.value = _lugares.value + lugarCompleto
@@ -420,18 +420,18 @@ class LugaresViewModel : ViewModel() {
         viewModelScope.launch {
             try {
         val lugar = _lugares.value.find { it.id == id }
-                
+
                 // Actualizar en Firebase
                 db.collection("Lugares")
                     .document(id)
                     .update("estado", nuevoEstado.name)
                     .await()
-                
+
                 // Actualizar estado local
         _lugares.value = _lugares.value.map {
             if (it.id == id) it.copy(estado = nuevoEstado) else it
         }
-        
+
         // Enviar notificación cuando se autoriza un lugar
         if (nuevoEstado == EstadoLugar.AUTORIZADO && lugar != null) {
             usuarioViewModel?.crearNotificacion(
@@ -442,7 +442,7 @@ class LugaresViewModel : ViewModel() {
                 lugarId = lugar.id
             )
         }
-        
+
         // Enviar notificación cuando se rechaza un lugar
         if (nuevoEstado == EstadoLugar.RECHAZADO && lugar != null) {
             usuarioViewModel?.crearNotificacion(
@@ -468,17 +468,17 @@ class LugaresViewModel : ViewModel() {
                     .collection("comentarios")
                     .get()
                     .await()
-                
+
                 comentariosSnapshot.documents.forEach { doc ->
                     doc.reference.delete().await()
                 }
-                
+
                 // Eliminar lugar
                 db.collection("Lugares")
                     .document(lugarId)
                     .delete()
                     .await()
-                
+
                 // Actualizar lista local
         _lugares.value = _lugares.value.filter { it.id != lugarId }
             } catch (e: Exception) {
@@ -500,24 +500,24 @@ class LugaresViewModel : ViewModel() {
             java.util.Calendar.SATURDAY -> "Sábado"
             else -> "Lunes"
         }
-        
+
         // buscar horario para el día actual
         val horarioHoy = lugar.horario[diaActual] ?: return false
-        
+
         // si el horario es "Cerrado" o "00:00" a "00:00", está cerrado
-        if (horarioHoy.first.lowercase().contains("cerrado") || 
+        if (horarioHoy.first.lowercase().contains("cerrado") ||
             horarioHoy.second.lowercase().contains("cerrado") ||
             (horarioHoy.first == "00:00" && horarioHoy.second == "00:00")) {
             return false
         }
-        
+
         // convertir horas a minutos para comparar correctamente
         fun horaAMinutos(hora: String): Int {
             // manejar formato AM/PM
             val horaLimpia = hora.trim()
             val esPM = horaLimpia.uppercase().contains("PM")
             val esAM = horaLimpia.uppercase().contains("AM")
-            
+
             if (esPM || esAM) {
                 // extraer solo la parte numérica (ej: "8:00 AM" -> "8:00")
                 val patron = Regex("""(\d{1,2}):(\d{2})""")
@@ -525,36 +525,36 @@ class LugaresViewModel : ViewModel() {
                 if (match != null) {
                     var horas = match.groupValues[1].toInt()
                     val minutos = match.groupValues[2].toInt()
-                    
+
                     // convertir a formato 24h
                     if (esPM && horas != 12) {
                         horas += 12
                     } else if (esAM && horas == 12) {
                         horas = 0
                     }
-                    
+
                     return horas * 60 + minutos
                 }
             }
-            
+
             // formato 24h normal (ej: "08:00")
             val partes = horaLimpia.split(":")
             if (partes.size == 2) {
                 return partes[0].toInt() * 60 + partes[1].toInt()
             }
-            
+
             return 0
         }
-        
+
         val horaActual = ahora.get(java.util.Calendar.HOUR_OF_DAY) * 60 + ahora.get(java.util.Calendar.MINUTE)
         val horaApertura = horaAMinutos(horarioHoy.first)
         val horaCierre = horaAMinutos(horarioHoy.second)
-        
+
         // manejar horarios que cruzan medianoche (ej: 18:00 a 02:00)
         if (horaCierre < horaApertura) {
             return horaActual >= horaApertura || horaActual <= horaCierre
         }
-        
+
         return horaActual >= horaApertura && horaActual <= horaCierre
     }
 
@@ -586,9 +586,9 @@ class LugaresViewModel : ViewModel() {
                     .collection("comentarios")
                     .add(comentarioData)
                     .await()
-                
+
                 val comentarioConId = comentario.copy(id = docRef.id)
-                
+
                 // Actualizar estado local
         _lugares.value = _lugares.value.map { lugar ->
             if (lugar.id == lugarId) {
@@ -597,7 +597,7 @@ class LugaresViewModel : ViewModel() {
                 lugar
                     }
                 }
-                
+
                 // Enviar notificación al creador del lugar
                 val lugar = _lugares.value.find { it.id == lugarId }
                 if (lugar != null && lugar.creadorId != comentario.usuarioId) {
@@ -625,7 +625,7 @@ class LugaresViewModel : ViewModel() {
                         .document(lugarId)
                         .update("likes", lugar.likes + 1)
                         .await()
-                    
+
                     // Actualizar estado local
                     _lugares.value = _lugares.value.map { l ->
                         if (l.id == lugarId) {
@@ -635,7 +635,7 @@ class LugaresViewModel : ViewModel() {
                         }
             }
         }
-        
+
         // Delegar la gestión de likes del usuario al UsuarioViewModel
         usuarioViewModel?.darLike(lugarId)
             } catch (e: Exception) {
@@ -655,7 +655,7 @@ class LugaresViewModel : ViewModel() {
                         .document(lugarId)
                         .update("likes", nuevosLikes)
                         .await()
-                    
+
                     // Actualizar estado local
                     _lugares.value = _lugares.value.map { l ->
                         if (l.id == lugarId) {
@@ -665,7 +665,7 @@ class LugaresViewModel : ViewModel() {
                         }
             }
         }
-        
+
         // Delegar la gestión de likes del usuario al UsuarioViewModel
         usuarioViewModel?.quitarLike(lugarId)
             } catch (e: Exception) {
@@ -679,19 +679,7 @@ class LugaresViewModel : ViewModel() {
         return usuarioViewModel?.yaDioLike(lugarId) ?: false
     }
 
-    fun agregarFavorito(lugarId: String) {
-        // Esta función se maneja en UsuarioViewModel
-    }
 
-    fun quitarFavorito(lugarId: String) {
-        // Esta función se maneja en UsuarioViewModel
-    }
-
-    fun estaGuardado(lugarId: String): Boolean {
-        // Esta función se maneja en UsuarioViewModel
-        return false
-    }
-    
     fun responderComentario(lugarId: String, comentarioId: String, respuesta: String) {
         viewModelScope.launch {
             try {
@@ -708,7 +696,7 @@ class LugaresViewModel : ViewModel() {
                     .document(comentarioId)
                     .update("respuesta", respuesta)
                     .await()
-                
+
                 // Actualizar estado local
         _lugares.value = _lugares.value.map { lugar ->
             if (lugar.id == lugarId) {
@@ -732,3 +720,4 @@ class LugaresViewModel : ViewModel() {
     }
 
 }
+

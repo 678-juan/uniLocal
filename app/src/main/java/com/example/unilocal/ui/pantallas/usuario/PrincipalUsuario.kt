@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario
+﻿package com.example.unilocal.ui.pantallas.usuario
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -72,3 +72,4 @@ enum class Destino(
     RECOMENDACIONES(RutaTab.Recomendados,R.string.recomendados,Icons.Default.Place),
     PERFIL(RutaTab.Perfil,R.string.perfil,Icons.Default.Person) // vamos al editar momentaniam
 }
+

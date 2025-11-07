@@ -1,4 +1,4 @@
-package com.example.unilocal.model.entidad
+﻿package com.example.unilocal.model.entidad
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,3 +11,4 @@ data class Comentario(
     val fecha: Long = System.currentTimeMillis(),
     val respuesta: String? = null
 )
+

@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.componentes
+﻿package com.example.unilocal.ui.componentes
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.height
@@ -36,3 +36,4 @@ fun LineaDecorativa(lineHeightDp: Dp) {
         )
     }
 }
+

@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.theme
+﻿package com.example.unilocal.ui.theme
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.darkColorScheme
@@ -29,3 +29,4 @@ val ColoresApp = darkColorScheme(
     onSurface = Color.Black
 
 )
+

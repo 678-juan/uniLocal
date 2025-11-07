@@ -1,4 +1,4 @@
-package com.example.unilocal.viewModel
+﻿package com.example.unilocal.viewModel
 
 import android.app.Application
 import android.content.Context
@@ -20,10 +20,10 @@ import kotlinx.coroutines.tasks.await
 class UsuarioViewModel(application: Application) : AndroidViewModel(application) {
     private val _usuario = MutableStateFlow(emptyList<Usuario>())
     val usuario: StateFlow<List<Usuario>> = _usuario.asStateFlow()
-    
+
     private val _usuarioActual = MutableStateFlow<Usuario?>(null)
     val usuarioActual: StateFlow<Usuario?> = _usuarioActual.asStateFlow()
-    
+
     // ubicación seleccionada por el usuario (p.ej. desde CrearLugar)
     private val _ubicacionSeleccionada = MutableStateFlow<com.example.unilocal.model.entidad.Ubicacion?>(null)
     val ubicacionSeleccionada: StateFlow<com.example.unilocal.model.entidad.Ubicacion?> = _ubicacionSeleccionada.asStateFlow()
@@ -78,23 +78,23 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             // ignore errors
         }
     }
-    
+
     // likes por usuario - Map<usuarioId, Set<lugarId>>
     private val _likesPorUsuario = MutableStateFlow(mapOf<String, Set<String>>())
     val likesPorUsuario: StateFlow<Map<String, Set<String>>> = _likesPorUsuario.asStateFlow()
-    
+
     // likes del usuario actual - se actualiza dinámicamente
     private val _likesDados = MutableStateFlow(setOf<String>())
     val likesDados: StateFlow<Set<String>> = _likesDados.asStateFlow()
-    
+
     // favoritos
     private val _favoritosGuardados = MutableStateFlow(setOf<String>())
     val favoritosGuardados: StateFlow<Set<String>> = _favoritosGuardados.asStateFlow()
-    
+
     // notificaciones por usuario - Map<usuarioId, List<Notificacion>>
     private val _notificacionesPorUsuario = MutableStateFlow(mapOf<String, List<Notificacion>>())
     val notificacionesPorUsuario: StateFlow<Map<String, List<Notificacion>>> = _notificacionesPorUsuario.asStateFlow()
-    
+
     // notificaciones del usuario actual
     private val _notificacionesUsuario = MutableStateFlow(emptyList<Notificacion>())
     val notificacionesUsuario: StateFlow<List<Notificacion>> = _notificacionesUsuario.asStateFlow()
@@ -103,7 +103,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
     val usuarioResult: StateFlow<RequestResult?> = _usuarioResult.asStateFlow()
 
     val db = Firebase.firestore
-    
+
     init {
         // load persisted selected location if any
         try {
@@ -178,11 +178,11 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             "avatar" to usuario.avatar.toLong() // Guardar como Long para compatibilidad con Firestore
             // favoritos NO se guarda aquí, se maneja en subcolección
         )
-        
+
         val docRef = db.collection("Usuarios")
             .add(usuarioData)
             .await()
-        
+
         // Actualizar lista local con el usuario y su ID de Firestore
         val usuarioConId = usuario.copy(id = docRef.id, favoritos = emptyList())
         _usuario.value = _usuario.value + usuarioConId
@@ -192,7 +192,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
     fun obtenerUsuarioPorId(id: String): Usuario? {
         return _usuario.value.find { it.id == id }
     }
-    
+
     fun buscarId(id: String){
         viewModelScope.launch {
             _usuarioResult.value = RequestResult.Cargar
@@ -224,14 +224,14 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                 },
                 favoritos = emptyList() // Se carga desde subcolección
             )
-            
+
             _usuarioActual.value = usuario
-            
+
             // Agregar a la lista local si no existe
             if (!_usuario.value.any { it.id == usuario.id }) {
                 _usuario.value = _usuario.value + usuario
             }
-            
+
             // Cargar datos relacionados del usuario
             cargarLikesUsuarioFirebase(id)
             cargarFavoritosUsuarioFirebase(id)
@@ -246,7 +246,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                     .whereEqualTo("email", email)
                     .get()
                     .await()
-                
+
                 val doc = snapshot.documents.firstOrNull()
                 if (doc != null && doc.exists()) {
                     val data = doc.data!!
@@ -266,14 +266,14 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                 },
                         favoritos = emptyList() // Se carga desde subcolección
                     )
-                    
+
                     _usuarioActual.value = usuario
-                    
+
                     // Agregar a la lista local si no existe
                     if (!_usuario.value.any { it.id == usuario.id }) {
                         _usuario.value = _usuario.value + usuario
                     }
-                    
+
                     cargarLikesUsuarioFirebase(usuario.id)
                     cargarFavoritosUsuarioFirebase(usuario.id)
                     cargarNotificacionesUsuarioFirebase(usuario.id)
@@ -333,14 +333,14 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                 },
                 favoritos = emptyList() // Se carga desde subcolección
             )
-            
+
             _usuarioActual.value = usuario
-            
+
             // Agregar a la lista local si no existe
             if (!_usuario.value.any { it.id == usuario.id }) {
                 _usuario.value = _usuario.value + usuario
             }
-            
+
             // Cargar datos relacionados del usuario
             cargarLikesUsuarioFirebase(usuario.id)
             cargarFavoritosUsuarioFirebase(usuario.id)
@@ -349,13 +349,13 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             throw Exception("Usuario no encontrado")
         }
     }
-    
+
     fun cerrarSesion() {
         _usuarioActual.value = null
         _likesDados.value = emptySet()
         _notificacionesUsuario.value = emptyList()
     }
-    
+
     private suspend fun cargarLikesUsuarioFirebase(usuarioId: String) {
         try {
             val snapshot = db.collection("Usuarios")
@@ -363,10 +363,10 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                 .collection("likes")
                 .get()
                 .await()
-            
+
             val likesIds = snapshot.documents.map { it.id }.toSet()
             _likesDados.value = likesIds
-            
+
             // Actualizar mapa de likes por usuario
             val likesPorUsuarioActual = _likesPorUsuario.value.toMutableMap()
             likesPorUsuarioActual[usuarioId] = likesIds
@@ -375,7 +375,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             // Error al cargar likes
         }
     }
-    
+
     private suspend fun cargarFavoritosUsuarioFirebase(usuarioId: String) {
         try {
             val snapshot = db.collection("Usuarios")
@@ -383,14 +383,14 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                 .collection("favoritos")
                 .get()
                 .await()
-            
+
             val favoritosIds = snapshot.documents.map { it.id }.toSet()
             _favoritosGuardados.value = favoritosIds
         } catch (e: Exception) {
             // Error al cargar favoritos
         }
     }
-    
+
     private suspend fun cargarNotificacionesUsuarioFirebase(usuarioId: String) {
         try {
             val snapshot = db.collection("Usuarios")
@@ -399,7 +399,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                 .orderBy("fecha", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .get()
                 .await()
-            
+
             val notificaciones = snapshot.documents.mapNotNull { doc ->
                 if (doc.exists()) {
                     val data = doc.data!!
@@ -409,7 +409,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                     } catch (e: Exception) {
                         TipoNotificacion.LUGAR_AUTORIZADO
                     }
-                    
+
                     Notificacion(
                         id = doc.id,
                         usuarioId = data["usuarioId"] as? String ?: "",
@@ -424,9 +424,9 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                     null
                 }
             }
-            
+
             _notificacionesUsuario.value = notificaciones
-            
+
             // Actualizar mapa de notificaciones por usuario
             val notificacionesPorUsuarioActual = _notificacionesPorUsuario.value.toMutableMap()
             notificacionesPorUsuarioActual[usuarioId] = notificaciones
@@ -448,7 +448,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                         .document(lugar.id)
                         .set(mapOf("lugarId" to lugar.id, "agregadoEn" to System.currentTimeMillis()))
                         .await()
-                    
+
                     // Actualizar estado local
                     val favoritosActuales = _favoritosGuardados.value.toMutableSet()
                     favoritosActuales.add(lugar.id)
@@ -472,7 +472,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                         .document(lugar.id)
                         .delete()
                         .await()
-                    
+
                     // Actualizar estado local
                     val favoritosActuales = _favoritosGuardados.value.toMutableSet()
                     favoritosActuales.remove(lugar.id)
@@ -489,7 +489,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
         if (usuario != null) {
             viewModelScope.launch {
                 _usuarioResult.value = RequestResult.Cargar
-                _usuarioResult.value = runCatching { 
+                _usuarioResult.value = runCatching {
                     actualizarUsuarioFirebase(nombre, username, email, ciudad, nuevaContrasena)
                 }.fold(
                     onSuccess = { RequestResult.Sucess("Usuario actualizado exitosamente") },
@@ -498,11 +498,11 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
-    
+
     private suspend fun actualizarUsuarioFirebase(nombre: String, username: String, email: String, ciudad: String, nuevaContrasena: String?) {
         val usuario = _usuarioActual.value ?: throw Exception("No hay usuario actual")
         val clave = nuevaContrasena ?: usuario.clave
-        
+
         val usuarioActualizado = usuario.copy(
             nombre = nombre,
             username = username,
@@ -510,7 +510,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             ciudad = ciudad,
             clave = clave
         )
-        
+
         // Actualizar en Firebase (sin favoritos, se manejan en subcolección)
         val usuarioData = hashMapOf<String, Any>(
             "nombre" to usuarioActualizado.nombre,
@@ -521,19 +521,19 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             "sexo" to usuarioActualizado.sexo,
             "avatar" to usuarioActualizado.avatar.toLong() // Guardar como Long para compatibilidad
         )
-        
+
         db.collection("Usuarios")
             .document(usuario.id)
             .set(usuarioData)
             .await()
-        
+
         // Actualizar estado local
         _usuarioActual.value = usuarioActualizado
-        _usuario.value = _usuario.value.map { 
-            if (it.id == usuario.id) usuarioActualizado else it 
+        _usuario.value = _usuario.value.map {
+            if (it.id == usuario.id) usuarioActualizado else it
         }
     }
-    
+
     // likes
     fun darLike(lugarId: String) {
         val usuario = _usuarioActual.value
@@ -547,12 +547,12 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                         .document(lugarId)
                         .set(mapOf("lugarId" to lugarId, "fecha" to System.currentTimeMillis()))
                         .await()
-                    
+
                     // Actualizar estado local
                     val likesActuales = _likesDados.value.toMutableSet()
                     likesActuales.add(lugarId)
                     _likesDados.value = likesActuales
-                    
+
                     // Actualizar likes por usuario
                     val likesPorUsuarioActual = _likesPorUsuario.value.toMutableMap()
                     likesPorUsuarioActual[usuario.id] = likesActuales
@@ -563,7 +563,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
-    
+
     fun quitarLike(lugarId: String) {
         val usuario = _usuarioActual.value
         if (usuario != null) {
@@ -576,12 +576,12 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                         .document(lugarId)
                         .delete()
                         .await()
-                    
+
                     // Actualizar estado local
                     val likesActuales = _likesDados.value.toMutableSet()
                     likesActuales.remove(lugarId)
                     _likesDados.value = likesActuales
-                    
+
                     // Actualizar likes por usuario
                     val likesPorUsuarioActual = _likesPorUsuario.value.toMutableMap()
                     likesPorUsuarioActual[usuario.id] = likesActuales
@@ -592,15 +592,15 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
-    
+
     fun yaDioLike(lugarId: String): Boolean {
         return _likesDados.value.contains(lugarId)
     }
-    
+
     fun estaGuardado(lugarId: String): Boolean {
         return _favoritosGuardados.value.contains(lugarId)
     }
-    
+
     // Funciones para manejar notificaciones
     fun crearNotificacion(usuarioId: String, titulo: String, mensaje: String, tipo: TipoNotificacion, lugarId: String? = null) {
         viewModelScope.launch {
@@ -615,7 +615,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                     fecha = System.currentTimeMillis(),
                     leida = false
                 )
-                
+
                 // Guardar en Firebase (convertir enum a String)
                 val notificacionData = hashMapOf<String, Any>(
                     "usuarioId" to notificacion.usuarioId,
@@ -626,22 +626,22 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                     "fecha" to notificacion.fecha,
                     "leida" to notificacion.leida
                 )
-                
+
                 val docRef = db.collection("Usuarios")
                     .document(usuarioId)
                     .collection("notificaciones")
                     .add(notificacionData)
                     .await()
-                
+
                 val notificacionConId = notificacion.copy(id = docRef.id)
-                
+
                 // Actualizar estado local
                 val notificacionesActuales = _notificacionesPorUsuario.value.toMutableMap()
                 val notificacionesDelUsuario = (notificacionesActuales[usuarioId] ?: emptyList()).toMutableList()
                 notificacionesDelUsuario.add(0, notificacionConId) // Agregar al inicio
                 notificacionesActuales[usuarioId] = notificacionesDelUsuario
                 _notificacionesPorUsuario.value = notificacionesActuales
-                
+
                 // Si es el usuario actual, actualizar también su lista
                 if (_usuarioActual.value?.id == usuarioId) {
                     _notificacionesUsuario.value = notificacionesDelUsuario
@@ -651,7 +651,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
-    
+
     fun marcarNotificacionComoLeida(notificacionId: String) {
         val usuario = _usuarioActual.value
         if (usuario != null) {
@@ -664,7 +664,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                         .document(notificacionId)
                         .update("leida", true)
                         .await()
-                    
+
                     // Actualizar estado local
                     val notificacionesActuales = _notificacionesPorUsuario.value.toMutableMap()
                     val notificacionesDelUsuario = (notificacionesActuales[usuario.id] ?: emptyList()).toMutableList()
@@ -681,7 +681,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
-    
+
     fun obtenerNotificacionesNoLeidas(): Int {
         return _notificacionesUsuario.value.count { !it.leida }
     }
@@ -690,3 +690,4 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
         _usuarioResult.value = null
     }
 }
+

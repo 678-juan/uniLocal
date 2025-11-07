@@ -1,4 +1,4 @@
-package com.example.unilocal.viewModel
+﻿package com.example.unilocal.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,26 +29,26 @@ class ModeradorViewModel : ViewModel(){
 
     private val _moderadorActual = MutableStateFlow<Moderador?>(null)
     val moderadorActual: StateFlow<Moderador?> = _moderadorActual.asStateFlow()
-    
+
     // Historial cargado desde Firebase
     private val _historial = MutableStateFlow<List<Solicitud>>(emptyList())
     val historial: StateFlow<List<Solicitud>> = _historial.asStateFlow()
-    
+
     // Lugares autorizados - IDs del moderador actual
     private val _lugaresAutorizados = MutableStateFlow<List<String>>(emptyList())
-    
+
     // necesitamos acceso a los lugares para obtener los objetos completos
     private val _lugares = MutableStateFlow<List<Lugar>>(emptyList())
     val misAutorizados: StateFlow<List<Lugar>> = combine(_lugaresAutorizados, _lugares) { lugaresIds, lugares ->
-        lugares.filter { lugar -> 
-            lugaresIds.contains(lugar.id) 
+        lugares.filter { lugar ->
+            lugaresIds.contains(lugar.id)
         }
     }.stateIn(
         scope = CoroutineScope(Dispatchers.Main),
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
-    
+
     val db = Firebase.firestore
 
     init{
@@ -83,10 +83,10 @@ class ModeradorViewModel : ViewModel(){
             }
         }
     }
-    
+
     // Crear moderadores quemados en Firebase si no existen
 
-    
+
     fun buscarId(id: String): Moderador? {
         return _moderador.value.find { it.id == id }
     }
@@ -141,7 +141,7 @@ class ModeradorViewModel : ViewModel(){
             throw Exception("Moderador no encontrado")
         }
     }
-    
+
     private fun cargarDatosModerador(moderadorId: String) {
         viewModelScope.launch {
             try {
@@ -152,7 +152,7 @@ class ModeradorViewModel : ViewModel(){
                     .orderBy("fechaIso", com.google.firebase.firestore.Query.Direction.DESCENDING)
                     .get()
                     .await()
-                
+
                 val historialList = historialSnapshot.documents.mapNotNull { doc ->
                     if (doc.exists()) {
                         val data = doc.data!!
@@ -162,7 +162,7 @@ class ModeradorViewModel : ViewModel(){
                         } catch (e: Exception) {
                             EstadoLugar.PENDIENTE
                         }
-                        
+
                         Solicitud(
                             lugarId = data["lugarId"] as? String ?: "",
                             lugarNombre = data["lugarNombre"] as? String ?: "",
@@ -176,17 +176,17 @@ class ModeradorViewModel : ViewModel(){
                     }
                 }
                 _historial.value = historialList
-                
+
                 // Cargar lugares autorizados (IDs)
                 val lugaresSnapshot = db.collection("Moderadores")
                     .document(moderadorId)
                     .collection("lugaresAutorizados")
                     .get()
                     .await()
-                
+
                 val lugaresIds = lugaresSnapshot.documents.map { it.id }
                 _lugaresAutorizados.value = lugaresIds
-                
+
                 // Actualizar moderador actual con datos de Firebase
                 val moderadorActual = _moderadorActual.value
                 if (moderadorActual != null) {
@@ -301,3 +301,4 @@ class ModeradorViewModel : ViewModel(){
         }
     }
 }
+

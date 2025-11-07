@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.theme
+﻿package com.example.unilocal.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -56,3 +56,4 @@ fun UniLocalTheme(
         content = content
     )
 }
+

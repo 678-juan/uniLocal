@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas
+﻿package com.example.unilocal.ui.pantallas
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,7 +20,7 @@ fun Navegacion() {
     val usuarioViewModel: UsuarioViewModel = viewModel()
     val lugaresViewModel: LugaresViewModel = viewModel()
     val moderadorViewModel: ModeradorViewModel = viewModel()
-    
+
     // Conectar LugaresViewModel con UsuarioViewModel para sincronizar likes
     lugaresViewModel.setUsuarioViewModel(usuarioViewModel)
 
@@ -54,7 +54,7 @@ fun Navegacion() {
 
         composable<RutasPantallas.PrincipalUsuarios> {
             PrincipalUsuario(
-                usuarioViewModel = usuarioViewModel, 
+                usuarioViewModel = usuarioViewModel,
                 lugaresViewModel = lugaresViewModel,
                 navegarALogin = {
                     navController.navigate(RutasPantallas.Login) {
@@ -85,3 +85,4 @@ fun Navegacion() {
 
     }
 }
+

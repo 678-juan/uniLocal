@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.admin.tapsAdmin
+﻿package com.example.unilocal.ui.pantallas.admin.tapsAdmin
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -54,7 +54,7 @@ fun SolicitudesAdmin(
             .padding(16.dp)
     ) {
         Text(
-            text = "Solicitudes (${pendientes.size})", 
+            text = "Solicitudes (${pendientes.size})",
             style = MaterialTheme.typography.titleLarge
         )
         Spacer(Modifier.height(12.dp))
@@ -167,7 +167,7 @@ fun SolicitudesAdmin(
                             )
                         }
                     }
-                    
+
                     // contenido de la tarjeta
                     Column(Modifier.padding(16.dp)) {
                         // header con nombre y categoría
@@ -189,7 +189,7 @@ fun SolicitudesAdmin(
                                     color = Color.Gray
                                 )
                             }
-                            
+
                             // badge de estado
                             androidx.compose.material3.AssistChip(
                                 onClick = { },
@@ -200,9 +200,9 @@ fun SolicitudesAdmin(
                                 )
                             )
                         }
-                        
+
                         Spacer(Modifier.height(12.dp))
-                        
+
                         // descripción
                         Text(
                             text = lugar.descripcion,
@@ -211,9 +211,9 @@ fun SolicitudesAdmin(
                             maxLines = 3,
                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
-                        
+
                         Spacer(Modifier.height(8.dp))
-                        
+
                         // información adicional
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -228,7 +228,7 @@ fun SolicitudesAdmin(
                                     color = Color.Gray
                                 )
                             }
-                            
+
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 androidx.compose.material.icons.Icons.Default.LocationOn
                                 Spacer(Modifier.width(4.dp))
@@ -241,9 +241,9 @@ fun SolicitudesAdmin(
                                 )
                             }
                         }
-                        
+
                         Spacer(Modifier.height(16.dp))
-                        
+
                         // botones de acción
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -260,7 +260,7 @@ fun SolicitudesAdmin(
                             ) {
                                 Text("✅ Autorizar", color = Color.White)
                             }
-                            
+
                             OutlinedButton(
                                 onClick = {
                                     lugaresViewModel.actualizarEstado(lugar.id, EstadoLugar.RECHAZADO)
@@ -280,5 +280,6 @@ fun SolicitudesAdmin(
         }
     }
 }
+
 
 

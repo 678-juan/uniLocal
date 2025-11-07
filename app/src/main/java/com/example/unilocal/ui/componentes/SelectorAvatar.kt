@@ -1,7 +1,6 @@
-package com.example.unilocal.ui.componentes
+﻿package com.example.unilocal.ui.componentes
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -44,9 +43,9 @@ fun SelectorAvatar(
             fontWeight = FontWeight.Medium,
             color = Color.Black
         )
-        
+
         Spacer(modifier = Modifier.height(12.dp))
-        
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(horizontal = 4.dp)
@@ -54,7 +53,7 @@ fun SelectorAvatar(
             items(avatares.size) { index ->
                 val avatarId = avatares[index]
                 val estaSeleccionado = avatarSeleccionado == index
-                
+
                 Box(
                     modifier = Modifier
                         .size(60.dp)
@@ -80,3 +79,4 @@ fun SelectorAvatar(
         }
     }
 }
+

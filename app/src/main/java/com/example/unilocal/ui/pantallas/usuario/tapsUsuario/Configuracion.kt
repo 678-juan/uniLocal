@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -106,7 +106,7 @@ fun Configuracion(
                     color = Color.Black,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-                
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -118,9 +118,9 @@ fun Configuracion(
                             .size(50.dp)
                             .clip(CircleShape)
                     )
-                    
+
                     Spacer(modifier = Modifier.width(12.dp))
-                    
+
                     Text(
                         text = usuarioUsername,
                         fontSize = 16.sp,
@@ -145,40 +145,40 @@ fun Configuracion(
                     text = "Guardados",
                     onClick = { navController.navigate(com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab.Guardados) }
                 )
-                
+
                 Divider(color = Color.LightGray, thickness = 0.5.dp)
-                
+
                 // Notificaciones
                 MenuOption(
                     text = "Notificaciones",
-                    onClick = { 
+                    onClick = {
                         // TODO: Implementar notificaciones en futuras versiones
                         // Por ahora, mostrar mensaje informativo
                     }
                 )
-                
+
                 Divider(color = Color.LightGray, thickness = 0.5.dp)
-                
+
                 // Cambiar contraseña
                 MenuOption(
                     text = "Cambiar contraseña",
                     onClick = { navController.navigate(com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab.CambiarPassword) }
                 )
-                
+
                 Divider(color = Color.LightGray, thickness = 0.5.dp)
-                
+
                 // Editar datos
                 MenuOption(
                     text = "Editar datos",
                     onClick = { navController.navigate(com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab.EditarUsuario) }
                 )
-                
+
                 Divider(color = Color.LightGray, thickness = 0.5.dp)
-                
+
                 // Cerrar sesión
                 MenuOption(
                     text = "Cerrar sesión",
-                    onClick = { 
+                    onClick = {
                         viewModel.cerrarSesion()
                         navegarALogin()
                     },
@@ -237,3 +237,4 @@ fun MenuOption(
         )
     }
 }
+

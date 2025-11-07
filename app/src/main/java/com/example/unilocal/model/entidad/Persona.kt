@@ -1,4 +1,4 @@
-package com.example.unilocal.model.entidad
+﻿package com.example.unilocal.model.entidad
 
 import kotlinx.serialization.Serializable
 
@@ -10,3 +10,4 @@ open class Persona(
     val email: String,
     val clave: String
 )
+

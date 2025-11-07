@@ -1,10 +1,16 @@
-package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
-import androidx.compose.foundation.Image
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
+ 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -14,46 +20,38 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
-import com.example.unilocal.R
-import com.example.unilocal.ui.componentes.BotonPrincipal
-import com.example.unilocal.ui.componentes.CampoTexto
-import com.example.unilocal.ui.theme.VerdePrincipal
-import com.example.unilocal.viewModel.LugaresViewModel
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.unilocal.R
+import com.example.unilocal.ui.componentes.CampoTexto
+import com.example.unilocal.ui.componentes.Resultadooperacion
+import com.example.unilocal.ui.theme.VerdePrincipal
+import com.example.unilocal.utils.RequestResult
+import com.example.unilocal.viewModel.LugaresViewModel
+import com.example.unilocal.viewModel.UsuarioViewModel
 import com.example.unilocal.model.entidad.EstadoLugar
 import com.example.unilocal.model.entidad.Lugar
 import com.example.unilocal.model.entidad.Ubicacion
-import com.example.unilocal.viewModel.UsuarioViewModel
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import com.example.unilocal.ui.componentes.Resultadooperacion
-import com.example.unilocal.utils.RequestResult
-import kotlinx.coroutines.delay
-import android.widget.Toast
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -61,32 +59,12 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.views.overlay.Marker
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.compose.runtime.DisposableEffect
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import android.graphics.Color as AndroidColor
+import com.example.unilocal.ui.map.createPlacePinDrawable
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.FusedLocationProviderClient
-import android.location.LocationManager
-import android.location.Location
-import androidx.compose.ui.viewinterop.AndroidView
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.Bitmap.Config
-import android.graphics.Color as AndroidColor
-import android.graphics.drawable.BitmapDrawable
-import android.content.Context
-import android.graphics.drawable.Drawable
-import com.example.unilocal.ui.map.createPlacePinDrawable
+import androidx.core.content.ContextCompat
+import androidx.compose.foundation.horizontalScroll
 
 @Composable
 fun CrearLugar(
@@ -99,15 +77,13 @@ fun CrearLugar(
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
-    
-    // Estados estables para evitar recomposición
-    val esFormularioValido = nombre.isNotBlank() && descripcion.isNotBlank()
+
     var direccion by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf("") }
     var imagenSeleccionada by remember { mutableStateOf<android.net.Uri?>(null) }
-    
+
     // horarios
-    var horarios by remember { 
+    var horarios by remember {
         mutableStateOf(
             mapOf(
                 "Lunes" to "",
@@ -142,7 +118,7 @@ fun CrearLugar(
                 // buscar horarios
                 val patron = Regex("""(.+?)\s*[-–—]\s*(.+)""")
                 val match = patron.find(horarioTexto)
-                
+
                 if (match != null) {
                     Pair(match.groupValues[1].trim(), match.groupValues[2].trim())
                 } else {
@@ -165,10 +141,8 @@ fun CrearLugar(
     val latSeleccionadaState = remember { mutableStateOf(0.0) }
     val lngSeleccionadaState = remember { mutableStateOf(0.0) }
 
-    
-    // Por defecto: Armenia, Colombia si no hay ubicación
-    val DEFAULT_LAT = 4.5338889
-    val DEFAULT_LNG = -75.6811111
+
+    // Por defecto: Armenia, Colombia si no hay ubicación (valores inline usados bajo demanda)
     // referencia al MapView nativo
     val referenciaMapa = remember { mutableStateOf<MapView?>(null) }
 
@@ -304,9 +278,9 @@ fun CrearLugar(
                         modifier = Modifier.size(40.dp)
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Text(
                     text = stringResource(R.string.crea_nuevo_hogar),
                     fontSize = 24.sp,
@@ -314,7 +288,7 @@ fun CrearLugar(
                     color = Color.White,
                     textAlign = TextAlign.Center
                 )
-                
+
                 Text(
                     text = "Comparte tu lugar favorito con la comunidad",
                     fontSize = 14.sp,
@@ -346,17 +320,17 @@ fun CrearLugar(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                    
+
                     Spacer(modifier = Modifier.height(12.dp))
-                    
+
                     Text(
                         text = stringResource(R.string.selecciona_categoria),
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -410,17 +384,17 @@ fun CrearLugar(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                    
+
                     Spacer(modifier = Modifier.height(12.dp))
-                    
+
                     Text(
                         text = "Selecciona una imagen que represente tu lugar",
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     // preview de imagen o botón para seleccionar
                     if (imagenSeleccionada != null) {
                         // mostrar imagen seleccionada
@@ -528,28 +502,28 @@ fun CrearLugar(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     CampoTexto(
                         valor = nombre,
                         cuandoCambia = { nombre = it },
                         etiqueta = stringResource(R.string.nombre_lugar)
                     )
-                    
+
                     Spacer(modifier = Modifier.height(12.dp))
-                    
+
                     CampoTexto(
                         valor = descripcion,
                         cuandoCambia = { descripcion = it },
                         etiqueta = stringResource(R.string.descripcion_lugar)
                     )
-                    
+
                     Spacer(modifier = Modifier.height(12.dp))
-                    
-                    
+
+
                     Spacer(modifier = Modifier.height(12.dp))
-                    
+
                     CampoTexto(
                         valor = telefono,
                         cuandoCambia = { telefono = it },
@@ -576,17 +550,17 @@ fun CrearLugar(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                    
+
                     Spacer(modifier = Modifier.height(12.dp))
-                    
+
                     Text(
                         text = "Ingresa el horario para cada día (ej: 8:00 AM - 6:00 PM o Cerrado)",
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     // lista de horarios por día
                     horarios.forEach { (dia, horario) ->
                         Row(
@@ -604,7 +578,7 @@ fun CrearLugar(
                                 color = Color.Black,
                                 modifier = Modifier.width(90.dp)
                             )
-                            
+
                             // campo de horario
                             OutlinedTextField(
                                 value = horario,
@@ -624,9 +598,9 @@ fun CrearLugar(
                             )
                         }
                     }
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     // botón de conveniencia
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -667,9 +641,9 @@ fun CrearLugar(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -680,7 +654,7 @@ fun CrearLugar(
                             etiqueta = stringResource(R.string.marca_direccion),
                             modificador = Modifier.weight(1f)
                         )
-                        
+
                         Button(
                             onClick = { /* abrir mapa */ },
                             colors = ButtonDefaults.buttonColors(containerColor = VerdePrincipal),
@@ -694,9 +668,9 @@ fun CrearLugar(
                             )
                         }
                     }
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     // mapa placeholder
                     Box(
                         modifier = Modifier
@@ -822,7 +796,7 @@ fun CrearLugar(
             )
         }
     }
-    
+
     // Mostrar el dialog del mapa cuando showMap sea true
     if (showMap) {
         MapDialog(
@@ -1029,4 +1003,5 @@ private fun MapDialog(
         }
     }
 }
+
 

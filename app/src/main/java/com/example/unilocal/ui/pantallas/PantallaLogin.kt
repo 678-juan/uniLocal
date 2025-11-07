@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas
+﻿package com.example.unilocal.ui.pantallas
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -46,7 +46,7 @@ fun PantallaLogin(
     val usuarioResult by viewModel.usuarioResult.collectAsState()
     val usuarioActual by viewModel.usuarioActual.collectAsState()
     val moderadorActual by moderadorVM.moderadorActual.collectAsState()
-    
+
 
 
     Box(
@@ -151,7 +151,7 @@ fun PantallaLogin(
                     viewModel.resetear()
                 }
             )
-            
+
             // Observar cuando el moderador se loguea exitosamente (después de buscar en Firebase)
             LaunchedEffect(moderadorActual) {
                 if (moderadorActual != null && intentandoLoginModerador && correo.isNotBlank()) {
@@ -171,10 +171,10 @@ fun PantallaLogin(
                     }
                 }
             }
-            
+
             // Observar cuando el usuario se loguea exitosamente
             LaunchedEffect(usuarioActual, usuarioResult) {
-                if (usuarioActual != null && 
+                if (usuarioActual != null &&
                     usuarioResult is com.example.unilocal.utils.RequestResult.Sucess &&
                     !intentandoLoginModerador) {
                     cargando = false
@@ -190,7 +190,7 @@ fun PantallaLogin(
                     clave = ""
                 }
             }
-            
+
             // Timeout: si después de intentar login de moderador no hay resultado, intentar como usuario
             LaunchedEffect(intentandoLoginModerador, moderadorActual) {
                 if (intentandoLoginModerador && correo.isNotBlank() && clave.isNotBlank()) {
@@ -221,3 +221,4 @@ fun PantallaLogin(
 
 
 }
+

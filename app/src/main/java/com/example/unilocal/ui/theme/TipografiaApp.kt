@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.theme
+﻿package com.example.unilocal.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
@@ -34,3 +34,4 @@ val TipografiaApp = Typography(
         fontSize = 14.sp
     )
 )
+

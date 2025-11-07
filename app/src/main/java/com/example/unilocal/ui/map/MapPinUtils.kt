@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.map
+﻿package com.example.unilocal.ui.map
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -50,3 +50,4 @@ fun createPlacePinDrawable(context: Context, color: Int, sizeDp: Int = 44): Draw
 
     return BitmapDrawable(context.resources, bitmap)
 }
+

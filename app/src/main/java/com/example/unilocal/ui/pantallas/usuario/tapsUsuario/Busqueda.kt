@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,11 +25,11 @@ fun Busqueda(
     var textoBusqueda by remember { mutableStateOf("") }
     val lugaresVM: LugaresViewModel = lugaresViewModel ?: viewModel()
     val lugares by lugaresVM.lugares.collectAsState()
-    
+
     // filtrar lugares
     val lugaresFiltrados = remember(textoBusqueda, lugares) {
         val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }.take(15)
-        
+
         if (textoBusqueda.isBlank()) {
             lugaresAutorizados
         } else {
@@ -64,7 +64,7 @@ fun Busqueda(
             Spacer(modifier = Modifier.height(8.dp))
         } else {
             Text(
-                "Resultados para: '$textoBusqueda' (${lugaresFiltrados.size})", 
+                "Resultados para: '$textoBusqueda' (${lugaresFiltrados.size})",
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -85,4 +85,5 @@ fun Busqueda(
         }
     }
 }
+
 

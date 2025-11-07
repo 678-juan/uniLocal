@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.pantallas.usuario.navegacionUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.navegacionUsuario
 
 import kotlinx.serialization.Serializable
 
@@ -36,3 +36,4 @@ sealed class RutaTab() {
 
 
 }
+

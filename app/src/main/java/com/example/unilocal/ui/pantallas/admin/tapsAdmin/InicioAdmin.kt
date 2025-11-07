@@ -1,11 +1,9 @@
-package com.example.unilocal.ui.pantallas.admin.tapsAdmin
+﻿package com.example.unilocal.ui.pantallas.admin.tapsAdmin
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -173,7 +171,7 @@ fun InicioAdmin(
                         }
                         Spacer(Modifier.width(12.dp))
                     }
-                    
+
                     // información del lugar
                     Column(Modifier.weight(1f)) {
                         Text(
@@ -196,7 +194,7 @@ fun InicioAdmin(
                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                     }
-                    
+
                     // botones de acción compactos
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -231,7 +229,7 @@ fun InicioAdmin(
         }
 
         Spacer(Modifier.height(16.dp))
-        
+
         // sección de lugares autorizados
         Card(
             modifier = Modifier
@@ -250,24 +248,24 @@ fun InicioAdmin(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Lugares Autorizados", 
+                        text = "Lugares Autorizados",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    
+
                     AssistChip(
                         onClick = {},
-                        label = { 
+                        label = {
                             Text(
                                 "${autorizadosPorMi.size} lugares",
                                 fontSize = 12.sp
-                            ) 
+                            )
                         }
                     )
                 }
-                
+
                 Spacer(Modifier.height(12.dp))
-                
+
                 if (autorizadosPorMi.isEmpty()) {
                     Box(
                         modifier = Modifier
@@ -290,7 +288,7 @@ fun InicioAdmin(
                             onClick = { /* navegar a detalles si es necesario */ }
                         )
                     }
-                    
+
                     // ver más
                     if (autorizadosPorMi.size > 3) {
                         Text(
@@ -308,3 +306,4 @@ fun InicioAdmin(
         }
     }
 }
+

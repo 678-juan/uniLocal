@@ -1,4 +1,4 @@
-package com.example.unilocal.model.entidad
+﻿package com.example.unilocal.model.entidad
 
 import kotlinx.serialization.Serializable
 
@@ -11,3 +11,4 @@ data class Solicitud(
     val motivo: String,
     val fechaIso: String
 )
+

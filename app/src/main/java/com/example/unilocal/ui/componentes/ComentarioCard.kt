@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.componentes
+﻿package com.example.unilocal.ui.componentes
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -33,21 +33,21 @@ fun ComentarioCard(
 ) {
     val usuario = usuarioViewModel.obtenerUsuarioPorId(comentario.usuarioId)
     val dueñoLugar = lugar?.let { usuarioViewModel.obtenerUsuarioPorId(it.creadorId) }
-    
+
     // Cargar usuario desde Firebase si no está en local
     LaunchedEffect(comentario.usuarioId) {
         if (usuario == null) {
             usuarioViewModel.buscarId(comentario.usuarioId)
         }
     }
-    
+
     // Cargar dueño del lugar desde Firebase si no está en local
     LaunchedEffect(lugar?.creadorId) {
         if (dueñoLugar == null && lugar != null) {
             usuarioViewModel.buscarId(lugar.creadorId)
         }
     }
-    
+
     // Usar usuario actualizado después de la búsqueda
     val usuarioActualizado by usuarioViewModel.usuarioActual.collectAsState()
     val usuarioFinal = usuario ?: (if (usuarioActualizado?.id == comentario.usuarioId) usuarioActualizado else null)
@@ -59,7 +59,7 @@ fun ComentarioCard(
                 .fillMaxWidth()
                 .padding(8.dp)
                 .background(
-                    if (esSeleccionado) Color(0xFFF0F0F0) else Color.White, 
+                    if (esSeleccionado) Color(0xFFF0F0F0) else Color.White,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .border(2.dp, Color.Black, shape = RoundedCornerShape(12.dp))
@@ -123,7 +123,7 @@ fun ComentarioCard(
                 }
             }
         }
-        
+
         // Mostrar respuesta si existe
         if (comentario.respuesta != null && dueñoLugarFinal != null) {
             Spacer(modifier = Modifier.height(12.dp))
@@ -150,7 +150,7 @@ fun ComentarioCard(
                         5 -> R.drawable.mujer2
                         else -> R.drawable.logo // por defecto
                     }
-                    
+
                     Image(
                         painter = painterResource(id = avatarRes),
                         contentDescription = "Dueño del lugar",
@@ -159,9 +159,9 @@ fun ComentarioCard(
                             .clip(CircleShape)
                             .border(1.dp, Color(0xFF4CAF50), CircleShape)
                     )
-                    
+
                     Spacer(modifier = Modifier.width(12.dp))
-                    
+
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
@@ -173,9 +173,9 @@ fun ComentarioCard(
                                 color = Color(0xFF4CAF50)
                             )
                         )
-                        
+
                         Spacer(modifier = Modifier.height(2.dp))
-                        
+
                         // Indicador de respuesta
                         Text(
                             text = "Respondió",
@@ -184,9 +184,9 @@ fun ComentarioCard(
                                 fontSize = 10.sp
                             )
                         )
-                        
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        
+
                         // Texto de la respuesta
                         Text(
                             text = comentario.respuesta,
@@ -206,5 +206,6 @@ fun ComentarioCard(
             modifier = Modifier.padding(8.dp)
         )
     }
-    
+
 }
+

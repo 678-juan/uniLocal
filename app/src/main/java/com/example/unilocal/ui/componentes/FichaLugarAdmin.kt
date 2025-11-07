@@ -1,4 +1,4 @@
-package com.example.unilocal.ui.componentes
+﻿package com.example.unilocal.ui.componentes
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -115,9 +115,9 @@ fun FichaLugarAdmin(
                     )
                 }
             }
-            
+
             Spacer(Modifier.width(12.dp))
-            
+
             // información
             Column(
                 modifier = Modifier.weight(1f)
@@ -130,7 +130,7 @@ fun FichaLugarAdmin(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                
+
                 Text(
                     text = lugar.categoria,
                     style = MaterialTheme.typography.bodySmall,
@@ -138,7 +138,7 @@ fun FichaLugarAdmin(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                
+
                 Text(
                     text = lugar.direccion,
                     style = MaterialTheme.typography.bodySmall,
@@ -147,12 +147,12 @@ fun FichaLugarAdmin(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            
+
             // estado
             if (estado.isNotEmpty()) {
                 AssistChip(
                     onClick = {},
-                    label = { 
+                    label = {
                         Text(
                             estado,
                             color = when (estado.uppercase()) {
@@ -162,10 +162,11 @@ fun FichaLugarAdmin(
                                 else -> Color.Gray
                             },
                             fontSize = 10.sp
-                        ) 
+                        )
                     }
                 )
             }
         }
     }
 }
+

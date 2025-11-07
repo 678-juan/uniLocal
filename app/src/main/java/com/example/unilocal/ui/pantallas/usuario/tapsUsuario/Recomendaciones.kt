@@ -1,67 +1,41 @@
-package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
+﻿package com.example.unilocal.ui.pantallas.usuario.tapsUsuario
 
-import androidx.compose.material3.Text
-import androidx.compose.ui.viewinterop.AndroidView
-import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
-import org.osmdroid.util.BoundingBox
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.drawable.BitmapDrawable
-import android.content.Context
-import com.example.unilocal.ui.map.createPlacePinDrawable
-import androidx.compose.foundation.border
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.platform.LocalContext
-import android.location.Location
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
-import com.google.android.gms.location.LocationServices
+import android.location.Location
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import com.example.unilocal.R
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.runtime.*
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.unilocal.ui.componentes.FichaLugar
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-// No lectura en vivo de UsuarioViewModel: Recomendaciones lee la ubicación persistida solo al iniciar
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import com.example.unilocal.model.entidad.Lugar
+import androidx.core.content.ContextCompat
+// R not required in this file
+import com.example.unilocal.ui.componentes.FichaLugar
 import com.example.unilocal.model.entidad.EstadoLugar
-import com.example.unilocal.ui.componentes.FichaInformacion
-import com.example.unilocal.ui.componentes.PublicacionUno
+import com.example.unilocal.model.entidad.Lugar
+import com.example.unilocal.ui.map.createPlacePinDrawable
 import com.example.unilocal.viewModel.LugaresViewModel
 import com.example.unilocal.viewModel.UsuarioViewModel
+import com.google.android.gms.location.LocationServices
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.BoundingBox
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 
 @Composable
@@ -71,7 +45,7 @@ fun Recomendaciones(
     usuarioViewModel: UsuarioViewModel? = null
 ) {
     val lugares by lugaresViewModel.lugares.collectAsState()
-    
+
     // solo lugares autorizados
     val lugaresAutorizados = lugares.filter { it.estado == EstadoLugar.AUTORIZADO }.take(10)
 
@@ -92,50 +66,43 @@ fun Recomendaciones(
         }
     }
 
-    // Al iniciar, preferir la ubicación del dispositivo. Capturar una vez para mantener el mapa estable.
-    var ubicacionUsuario by remember { mutableStateOf<GeoPoint?>(null) }
+    // Recolectar reactiva y continuamente la ubicación seleccionada desde el ViewModel.
+    // Esto asegura que si el usuario selecciona/actualiza su ubicación en otra pantalla,
+    // Recomendaciones se actualiza automáticamente.
     val usuarioVM: UsuarioViewModel = usuarioViewModel ?: androidx.lifecycle.viewmodel.compose.viewModel(LocalContext.current as androidx.activity.ComponentActivity)
+    val ubicacionSeleccionadaVm by usuarioVM.ubicacionSeleccionada.collectAsState()
+
+    // Si el permiso de ubicación está concedido, solicitar una ubicación fresca del dispositivo
+    // y SOBREESCRIBIR la ubicación guardada en el ViewModel (esto resuelve el caso en que
+    // Recomendaciones mostraba siempre la primera ubicación que entró en la app).
+    // Nota: esto ocurrirá cada vez que se entre en la composición con permiso concedido.
     LaunchedEffect(permisoUbicacionConcedido) {
         if (permisoUbicacionConcedido) {
-                // pedir a UsuarioViewModel que obtenga y persista una ubicación del dispositivo si falta
             try {
-                usuarioVM.obtenerYGuardarUbicacionDispositivoSiFalta()
-            } catch (e: Exception) {
-
-            }
-
-            // Leer la ubicacionSeleccionada desde el ViewModel
-            val fromVm = usuarioVM.ubicacionSeleccionada.value
-            if (fromVm != null) {
-                ubicacionUsuario = GeoPoint(fromVm.latitud, fromVm.longitud)
-                android.util.Log.d("Recomendaciones", "using location from UsuarioViewModel -> lat=${fromVm.latitud}, lng=${fromVm.longitud}")
-            } else {
-                // si el ViewModel aún no tiene una, intentar obtenerla directamente del dispositivo (getCurrentLocation)
-                try {
-                    clienteUbicacion.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
-                        .addOnSuccessListener { loc: Location? ->
-                            if (loc != null) {
-                                android.util.Log.d("Recomendaciones", "getCurrentLocation direct -> lat=${loc.latitude}, lng=${loc.longitude}, accuracy=${loc.accuracy}")
-                                android.os.Handler(context.mainLooper).post { ubicacionUsuario = GeoPoint(loc.latitude, loc.longitude) }
-                            } else {
-                                clienteUbicacion.lastLocation.addOnSuccessListener { lastLoc: Location? ->
-                                    if (lastLoc != null) {
-                                        android.util.Log.d("Recomendaciones", "fused lastLocation direct -> lat=${lastLoc.latitude}, lng=${lastLoc.longitude}, accuracy=${lastLoc.accuracy}")
-                                        android.os.Handler(context.mainLooper).post { ubicacionUsuario = GeoPoint(lastLoc.latitude, lastLoc.longitude) }
-                                    } else {
-                                        android.util.Log.d("Recomendaciones", "no device location available; ubicacionUsuario stays null")
-                                        android.os.Handler(context.mainLooper).post { ubicacionUsuario = null }
-                                    }
-                                }
+                // Intentar obtener una ubicación de alta precisión y guardarla en el ViewModel
+                clienteUbicacion.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                    .addOnSuccessListener { loc: Location? ->
+                        if (loc != null) {
+                            try {
+                                val u = com.example.unilocal.model.entidad.Ubicacion(loc.latitude, loc.longitude)
+                                usuarioVM.setUbicacionSeleccionada(u) // sobrescribe la previa
+                                android.util.Log.d("Recomendaciones", "Refreshed location -> lat=${loc.latitude}, lng=${loc.longitude}")
+                            } catch (_: Exception) {
+                                // ignore
                             }
+                        } else {
+                            // Si no hay currentLocation, fallback a método del ViewModel (no forzará si ya existe)
+                            try {
+                                usuarioVM.obtenerYGuardarUbicacionDispositivoSiFalta()
+                            } catch (_: Exception) { /* ignore */ }
                         }
-                } catch (t: Throwable) {
-                    android.util.Log.e("Recomendaciones", "Error al obtener ubicación directa del dispositivo", t)
-                    ubicacionUsuario = null
-                }
+                    }
+            } catch (e: Throwable) {
+                // Fallback: pedir al ViewModel que intente obtener/guardar si falta
+                try {
+                    usuarioVM.obtenerYGuardarUbicacionDispositivoSiFalta()
+                } catch (_: Exception) { /* ignore */ }
             }
-        } else {
-            ubicacionUsuario = null
         }
     }
 
@@ -147,6 +114,14 @@ fun Recomendaciones(
     }
 
     // Usar createPlacePinDrawable de MapPinUtils para los pines
+
+    // definir ubicación efectiva y lugares cercanos (250 m) una vez para que mapa y lista usen lo mismo
+    val defaultEam = GeoPoint(4.5338889, -75.6811111)
+        val effectiveLocation = ubicacionSeleccionadaVm?.let { GeoPoint(it.latitud, it.longitud) } ?: defaultEam
+    val nearbyPlaces = lugaresAutorizados.filter { lugar ->
+        val p = GeoPoint(lugar.ubicacion.latitud, lugar.ubicacion.longitud)
+        distanciaEnMetros(effectiveLocation, p) <= 250f
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -195,20 +170,10 @@ fun Recomendaciones(
                         // Ejecutar actualizaciones UI en el hilo del MapView para evitar problemas de hilos
                         map.post {
                             try {
-                                map.overlays.clear()
+                                        map.overlays.clear()
 
-                                // calcular lugares cercanos para marcadores: si hay ubicación del usuario, filtrar radio 2km
-                                val nearbyPlacesOnMap = if (ubicacionUsuario != null) {
-                                    lugaresAutorizados.filter { lugar ->
-                                        val p = GeoPoint(lugar.ubicacion.latitud, lugar.ubicacion.longitud)
-                                        distanciaEnMetros(ubicacionUsuario!!, p) <= 2000f
-                                    }
-                                } else {
-                                    emptyList()
-                                }
-
-                                // agregar marcadores rojos para lugares cercanos
-                                nearbyPlacesOnMap.forEach { lugar ->
+                                                    // agregar marcadores rojos para lugares cercanos (usar same nearbyPlaces que la lista, 250 m)
+                                        nearbyPlaces.forEach { lugar ->
                                     val m = Marker(map).apply {
                                         position = GeoPoint(lugar.ubicacion.latitud, lugar.ubicacion.longitud)
                                         title = lugar.nombre ?: "Lugar"
@@ -222,28 +187,20 @@ fun Recomendaciones(
                                     map.overlays.add(m)
                                 }
 
-                                // decidir ubicación efectiva: la del usuario si existe, de lo contrario EAM (Armenia) por defecto
-                                val defaultEam = GeoPoint(4.5338889, -75.6811111)
-                                val effectiveLocation = ubicacionUsuario ?: defaultEam
+                                // decidir ubicación efectiva: (ya calculada arriba -> effectiveLocation)
 
                                 // agregar un marcador azul en la ubicación efectiva (si es por defecto, indicarlo)
                                 val effectiveMarker = Marker(map).apply {
                                     position = effectiveLocation
-                                    title = if (ubicacionUsuario != null) "Tu posición" else "EAM (ubicación por defecto)"
+                                    title = if (ubicacionSeleccionadaVm != null) "Tu posición" else "EAM (ubicación por defecto)"
                                     icon = createPlacePinDrawable(map.context, android.graphics.Color.BLUE)
                                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                                 }
                                 map.overlays.add(effectiveMarker)
 
-                                // calcular lugares cercanos alrededor de la ubicación efectiva (2 km)
-                                val nearbyPlaces = lugaresAutorizados.filter { lugar ->
-                                    val p = GeoPoint(lugar.ubicacion.latitud, lugar.ubicacion.longitud)
-                                    distanciaEnMetros(effectiveLocation, p) <= 2000f
-                                }
-
                                 if (nearbyPlaces.isEmpty()) {
                                     // no hay lugares cercanos: si es ubicación real hacer zoom cercano, si no mostrar zoom de ciudad
-                                    if (ubicacionUsuario != null) {
+                                    if (ubicacionSeleccionadaVm != null) {
                                         map.controller.setCenter(effectiveLocation)
                                         map.controller.setZoom(16.5)
                                     } else {
@@ -276,25 +233,18 @@ fun Recomendaciones(
 
             Spacer(modifier = Modifier.height(8.dp))
         }
-        // compute and display nearby places (2km) below the map as FichaLugar
-        val defaultEamForList = GeoPoint(4.5338889, -75.6811111)
-        val effectiveLocationForList = ubicacionUsuario ?: defaultEamForList
-        val nearbyPlacesForList = lugaresAutorizados.filter { lugar ->
-            val p = GeoPoint(lugar.ubicacion.latitud, lugar.ubicacion.longitud)
-            distanciaEnMetros(effectiveLocationForList, p) <= 2000f
-        }
-
-        if (nearbyPlacesForList.isEmpty()) {
+    // mostrar la misma lista de lugares que los marcadores del mapa (nearbyPlaces calculado arriba, 250 m)
+        if (nearbyPlaces.isEmpty()) {
             item {
                 Text(
-                    text = if (ubicacionUsuario == null) "Usando ubicación por defecto (EAM, Armenia). No hay recomendaciones dentro de 2 km" else "No hay recomendaciones dentro de 2 km",
+                    text = if (ubicacionSeleccionadaVm == null) "Usando ubicación por defecto (EAM, Armenia). No hay recomendaciones dentro de 250 m" else "No hay recomendaciones dentro de 250 m",
                     fontSize = 16.sp,
                     color = androidx.compose.ui.graphics.Color.Gray,
                     modifier = Modifier.padding(16.dp)
                 )
             }
         } else {
-            items(nearbyPlacesForList) { lugar ->
+            items(nearbyPlaces) { lugar ->
                 // show a compact card for each nearby place
                 FichaLugar(lugar = lugar, onClick = { navegarALugar(lugar.id) })
                 Spacer(modifier = Modifier.height(8.dp))
@@ -302,6 +252,7 @@ fun Recomendaciones(
         }
     }
 }
+
 
 
 
