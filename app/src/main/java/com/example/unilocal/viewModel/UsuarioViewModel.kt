@@ -10,7 +10,9 @@ import com.example.unilocal.model.entidad.TipoNotificacion
 import com.example.unilocal.utils.RequestResult
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.auth.FirebaseAuth
 import com.google.android.gms.location.LocationServices
+import android.util.Patterns
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -103,6 +105,9 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
     val usuarioResult: StateFlow<RequestResult?> = _usuarioResult.asStateFlow()
 
     val db = Firebase.firestore
+    private val autentificacion: FirebaseAuth = FirebaseAuth.getInstance()
+    
+
 
     init {
         // load persisted selected location if any
@@ -155,15 +160,58 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun crearUsuario(usuario: Usuario) {
+        // Crear usuario en Firebase Auth (email/password) y luego crear perfil en Firestore con id = uid
         viewModelScope.launch {
             _usuarioResult.value = RequestResult.Cargar
-            _usuarioResult.value = runCatching { crearUsuarioFireBase(usuario) }.fold(
-                onSuccess = { RequestResult.Sucess("Usuario creado exitosamente") },
-                onFailure = { RequestResult.Error(it.message ?: "Error creando usuario") }
+
+            val email = usuario.email.orEmpty()
+            val password = usuario.clave.orEmpty()
+
+            // validación básica antes de llamar a Firebase
+            if (email.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                _usuarioResult.value = RequestResult.Error("Formato de email inválido")
+                return@launch
+            }
+            if (password.length < 6) {
+                _usuarioResult.value = RequestResult.Error("La contraseña debe tener al menos 6 caracteres")
+                return@launch
+            }
+
+            _usuarioResult.value = runCatching {
+                val authResult = autentificacion.createUserWithEmailAndPassword(email, password).await()
+                val firebaseUser = authResult.user ?: throw Exception("Error al crear usuario en Auth")
+                val uid = firebaseUser.uid
+
+                // crear perfil en Firestore con id = uid (no guardamos la contraseña)
+                val usuarioData = hashMapOf<String, Any>(
+                    "nombre" to usuario.nombre,
+                    "username" to usuario.username,
+                    "email" to usuario.email.orEmpty(),
+                    "ciudad" to usuario.ciudad,
+                    "sexo" to usuario.sexo,
+                    "avatar" to usuario.avatar.toLong(),
+                    "id" to uid
+                )
+
+                db.collection("Usuarios").document(uid).set(usuarioData).await()
+
+                // Actualizar lista local y estado actual
+                val usuarioConId = usuario.copy(id = uid, favoritos = emptyList(), clave = "")
+                _usuario.value = _usuario.value + usuarioConId
+                _usuarioActual.value = usuarioConId
+                RequestResult.Sucess("Usuario creado exitosamente")
+            }.fold(
+                onSuccess = { it },
+                onFailure = { e ->
+                    when (e) {
+                        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> RequestResult.Error("Email mal formado")
+                        is com.google.firebase.auth.FirebaseAuthUserCollisionException -> RequestResult.Error("El email ya está registrado")
+                        is com.google.firebase.auth.FirebaseAuthWeakPasswordException -> RequestResult.Error("Contraseña débil: mínimo 6 caracteres")
+                        else -> RequestResult.Error(e.message ?: "Error creando usuario")
+                    }
+                }
             )
         }
-
-
     }
 
     suspend fun crearUsuarioFireBase(usuario: Usuario) {
@@ -300,9 +348,60 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _usuarioResult.value = RequestResult.Cargar
-            _usuarioResult.value = runCatching { loginFireBase(email,password) }.fold(
-                onSuccess = { RequestResult.Sucess("Iniciado sesion exitosamente") },
-                onFailure = { RequestResult.Error(it.message ?: "Error al iniciar sesion") }
+
+            val emailTrim = email.orEmpty().trim()
+            if (emailTrim.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(emailTrim).matches()) {
+                _usuarioResult.value = RequestResult.Error("Formato de email inválido")
+                return@launch
+            }
+
+            _usuarioResult.value = runCatching {
+                // Autenticar con Firebase Auth
+                val authResult = autentificacion.signInWithEmailAndPassword(emailTrim, password).await()
+                val firebaseUser = authResult.user ?: throw Exception("Error al autenticar usuario")
+                val uid = firebaseUser.uid
+
+                // Cargar perfil desde Firestore
+                val snapshot = db.collection("Usuarios").document(uid).get().await()
+                if (!snapshot.exists()) throw Exception("Perfil de usuario no encontrado en Firestore")
+                val data = snapshot.data!!
+                val usuario = Usuario(
+                    id = snapshot.id,
+                    nombre = data["nombre"] as? String ?: "",
+                    username = data["username"] as? String ?: "",
+                    clave = "",
+                    email = data["email"] as? String ?: "",
+                    ciudad = data["ciudad"] as? String ?: "",
+                    sexo = data["sexo"] as? String ?: "",
+                    avatar = when (val avatarValue = data["avatar"]) {
+                        is Int -> avatarValue
+                        is Long -> avatarValue.toInt()
+                        is Number -> avatarValue.toInt()
+                        else -> 0
+                    },
+                    favoritos = emptyList()
+                )
+
+                _usuarioActual.value = usuario
+                if (!_usuario.value.any { it.id == usuario.id }) {
+                    _usuario.value = _usuario.value + usuario
+                }
+
+                // Cargar datos relacionados
+                cargarLikesUsuarioFirebase(usuario.id)
+                cargarFavoritosUsuarioFirebase(usuario.id)
+                cargarNotificacionesUsuarioFirebase(usuario.id)
+
+                RequestResult.Sucess("Iniciado sesion exitosamente")
+            }.fold(
+                onSuccess = { it },
+                onFailure = { e ->
+                    when (e) {
+                        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> RequestResult.Error("Credenciales inválidas / formato de email incorrecto")
+                        is com.google.firebase.auth.FirebaseAuthInvalidUserException -> RequestResult.Error("Usuario no existe o deshabilitado")
+                        else -> RequestResult.Error(e.message ?: "Error iniciando sesión")
+                    }
+                }
             )
         }
     }
@@ -354,7 +453,12 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
         _usuarioActual.value = null
         _likesDados.value = emptySet()
         _notificacionesUsuario.value = emptyList()
+        try {
+            autentificacion.signOut()
+        } catch (_: Exception) {
+        }
     }
+
 
     private suspend fun cargarLikesUsuarioFirebase(usuarioId: String) {
         try {

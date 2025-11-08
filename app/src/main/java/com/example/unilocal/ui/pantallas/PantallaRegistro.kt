@@ -281,16 +281,7 @@ fun PantallaRegisto(
                             sexo = sexo.trim(),
                             avatar = avatarSeleccionado
                         )
-
                         viewModel.crearUsuario(nuevoUsuario)
-
-                        Toast.makeText(
-                            contexto,
-                            "¡Usuario registrado exitosamente!",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        cargando = false
                     }
                 }
             )
@@ -307,5 +298,20 @@ fun PantallaRegisto(
             usuarioViewModel?.resetear()
         }
     )
+
+    // Mostrar Toasts basados en el resultado real de usuarioResult y controlar cargando
+    LaunchedEffect(usuarioResult) {
+        when (usuarioResult) {
+            is com.example.unilocal.utils.RequestResult.Sucess -> {
+                Toast.makeText(contexto, "¡Usuario registrado exitosamente!", Toast.LENGTH_SHORT).show()
+                cargando = false
+            }
+            is com.example.unilocal.utils.RequestResult.Error -> {
+                Toast.makeText(contexto, (usuarioResult as com.example.unilocal.utils.RequestResult.Error).errorMensaje, Toast.LENGTH_LONG).show()
+                cargando = false
+            }
+            else -> {}
+        }
+    }
 }
 

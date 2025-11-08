@@ -152,6 +152,22 @@ fun PantallaLogin(
                 }
             )
 
+            // Mostrar mensajes de error/éxito basados en usuarioResult
+            LaunchedEffect(usuarioResult) {
+                when (usuarioResult) {
+                    is com.example.unilocal.utils.RequestResult.Sucess -> {
+                        // Success handled in LaunchedEffect on usuarioActual
+                    }
+                    is com.example.unilocal.utils.RequestResult.Error -> {
+                        val mensajeError = (usuarioResult as com.example.unilocal.utils.RequestResult.Error).errorMensaje
+                        if (!intentandoLoginModerador) {
+                            Toast.makeText(contexto, "Error de login: $mensajeError", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    else -> {}
+                }
+            }
+
             // Observar cuando el moderador se loguea exitosamente (después de buscar en Firebase)
             LaunchedEffect(moderadorActual) {
                 if (moderadorActual != null && intentandoLoginModerador && correo.isNotBlank()) {

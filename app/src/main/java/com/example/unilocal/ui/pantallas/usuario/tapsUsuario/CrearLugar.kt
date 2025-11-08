@@ -72,7 +72,7 @@ fun CrearLugar(
     lugaresViewModel: LugaresViewModel = viewModel(),
     usuarioViewModel: UsuarioViewModel? = null
 ) {
-    // Asegura un UsuarioViewModel con alcance Activity si no se pasa uno
+
     val usuarioVM: UsuarioViewModel = usuarioViewModel ?: viewModel(LocalContext.current as androidx.activity.ComponentActivity)
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
@@ -137,7 +137,7 @@ fun CrearLugar(
     }
 
     // Ubicación seleccionada en el mapa (lat, lng) como MutableState para MapDialog
-    // Se inicializa desde la ubicación del dispositivo si está disponible; si no, queda en 0.0
+
     val latSeleccionadaState = remember { mutableStateOf(0.0) }
     val lngSeleccionadaState = remember { mutableStateOf(0.0) }
 
@@ -226,14 +226,14 @@ fun CrearLugar(
                     }
                 }
             } catch (e: Exception) {
-                // ignorar
+
             }
         } else {
             // pedir permiso para que el diálogo pueda mostrar la ubicación si el usuario lo permite
             try {
                 lanzadorPermisoUbicacion.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             } catch (e: Exception) {
-                // ignore
+
             }
         }
     }
@@ -825,7 +825,7 @@ fun CrearLugar(
         )
     }
 
-    // Manejar navegación cuando se crea exitosamente
+
 
 }
 
@@ -960,15 +960,15 @@ private fun MapDialog(
                                 .fillMaxSize()
                         )
                     }
-
-                // buttons row inside the boxed container, aligned to bottom
+                Spacer(modifier = Modifier.height(8.dp))
+                // botones de acción
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(15.dp))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
