@@ -36,6 +36,7 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import kotlin.math.cos
 
 
 @Composable
@@ -72,36 +73,46 @@ fun Recomendaciones(
     val usuarioVM: UsuarioViewModel = usuarioViewModel ?: androidx.lifecycle.viewmodel.compose.viewModel(LocalContext.current as androidx.activity.ComponentActivity)
     val ubicacionSeleccionadaVm by usuarioVM.ubicacionSeleccionada.collectAsState()
 
-    // Si el permiso de ubicación está concedido, solicitar una ubicación fresca del dispositivo
-    // y SOBREESCRIBIR la ubicación guardada en el ViewModel (esto resuelve el caso en que
-    // Recomendaciones mostraba siempre la primera ubicación que entró en la app).
-    // Nota: esto ocurrirá cada vez que se entre en la composición con permiso concedido.
+    // Helper que obtiene la ubicación del dispositivo una sola vez y devuelve el resultado
+    // vía callback. Recomendaciones la usará como ubicación inicial sin sobrescribir el
+    // valor del ViewModel (esto evita que la selección manual en CrearLugar sea reemplazada).
+    fun obtenerUbicacionUnaVez(context: Context, onResult: (com.example.unilocal.model.entidad.Ubicacion?) -> Unit) {
+        val client = LocationServices.getFusedLocationProviderClient(context)
+        try {
+            client.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener { loc: Location? ->
+                    if (loc != null) {
+                        onResult(com.example.unilocal.model.entidad.Ubicacion(loc.latitude, loc.longitude))
+                    } else {
+                        onResult(null)
+                    }
+                }
+                .addOnFailureListener {
+                    onResult(null)
+                }
+        } catch (t: Throwable) {
+            onResult(null)
+        }
+    }
+
+    // Estado local para almacenar la ubicación obtenida una sola vez durante esta composición
+    var ubicacionUnaVez by remember { mutableStateOf<com.example.unilocal.model.entidad.Ubicacion?>(null) }
+
+    // Si el permiso de ubicación está concedido, siempre obtenemos la ubicación del dispositivo
+    // al entrar en esta composición y la usamos como la ubicación efectiva. Esto garantiza que
+    // Recomendaciones siempre muestre la ubicación real del dispositivo aunque el usuario
+    // haya cambiado manualmente la selección en CrearLugar.
     LaunchedEffect(permisoUbicacionConcedido) {
         if (permisoUbicacionConcedido) {
-            try {
-                // Intentar obtener una ubicación de alta precisión y guardarla en el ViewModel
-                clienteUbicacion.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
-                    .addOnSuccessListener { loc: Location? ->
-                        if (loc != null) {
-                            try {
-                                val u = com.example.unilocal.model.entidad.Ubicacion(loc.latitude, loc.longitude)
-                                usuarioVM.setUbicacionSeleccionada(u) // sobrescribe la previa
-                                android.util.Log.d("Recomendaciones", "Refreshed location -> lat=${loc.latitude}, lng=${loc.longitude}")
-                            } catch (_: Exception) {
-                                // ignore
-                            }
-                        } else {
-                            // Si no hay currentLocation, fallback a método del ViewModel (no forzará si ya existe)
-                            try {
-                                usuarioVM.obtenerYGuardarUbicacionDispositivoSiFalta()
-                            } catch (_: Exception) { /* ignore */ }
-                        }
-                    }
-            } catch (e: Throwable) {
-                // Fallback: pedir al ViewModel que intente obtener/guardar si falta
-                try {
-                    usuarioVM.obtenerYGuardarUbicacionDispositivoSiFalta()
-                } catch (_: Exception) { /* ignore */ }
+            obtenerUbicacionUnaVez(context) { u ->
+                if (u != null) {
+                    ubicacionUnaVez = u
+                    android.util.Log.d("Recomendaciones", "Device location fetched -> lat=${u.latitud}, lng=${u.longitud}")
+                } else {
+                    try {
+                        usuarioVM.obtenerYGuardarUbicacionDispositivoSiFalta()
+                    } catch (_: Exception) { /* ignore */ }
+                }
             }
         }
     }
@@ -117,7 +128,9 @@ fun Recomendaciones(
 
     // definir ubicación efectiva y lugares cercanos (250 m) una vez para que mapa y lista usen lo mismo
     val defaultEam = GeoPoint(4.5338889, -75.6811111)
-        val effectiveLocation = ubicacionSeleccionadaVm?.let { GeoPoint(it.latitud, it.longitud) } ?: defaultEam
+    // Priorizar siempre la ubicación del dispositivo (ubicacionUnaVez). Ignorar la selección
+    // del ViewModel para que los cambios en CrearLugar no afecten a Recomendaciones.
+    val effectiveLocation = ubicacionUnaVez?.let { GeoPoint(it.latitud, it.longitud) } ?: defaultEam
     val nearbyPlaces = lugaresAutorizados.filter { lugar ->
         val p = GeoPoint(lugar.ubicacion.latitud, lugar.ubicacion.longitud)
         distanciaEnMetros(effectiveLocation, p) <= 250f
@@ -174,18 +187,32 @@ fun Recomendaciones(
 
                                                     // agregar marcadores rojos para lugares cercanos (usar same nearbyPlaces que la lista, 250 m)
                                         nearbyPlaces.forEach { lugar ->
-                                    val m = Marker(map).apply {
-                                        position = GeoPoint(lugar.ubicacion.latitud, lugar.ubicacion.longitud)
-                                        title = lugar.nombre ?: "Lugar"
-                                        icon = createPlacePinDrawable(map.context, android.graphics.Color.RED)
-                                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                                        setOnMarkerClickListener { _, _ ->
-                                            navegarALugar(lugar.id)
-                                            true
+                                            // calcular posición original y posible desplazamiento si está encima del usuario
+                                            val originalPos = GeoPoint(lugar.ubicacion.latitud, lugar.ubicacion.longitud)
+                                            val distanceToUser = distanciaEnMetros(effectiveLocation, originalPos)
+                                            // si la distancia es pequeña (ahora 3 m), desplazar para que no queden solapados
+                                            val displayPos = if (distanceToUser < 3.0f) {
+                                                // desplazar ~2 metros para separar visualmente los pines
+                                                val metersOffset = 2.0
+                                                val deltaLat = metersOffset / 111000.0
+                                                val deltaLon = metersOffset / (111000.0 * cos(Math.toRadians(effectiveLocation.latitude)))
+                                                GeoPoint(originalPos.latitude + deltaLat, originalPos.longitude + deltaLon)
+                                            } else {
+                                                originalPos
+                                            }
+
+                                            val m = Marker(map).apply {
+                                                position = displayPos
+                                                title = lugar.nombre ?: "Lugar"
+                                                icon = createPlacePinDrawable(map.context, android.graphics.Color.RED)
+                                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                                                setOnMarkerClickListener { _, _ ->
+                                                    navegarALugar(lugar.id)
+                                                    true
+                                                }
+                                            }
+                                            map.overlays.add(m)
                                         }
-                                    }
-                                    map.overlays.add(m)
-                                }
 
                                 // decidir ubicación efectiva: (ya calculada arriba -> effectiveLocation)
 
