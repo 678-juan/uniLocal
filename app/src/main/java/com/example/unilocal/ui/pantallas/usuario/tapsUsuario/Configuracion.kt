@@ -148,14 +148,8 @@ fun Configuracion(
 
                 Divider(color = Color.LightGray, thickness = 0.5.dp)
 
-                // Notificaciones
-                MenuOption(
-                    text = "Notificaciones",
-                    onClick = {
-                        // TODO: Implementar notificaciones en futuras versiones
-                        // Por ahora, mostrar mensaje informativo
-                    }
-                )
+
+
 
                 Divider(color = Color.LightGray, thickness = 0.5.dp)
 

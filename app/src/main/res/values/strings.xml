@@ -41,7 +41,7 @@
     <string name="categoria_hotel">Hotel</string>
     <string name="categoria_museo">Museo</string>
     <string name="categoria_comida_rapida">Comida rápida</string>
-    <string name="categoria_pasada">Pasada</string>
+    <string name="categoria_pasada">Posada</string>
 
     <!-- Barra Navegacion -->
     <string name="inicio">Inicio</string>
