@@ -149,18 +149,6 @@ fun Configuracion(
                 Divider(color = Color.LightGray, thickness = 0.5.dp)
 
 
-
-
-                Divider(color = Color.LightGray, thickness = 0.5.dp)
-
-                // Cambiar contraseña
-                MenuOption(
-                    text = "Cambiar contraseña",
-                    onClick = { navController.navigate(com.example.unilocal.ui.pantallas.usuario.navegacionUsuario.RutaTab.CambiarPassword) }
-                )
-
-                Divider(color = Color.LightGray, thickness = 0.5.dp)
-
                 // Editar datos
                 MenuOption(
                     text = "Editar datos",
