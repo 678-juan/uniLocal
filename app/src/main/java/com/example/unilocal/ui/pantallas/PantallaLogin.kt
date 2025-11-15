@@ -9,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -39,6 +41,8 @@ fun PantallaLogin(
     var clave by remember { mutableStateOf("") }
     var cargando by remember { mutableStateOf(false) }
     var intentandoLoginModerador by remember { mutableStateOf(false) }
+    var mostrarRecuperar by remember { mutableStateOf(false) }
+    var emailRecuperar by remember { mutableStateOf("") }
     val contexto = LocalContext.current
     val viewModel: UsuarioViewModel = usuarioViewModel ?: viewModel()
     val moderadorVM: ModeradorViewModel = moderadorViewModel ?: viewModel()
@@ -116,11 +120,75 @@ fun PantallaLogin(
                 text = stringResource(R.string.forgot_password),
                 fontSize = 14.sp,
                 color = AzulEnlaces,
-                modifier = Modifier.clickable { }
+                modifier = Modifier.clickable { mostrarRecuperar = true }
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // Mostrar un diálogo pantalla completa para recuperar contraseña
+            if (mostrarRecuperar) {
+                Dialog(
+                    onDismissRequest = { mostrarRecuperar = false; emailRecuperar = "" },
+                    properties = DialogProperties(usePlatformDefaultWidth = false)
+                ) {
+                    // Contenedor que se alinea en la parte superior dentro del Box padre
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                        Card(
+                            modifier = Modifier
+                                .wrapContentHeight()
+                                .fillMaxWidth()
+                                .padding(start = 24.dp, end = 24.dp, top = 24.dp),
+                            colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.White),
+                            shape = MaterialTheme.shapes.medium,
+                            elevation = CardDefaults.cardElevation(6.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                // Cabecera con botón regresar
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Start
+                                ) {
+                                    TextButton(onClick = { mostrarRecuperar = false; emailRecuperar = "" }) {
+                                        Text(text = "Regresar")
+                                    }
+                                }
 
+                                Text(text = stringResource(R.string.forgot_password), style = MaterialTheme.typography.titleMedium)
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                com.example.unilocal.ui.componentes.CampoMinimalista(
+                                    value = emailRecuperar,
+                                    onValueChange = { emailRecuperar = it },
+                                    placeholder = "Correo electrónico",
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    TextButton(onClick = { mostrarRecuperar = false; emailRecuperar = "" }) {
+                                        Text(text = "Cancelar")
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Button(onClick = {
+                                        // Enviar email de recuperación y cerrar el overlay
+                                        viewModel.enviarRecuperarContrasena(emailRecuperar)
+                                        mostrarRecuperar = false
+                                        emailRecuperar = ""
+                                    }) {
+                                        Text(text = "Enviar")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(35.dp))
             // boton entrar
             BotonPrincipal(
                 texto = if (cargando) "Iniciando sesión..." else stringResource(R.string.login_button),

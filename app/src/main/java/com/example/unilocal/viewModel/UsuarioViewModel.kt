@@ -68,7 +68,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                         }
                     }
             } catch (e: NoSuchMethodError) {
-                // Play Services más antiguo: fallback a lastLocation
+
                 client.lastLocation.addOnSuccessListener { loc: android.location.Location? ->
                     if (loc != null) {
                         val u = com.example.unilocal.model.entidad.Ubicacion(loc.latitude, loc.longitude)
@@ -327,7 +327,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                     cargarNotificacionesUsuarioFirebase(usuario.id)
                 }
             } catch (e: Exception) {
-                // Error al buscar
+
             }
         }
     }
@@ -456,6 +456,33 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
         try {
             autentificacion.signOut()
         } catch (_: Exception) {
+        }
+    }
+
+   //recuepracion de contraseña
+    fun enviarRecuperarContrasena(email: String) {
+        viewModelScope.launch {
+            _usuarioResult.value = RequestResult.Cargar
+
+            val emailTrim = email.orEmpty().trim()
+            if (emailTrim.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(emailTrim).matches()) {
+                _usuarioResult.value = RequestResult.Error("Formato de email inválido")
+                return@launch
+            }
+
+            _usuarioResult.value = runCatching {
+                autentificacion.sendPasswordResetEmail(emailTrim).await()
+                RequestResult.Sucess("Correo de recuperación enviado")
+            }.fold(
+                onSuccess = { it },
+                onFailure = { e ->
+                    when (e) {
+                        is com.google.firebase.auth.FirebaseAuthInvalidUserException -> RequestResult.Error("No existe una cuenta con ese correo")
+                        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> RequestResult.Error("Formato de email inválido")
+                        else -> RequestResult.Error(e.message ?: "Error al enviar correo de recuperación")
+                    }
+                }
+            )
         }
     }
 

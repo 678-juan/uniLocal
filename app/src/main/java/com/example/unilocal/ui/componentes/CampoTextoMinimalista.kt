@@ -21,10 +21,11 @@ import androidx.compose.material3.LocalTextStyle
 fun CampoMinimalista(
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: String = "Buscar..."
+    placeholder: String = "Buscar...",
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(50.dp)
             .background(Color(0xFFF0F0F0), RoundedCornerShape(25.dp))
